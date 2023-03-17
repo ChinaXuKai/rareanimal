@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.AnimalLabelMapper">
+
+<!--    List<AnimalLabel> selectAnimalLabelById(Long id);-->
+    <select id="selectAnimalLabelById" resultType="com.guangyou.rareanimal.pojo.vo.AnimalLabelVo">
+        select animal_id,animal_label from t_animal_label where animal_id = #{animalId}
+    </select>
+</mapper>

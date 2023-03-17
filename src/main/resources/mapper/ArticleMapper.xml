@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.ArticleMapper">
+
+    <sql id="t_article-filed">
+        article_id,article_name,article_content,user_account,publish_time,update_time,approve_count,disapprove_count
+    </sql>
+
+<!--    void increaseCommentCountsByArticleId(Long articleId);-->
+    <update id="increaseCommentCountsByArticleId">
+        update t_article set comment_counts = comment_counts + 1
+        where id = #{articleId}
+    </update>
+
+<!--    void increaseSupportCounts(Long articleId, int beforeSupportCounts);-->
+    <update id="increaseSupportCounts">
+        update t_article set support_counts = #{beforeSupportCounts} + 1
+        where id = #{articleId}
+    </update>
+
+<!--    void decreaseSupportCounts(Long articleId, int beforeSupportCounts);-->
+    <update id="decreaseSupportCounts">
+        update t_article set support_counts = #{beforeSupportCounts} - 1
+        where id = #{articleId}
+    </update>
+
+<!--    int increaseSaveCounts(Long articleId, int beforeSaveCounts);-->
+    <update id="increaseSaveCounts">
+        update t_article set save_counts = #{beforeSaveCounts} + 1
+        where id = #{articleId}
+    </update>
+
+<!--    int decreaseSaveCounts(Long articleId, int beforeSaveCounts);-->
+    <update id="decreaseSaveCounts">
+        update t_article set save_counts = #{beforeSaveCounts} - 1
+        where id = #{articleId}
+    </update>
+
+    <!--    List<Article> selectSaveArticles(Integer userId, Integer initialDataLocation, Integer pageSize);-->
+    <select id="selectSaveArticles" resultType="com.guangyou.rareanimal.pojo.Article">
+        select id,author_account,title,comment_counts,view_counts,support_counts,save_counts from t_article where id in (
+            select article_id from t_user_article where user_id = #{userId}
+        ) LIMIT #{initialDataLocation}, #{pageSize}
+    </select>
+
+<!--    int selectSupportCountsByArticleId(Long articleId);-->
+    <select id="selectSupportCountsByArticleId" resultType="java.lang.Integer">
+        select support_counts from t_article where id = #{articleId}
+    </select>
+
+<!--    int getArticleCountByUser(String userAccount);-->
+    <select id="getArticleCountByUser" resultType="java.lang.Integer">
+        select count(*) from t_article
+        where author_account = #{userAccount}
+    </select>
+
+<!--    String selectVisitPermission(Long articleId);-->
+    <select id="selectVisitPermission" resultType="java.lang.String">
+        select visit_permission from t_article
+        where id = #{articleId}
+    </select>
+</mapper>

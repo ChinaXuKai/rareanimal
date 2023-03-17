@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.CategoryMapper">
+
+
+<!--    CategoryVo findCategoryById(Long categoryId);-->
+    <select id="findCategoryById" resultType="com.guangyou.rareanimal.pojo.Category">
+        select * from t_category
+        where id = #{categoryId}
+    </select>
+
+<!--    List<CategoryVo> selectAllArticleCategories();-->
+    <select id="selectAllArticleCategories" resultType="com.guangyou.rareanimal.pojo.vo.CategoryVo">
+        select * from t_category
+    </select>
+
+<!--    List<CategoryTheme> selectAllCategoryTheme();-->
+    <select id="selectAllCategoryTheme" resultType="com.guangyou.rareanimal.pojo.CategoryTheme">
+        select id,theme_name from t_category_theme
+    </select>
+
+<!--    List<CategoryVo> selectCategoryByThemeId(Long themeId);-->
+    <select id="selectCategoryByThemeId" resultType="com.guangyou.rareanimal.pojo.vo.CategoryVo">
+        select id,category_label,category_name,article_count,category_avatar
+        from t_category
+        where theme_id = #{themeId}
+    </select>
+
+<!--    int selectArticleCount(Long categoryId);-->
+    <select id="selectArticleCount" resultType="java.lang.Integer">
+        select article_count from t_category
+        where id = #{categoryId}
+    </select>
+
+
+</mapper>

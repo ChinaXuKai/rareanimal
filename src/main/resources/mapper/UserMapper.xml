@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.UserMapper">
+
+    <sql id="t_user-filed">
+        (user_id,user_name,user_account,user_pwd,user_avatar,create_time,is_delete)
+    </sql>
+
+    
+    <!--List<UserVo> getUsersByAccountAndPwd(String userAccount, String userPwd)-->
+    <select id="getUsersByAccountAndPwd" resultType="com.guangyou.rareanimal.pojo.User">
+        select * from t_user where user_account = #{userAccount} and user_pwd = #{userPwd}
+    </select>
+
+    <!--List<User> getUsersByAccount(String userAccount); -->
+    <select id="getUsersByAccount" resultType="com.guangyou.rareanimal.pojo.User">
+        select * from t_user where user_account = #{userAccount}
+    </select>
+
+    <!--UserVo getUsersByUid(Long toUid); -->
+    <select id="getUsersByUid" resultType="com.guangyou.rareanimal.pojo.User">
+        select * from t_user where user_id = #{toUid}
+    </select>
+
+    <!--int insertUserByAccountAndPwd(String userName,String userAccount, String userPwd, String userAvatar, Long accountCreateTime)-->
+    <insert id="insertUserByAccountAndPwd">
+        insert into t_user <include refid="t_user-filed"></include>
+        values(null,#{userName},#{userAccount},#{userPwd},#{userAvatar},#{accountCreateTime},0)
+    </insert>
+
+    <!--int updateUserNameById(String userName,Integer userId) -->
+    <update id="updateUserNameById">
+        update t_user set user_name = #{userName} where user_id = #{userId}
+    </update>
+
+    <!--String updateUserAvatarById(String imageUrl, Integer userId); -->
+    <update id="updateUserAvatarById">
+        update t_user set user_avatar = #{imageUrl} where user_id = #{userId}
+    </update>
+
+
+    <!--int updateUserInfoById(Integer userId, String userName, String imageUrl); -->
+    <update id="updateUserInfoById">
+        update t_user
+        set user_name = #{userName}
+        where user_id = #{userId}
+    </update>
+
+<!--    void updateAvatarById(int userId, String imageUrl);-->
+    <update id="updateAvatarById">
+        update t_user
+        set user_avatar = #{imageUrl}
+        where user_id = #{userId}
+    </update>
+
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.UserCarerMapper">
+
+<!--    List<Long> selectCarersIdPageByUserId(Long userId, Integer initialDataLocation, Integer pageSize);-->
+    <select id="selectCarersIdPageByUserId" resultType="java.lang.Long">
+        select carer_id from t_user_carer
+        where user_id = #{userId}
+        LIMIT #{initialDataLocation}, #{pageSize}
+    </select>
+
+<!--    Integer getCarerCountByUserId(Long userId);-->
+    <select id="getCarerCountByUserId" resultType="java.lang.Integer">
+        select count(*) from t_user_carer where carer_id = #{userId}
+    </select>
+
+    <!--    UserCarer selectCarerById(Long userId, Long authorAccount);-->
+    <select id="selectCarerById" resultType="com.guangyou.rareanimal.pojo.UserCarer">
+        select *
+        from t_user_carer as user_carer
+        where user_carer.user_id = #{userId}
+        and user_carer.carer_id in (
+            select user_id
+            from t_user
+            where user_account = #{authorAccount}
+        )
+    </select>
+
+<!--    List<Long> selectCarersIdByUserId(Long userId);-->
+    <select id="selectCarersIdByUserId" resultType="java.lang.Long">
+        select carer_id from t_user_carer
+        where user_id = #{userId}
+    </select>
+</mapper>

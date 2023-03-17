@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.AnimalMapper">
+
+    <sql id="animal-complete-field">
+        t_animal.animal_id, animal_name, alias, animal_img, animal_model_url, is_vertebrates, is_suckle, is_birds, is_creep, animal_classification, distribution_area, protect_grade,
+        morphology, habitat, habits, population_status, protection_level, else_info, animal_label
+    </sql>
+
+    <sql id="t_animal_introduce-field">
+        morphology, habitat, habits, population_status, protection_level, else_info
+    </sql>
+
+    <!--    List<Animal> selectRandAnimalInfo(Integer randAnimalNumber);-->
+    <select id="selectRandAnimalInfo" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select animal_id, animal_name, animal_img
+        from t_animal as animal
+        where animal.animal_id >= (RAND()*(select MAX(animal_id) from t_animal))
+        LIMIT #{randAnimalNumber}
+    </select>
+
+<!--    List<Animal> selectVertebratesAnimals();-->
+    <select id="selectVertebratesAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_introduce,t_animal_label
+        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        and  is_vertebrates = 1
+    </select>
+
+<!--    List<Animal> selectNoVertebratesAnimals();-->
+    <select id="selectNoVertebratesAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_introduce,t_animal_label
+        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        and is_vertebrates = 0
+    </select>
+
+<!--    List<Animal> selectSuckleAnimals();-->
+    <select id="selectSuckleAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_introduce,t_animal_label
+        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        and is_suckle = 1
+    </select>
+
+<!--    List<Animal> selectBirdAnimalInfo();-->
+    <select id="selectBirdAnimalInfo" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_introduce,t_animal_label
+        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        and  is_birds = 1
+    </select>
+
+<!--    List<Animal> selectCreepAnimals();-->
+    <select id="selectCreepAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_introduce,t_animal_label
+        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        and  is_creep = 1
+    </select>
+
+<!--    AnimalIntroduce selectAnimalIntroduceById(Integer animalId);-->
+    <select id="selectAnimalIntroduceById" resultType="com.guangyou.rareanimal.pojo.vo.AnimalIntroduce">
+        select
+        <include refid="t_animal_introduce-field"></include>
+        from t_animal_introduce
+        where animal_id = #{animalId}
+    </select>
+
+<!--    Animal selectAnimalByLikeName(String animalName);-->
+    <select id="selectAnimalByLikeName" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_introduce,t_animal_label
+        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        and (animal_name like #{animalName} or animal_label like #{animalName})
+    </select>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.ProtectMapper">
+
+    <sql id="t_animal_rescue_phone-field">
+        phone_id,rescue_center,rescue_phone,rescue_center_province
+    </sql>
+    <sql id="t_forest_police_phone-field">
+        phone_id,forest_police,forest_police_phone,forest_police_province
+    </sql>
+
+    <!--List<AnimalRescuePhoneVo> selectAnimalRescuePhoneByAddress(String userAddress) -->
+    <select id="selectAnimalRescuePhoneByAddress" resultType="com.guangyou.rareanimal.pojo.vo.AnimalRescuePhoneVo">
+        select
+        <include refid="t_animal_rescue_phone-field"></include>
+        from t_animal_rescue_phone
+        <if test="userAddress != null">
+            where rescue_center_province = #{userAddress}
+        </if>
+    </select>
+
+    <!--List<ForestPolicePhoneVo> selectForestPolicePhoneByAddress(String userAddress) -->
+    <select id="selectForestPolicePhoneByAddress" resultType="com.guangyou.rareanimal.pojo.vo.ForestPolicePhoneVo">
+        select
+        <include refid="t_forest_police_phone-field"></include>
+        from t_forest_police_phone
+        <if test="userAddress != null">
+            where forest_police_province = #{userAddress}
+        </if>
+    </select>
+</mapper>

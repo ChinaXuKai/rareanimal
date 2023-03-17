@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.PersonalCenterMapper">
+
+<!--    List<Article> selectMyArticles(String userAccount);    -->
+    <select id="selectMyArticles" resultType="com.guangyou.rareanimal.pojo.Article">
+        select * from t_article where author_account = #{userAccount}
+    </select>
+
+<!--    int selectMyFansCounts(Long authorId);-->
+    <select id="selectMyFansCounts" resultType="java.lang.Integer">
+        select count(id) from t_user_carer where user_id = #{authorId}
+    </select>
+
+<!--    CaredBloggerVo selectCarerByUserId(Long carerId);-->
+    <select id="selectCarerByUserId" resultType="com.guangyou.rareanimal.pojo.User">
+        select user_id, user_name, user_account, user_avatar from t_user
+        where user_id = #{careId}
+    </select>
+</mapper>

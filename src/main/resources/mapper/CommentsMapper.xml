@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.CommentsMapper">
+
+<!--    void increaseSupportCounts(Long commentId,int beforeSupportCounts);-->
+    <update id="increaseSupportCounts">
+        update t_comment set support_counts = #{beforeSupportCounts} + 1
+        where id = #{commentId}
+    </update>
+
+<!--    void decreaseSupportCounts(Long commentId, int beforeSupportCounts);-->
+    <update id="decreaseSupportCounts">
+        update t_comment set support_counts = #{beforeSupportCounts} - 1
+        where id = #{commentId}
+    </update>
+
+    <!--    List<Comment> selectFirstFloorCommentsByArticleId(Long articleId);-->
+    <select id="selectFirstFloorCommentsByArticleId" resultType="com.guangyou.rareanimal.pojo.Comment">
+        select * from t_comment where article_id = #{articleId} and level = 1
+    </select>
+
+<!--    int selectSupportCountsByCommentId(Long commentId);-->
+    <select id="selectSupportCountsByCommentId" resultType="java.lang.Integer">
+        SELECT support_counts FROM t_comment WHERE id = #{commentId}
+    </select>
+
+</mapper>

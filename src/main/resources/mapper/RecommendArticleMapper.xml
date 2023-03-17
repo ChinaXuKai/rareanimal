@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.RecommendArticleMapper">
+
+<!--    List<RecommendUser> getRecommendArticles(Integer recommendUserNumber);-->
+    <select id="getRecommendArticles" resultType="com.guangyou.rareanimal.pojo.RecommendArticle">
+        select id, recommend_factor, article_id
+        from t_recommend_article
+        order by recommend_factor desc
+        LIMIT #{recommendUserNumber}
+    </select>
+</mapper>

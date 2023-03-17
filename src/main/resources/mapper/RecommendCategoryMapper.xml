@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.RecommendCategoryMapper">
+
+<!--    void deleteAll();-->
+    <delete id="deleteAll">
+        delete from t_recommend_category
+        where id > 0;
+    </delete>
+
+<!--        List<CategoryVo> getRecommendCategory(Integer recommendArticleCategoryNumber);-->
+    <select id="getRecommendCategory" resultType="com.guangyou.rareanimal.pojo.RecommendCategory">
+        select *
+        from t_recommend_category
+        order by recommend_factor desc
+        LIMIT #{recommendArticleCategoryNumber}
+    </select>
+
+</mapper>

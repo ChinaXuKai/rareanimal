@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.CustomTagMapper">
+
+<!--    List<CustomTagVo> selectTagsByArticleId(Long articleId);-->
+    <select id="selectTagsByArticleId" resultType="com.guangyou.rareanimal.pojo.vo.CustomTagVo">
+        select id,custom_tag_name as customTagName from t_article_custom_tag where article_id = #{articleId}
+    </select>
+
+    <!--    <select id="selectHotTags" resultType="com.guangyou.rareanimal.pojo.vo.TagVo">-->
+    <!--        select id, tag_name from t_tag where id in (-->
+    <!--            select t_tag_id.tag_id from (select tag_id from t_article_tag group by tag_id order by count(*) desc limit #{limit}) as t_tag_id-->
+    <!--            )-->
+    <!--    </select>-->
+
+<!--    List<Long> selectHotTagsId(int limit);-->
+<!--    <select id="selectHotTagsId" resultType="java.lang.Long">-->
+<!--        select tag_id from t_article_custom_tag group by tag_id order by count(*) desc limit #{limit}-->
+<!--    </select>-->
+<!--    List<TagVo> selectHotTags(List<Long> hotTagsId);-->
+<!--    <select id="selectHotTags" resultType="com.guangyou.rareanimal.pojo.vo.CustomTagVo">-->
+<!--        select id, tag_name from t_tag-->
+<!--        where id in-->
+<!--        <foreach collection="hotTagsId" separator="," item="hotTagId" open="(" close=")">-->
+<!--            #{hotTagId}-->
+<!--        </foreach>-->
+<!--    </select>-->
+
+    <select id="selectHotTags" resultType="com.guangyou.rareanimal.pojo.vo.CustomTagVo">
+        select custom_tag_name
+        from t_article_custom_tag
+        group by custom_tag_name
+        order by count(*) desc
+        limit #{limit}
+    </select>
+
+<!--    List<TagVo> selectAllTags();-->
+    <select id="selectAllTags" resultType="com.guangyou.rareanimal.pojo.vo.CustomTagVo">
+        select id,custom_tag_name from t_article_custom_tag
+    </select>
+
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.UploadMapper">
+
+    <sql id="t_upload_img-sql-filed">
+        (id,is_user_avatar_img,user_id,is_article_content_img,,is_article_cover_img,img_url)
+    </sql>
+
+<!--    int uploadImg(Integer isUserAvatarImg, Long userId,-->
+<!--                    Integer isArticleContentImg, Integer isArticleCoverImg, String imageUrl)-->
+    <insert id="uploadImg">
+        insert into t_upload_img <include refid="t_upload_img-sql-filed"></include>
+        values(null,#{isUserAvatarImg},#{userId},#{isArticleContentImg},#{isArticleCoverImg},#{imageUrl})
+    </insert>
+</mapper>
