@@ -19,4 +19,5 @@ public interface ArticleCoverImgMapper extends BaseMapper<ArticleCoverImg> {
      * @return
      */
     List<String> selectCoverImgByArticleId(Long articleId);
+
 }

@@ -2,14 +2,10 @@ package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.guangyou.rareanimal.mapper.*;
-import com.guangyou.rareanimal.pojo.Article;
-import com.guangyou.rareanimal.pojo.Category;
-import com.guangyou.rareanimal.pojo.UserCarer;
+import com.guangyou.rareanimal.pojo.*;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.*;
-import com.guangyou.rareanimal.pojo.User;
 import com.guangyou.rareanimal.service.PersonalCenterService;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +33,6 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
 
     @Autowired
     private UserCarerMapper userCarerMapper;
-
 
     @Override
     public UserCarerVo getMyCarers(PageDto pageDto, Integer userId) {
@@ -77,9 +72,28 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
     }
 
 
+    @Autowired
+    private ArticleMapper articleMapper;
     @Override
-    public List<ArticleVo> getMyArticles(String userAccount) {
-        return copyList(personalCenterMapper.selectMyArticles(userAccount), true,true, false, true);
+    public PageDataVo<ArticleVo> getMyArticles(PageDto pageDto,String userAccount) {
+        PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
+        List<Article> articleList = personalCenterMapper.selectMyArticles(userAccount, pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
+        List<ArticleVo> articleVoList = copyList(articleList, true, true, false, true);
+        pageDataVo.setPageData(articleVoList);
+        //设置 数据库中用户文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
+        pageDataVo.setCurrent(pageDto.getPage());
+        pageDataVo.setSize(pageDto.getPageSize());
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getAuthorAccount, userAccount);
+        int total = articleMapper.selectCount(queryWrapper).intValue();
+        pageDataVo.setTotal(total);
+        int isRemainZero = total%pageDto.getPageSize();
+        if (isRemainZero != 0){
+            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
+        }else {
+            pageDataVo.setPages( total/pageDto.getPageSize() );
+        }
+        return pageDataVo;
     }
 
     @Autowired
@@ -90,7 +104,8 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
     private ArticleBodyMapper articleBodyMapper;
     @Autowired
     private CategoryMapper categoryMapper;
-
+    @Autowired
+    private ArticleCoverImgMapper articleCoverImgMapper;
 
     private List<ArticleVo> copyList(List<Article> articleList,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory) {
         List<ArticleVo> articleVoList = new ArrayList<>();
@@ -99,15 +114,11 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
         }
         return articleVoList;
     }
-
-    @Autowired
-    private ArticleMapper articleMapper;
-
     private ArticleVo copy(Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory){
         ArticleVo articleVo = new ArticleVo();
         BeanUtils.copyProperties(article, articleVo);
         /**
-         * createDate、authorName、tag、category、body都不能被复制属性，所以要单独拿出来赋值
+         * coverImg、createDate、authorName、tag、category、body都不能被复制属性，所以要单独拿出来赋值
          */
         //authorName可以先根据article 的authorAccount 查询出 具体用户信息，从中可获取用户昵称
         List<User> userList = userMapper.getUsersByAccount(article.getAuthorAccount());
@@ -120,9 +131,12 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
                 }
             }
         }
+        //coverImg：可以先从
+        Long articleId = article.getId();
+        List<String> coverImgs = articleCoverImgMapper.selectCoverImgByArticleId(articleId);
+        articleVo.setCoverImg(coverImgs);
         //若需要从数据库查询时间则从数据库中查询，否则设置为当前时间
         if (isCreateTime){
-            Long articleId = article.getId();
             String articleCreateTime = new DateTime(articleMapper.selectById(articleId).getCreateDate()).toString("yyyy-MM-dd HH:mm:ss");
             articleVo.setCreateDate(articleCreateTime);
         }else {
@@ -130,7 +144,6 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
         }
         //不是所有的接口 都需要 tag
         if (isTag){     //若需要 tag 属性
-            Long articleId = article.getId();
             articleVo.setTags(customTagMapper.selectTagsByArticleId(articleId));
         }
         if (isBody){

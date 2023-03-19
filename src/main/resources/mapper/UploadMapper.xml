@@ -5,7 +5,7 @@
 <mapper namespace="com.guangyou.rareanimal.mapper.UploadMapper">
 
     <sql id="t_upload_img-sql-filed">
-        (id,is_user_avatar_img,user_id,is_article_content_img,,is_article_cover_img,img_url)
+        (id,is_user_avatar_img,user_id,is_article_content_img,is_article_cover_img,img_url)
     </sql>
 
 <!--    int uploadImg(Integer isUserAvatarImg, Long userId,-->

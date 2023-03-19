@@ -19,7 +19,7 @@ public interface PersonalCenterMapper {
      * @param userAccount
      * @return
      */
-    List<Article> selectMyArticles(String userAccount);
+    List<Article> selectMyArticles(String userAccount, Integer initialDataLocation, Integer pageSize);
 
     /**
      * 根据authorId 查询他的粉丝数

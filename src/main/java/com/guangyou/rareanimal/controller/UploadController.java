@@ -28,7 +28,7 @@ public class UploadController {
 
 
     @ApiOperation(value = "图片上传接口（不需要jwt）",notes = "用于上传用户头像或文章内容图的接口")
-    @PutMapping("/img")
+    @PostMapping("/img")
     public Result uploadImg(@Validated UploadImgDto uploadImgDto, @RequestParam("img") MultipartFile img){
         Long userId = uploadImgDto.getUserId();
         Integer isArticleContentImg = uploadImgDto.getIsArticleContentImg();

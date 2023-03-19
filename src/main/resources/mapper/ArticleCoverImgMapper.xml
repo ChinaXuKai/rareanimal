@@ -9,4 +9,5 @@
         select cover_img from t_article_cover_img
         where article_id = #{articleId}
     </select>
+
 </mapper>

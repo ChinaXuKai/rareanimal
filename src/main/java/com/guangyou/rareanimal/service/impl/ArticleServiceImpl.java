@@ -289,6 +289,9 @@ public class ArticleServiceImpl implements ArticleService {
             User author = userMapper.selectOne(queryWrapper);
             //获取到作者后赋值作者昵称并添加进 saveArticlesVo集合
             articleVo.setAuthorName(author.getUserName());
+            //根据文章id 获取文章封面url地址集合
+            List<String> coverImgList = articleCoverImgMapper.selectCoverImgByArticleId(saveArticle.getId());
+            articleVo.setCoverImg(coverImgList);
             saveArticlesVo.add(articleVo);
         }
 

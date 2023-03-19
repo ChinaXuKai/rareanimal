@@ -2,9 +2,8 @@ package com.guangyou.rareanimal.service;
 
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.ArticleVo;
+import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.pojo.vo.UserCarerVo;
-
-import java.util.List;
 
 /**
  * @author xukai
@@ -17,7 +16,7 @@ public interface PersonalCenterService {
      * @param userAccount
      * @return
      */
-    List<ArticleVo> getMyArticles(String userAccount);
+    PageDataVo<ArticleVo> getMyArticles(PageDto pageDto,String userAccount);
 
     /**
      * 根据authorId 查询粉丝数

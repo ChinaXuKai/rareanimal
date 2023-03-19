@@ -4,9 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.PersonalCenterMapper">
 
-<!--    List<Article> selectMyArticles(String userAccount);    -->
+<!--    List<Article> selectMyArticles(String userAccount, Integer initialDataLocation, Integer pageSize);    -->
     <select id="selectMyArticles" resultType="com.guangyou.rareanimal.pojo.Article">
-        select * from t_article where author_account = #{userAccount}
+        select * from t_article
+        where author_account = #{userAccount}
+        LIMIT #{initialDataLocation}, #{pageSize}
     </select>
 
 <!--    int selectMyFansCounts(Long authorId);-->

@@ -52,17 +52,18 @@ public class PersonalCenterController {
 
     @ApiOperation(value = "我的文章",notes = "获取当前用户的所发表过的所有文章")
     @GetMapping("/getMyArticles")
-    public Result getMyArticles(){
+    public Result getMyArticles(PageDto pageDto){
         String userAccount = ShiroUtil.getProfile().getUserAccount();
         if (userAccount == null){
             return Result.fail("当前还未登录，请先登录再访问该页面");
         }
 
-        List<ArticleVo> myArticles = personalCenterService.getMyArticles(userAccount);
-        if (myArticles.isEmpty()){
+        PageDataVo<ArticleVo> pageDataVo = personalCenterService.getMyArticles(pageDto,userAccount);
+
+        if (pageDataVo.getPageData().isEmpty()){
             return Result.succ(200,"当前还未发表过文章，快来发表文章让大家知道你吧~",null);
         }else {
-            return Result.succ(200, "下列为你已发表的文章",myArticles);
+            return Result.succ(200, "下列为你已发表的文章",pageDataVo);
         }
     }
 
