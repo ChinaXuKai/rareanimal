@@ -509,38 +509,34 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
+
+    private final static Integer RAND_ARTICLE_NUMBER = 3;
     /**
-     * 分页查询article数据库表
+     * 获取 articleList：
+     * 1、优先获取官方POEAzsyxk（weight == 1）
+     * 2、再获取 3 条文章（）
+     * 3、将 步骤1 和 步骤2获取 到的数据添加到 articleList中
      */
     @Override
-    public Result listArticle(PageDto pageDto) {
-        PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
-        Page<Article> page = new Page<>(pageDto.getPage(), pageDto.getPageSize());
+    public Result listArticle() {
+        List<ArticleVo> resultArticleVoList = new ArrayList<>();
+        //1、优先获取官方POEAzsyxk（weight == 1）
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        //先置顶排序
-        //order by weight desc
-        queryWrapper.orderByDesc(Article::getWeight);
-        Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);
-        List<Article> articleList = articlePage.getRecords();
+        queryWrapper.eq(Article::getWeight,1);
+        List<Article> articleList = articleMapper.selectList(queryWrapper);
         //将 articleList 转为 articleVoList 返回
         List<ArticleVo> articleVoList = copyList(articleList,true,true,false,false);
-        pageDataVo.setPageData(articleVoList);
-        //设置 数据库中文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
-        int total = articleMapper.selectList(null).size();
-        pageDataVo.setTotal(total);
-        int isRemainZero = total%pageDto.getPageSize();
-        if (isRemainZero != 0){
-            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
-        }else {
-            pageDataVo.setPages( total/pageDto.getPageSize() );
+        //2、再获取 RAND_ARTICLE_NUMBER 条随机数据
+        List<Article> randArticles = articleMapper.selectRandArticles(RAND_ARTICLE_NUMBER);
+        //将 randArticles 转为 randArticleVoList 返回
+        List<ArticleVo> randArticleVoList = copyList(randArticles, true, true, false, false);
+        //3、将 articleVoList 和 randArticleVoList 获取到的数据添加到 resultArticleVoList中
+        resultArticleVoList.addAll(articleVoList);
+        resultArticleVoList.addAll(randArticleVoList);
+        if (resultArticleVoList.isEmpty()){
+            return Result.fail("获取文章出现错误");
         }
-        pageDataVo.setSize(pageDto.getPageSize());
-        pageDataVo.setCurrent(pageDto.getPage());
-
-        if (pageDataVo.getPageData().isEmpty()){
-            return Result.fail("分页出现错误");
-        }
-        return Result.succ(200,"分页成功", pageDataVo);
+        return Result.succ(200,"获取文章成功", resultArticleVoList);
     }
 
 

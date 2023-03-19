@@ -61,4 +61,12 @@
         select visit_permission from t_article
         where id = #{articleId}
     </select>
+
+<!--    List<Article> selectRandArticles(Integer randArticleNumber);-->
+    <select id="selectRandArticles" resultType="com.guangyou.rareanimal.pojo.Article">
+        select *
+        from t_article as article
+        where article.id >= (RAND()*(select MAX(id) from t_article))
+        LIMIT #{randArticleNumber}
+    </select>
 </mapper>

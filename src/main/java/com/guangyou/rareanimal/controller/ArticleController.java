@@ -40,10 +40,10 @@ public class ArticleController {
     private static final int NEW_ARTICLE_LIMIT = 8;
 
 
-    @ApiOperation(value = "分页显示文章",notes = "分页显示文章，默认第一页")
+    @ApiOperation(value = "文章集合显示",notes = "显示文章集合")
     @GetMapping("listArticles")
-    public Result listArticles(PageDto pageDto){
-        return articleService.listArticle(pageDto);
+    public Result listArticles(){
+        return articleService.listArticle();
     }
 
 

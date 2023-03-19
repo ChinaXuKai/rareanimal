@@ -20,7 +20,7 @@ public interface ArticleService {
      * @param pageDto
      * @return
      */
-    Result listArticle(PageDto pageDto);
+    Result listArticle();
 
     /**
      * 查询最热文章

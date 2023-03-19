@@ -137,9 +137,9 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "修改用户信息",notes = "修改用户信息：昵称，进行密码验证（需要传jwt）")
+    @ApiOperation(value = "修改用户信息",notes = "修改用户信息：昵称，头像")
     @PutMapping("updateUserInfo")
-    public Result updateUserInfo(String password,String userName,String imgUrl){
+    public Result updateUserInfo(String userName,String imgUrl){
         //获取当前用户id 和 原先的账号
         Integer userId = ShiroUtil.getProfile().getUserId();
         String userAccount = ShiroUtil.getProfile().getUserAccount();
@@ -147,11 +147,7 @@ public class UserController {
         //修改用户信息
             //1、先判断用户是否存在
         if(userId != null) {     //说明用户存在
-                //2、判断密码是否正确
-            if (!userPwd.equals(password)){
-                return Result.fail(Result.FORBIDDEN,"密码错误，请校验密码",null);
-            }
-                //3、修改用户信息
+                //2、修改用户信息
             int result = userService.updateUserInfo(userId,userName,imgUrl);
             if (result == 1) {
                 UserVo user = userService.selectUserByAccountAndPwd(userAccount, userPwd);

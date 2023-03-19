@@ -79,5 +79,12 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     String selectVisitPermission(Long articleId);
+
+    /**
+     * 随机获取 randArticleNumber 个文章
+     * @param randArticleNumber 获取个数
+     * @return
+     */
+    List<Article> selectRandArticles(Integer randArticleNumber);
 }
 
