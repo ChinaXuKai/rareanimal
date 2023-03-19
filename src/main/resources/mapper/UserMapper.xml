@@ -41,18 +41,18 @@
     </update>
 
 
-    <!--int updateUserInfoById(Integer userId, String userName, String imageUrl); -->
+    <!--int updateUserInfoById(Integer userId, String userName, String imageUrl, String imgUrl); -->
     <update id="updateUserInfoById">
         update t_user
-        set user_name = #{userName}
+        set user_name = #{userName}, user_avatar = #{imgUrl}
         where user_id = #{userId}
     </update>
 
-<!--    void updateAvatarById(int userId, String imageUrl);-->
-    <update id="updateAvatarById">
-        update t_user
-        set user_avatar = #{imageUrl}
-        where user_id = #{userId}
-    </update>
+<!--&lt;!&ndash;    void updateAvatarById(int userId, String imageUrl);&ndash;&gt;-->
+<!--    <update id="updateAvatarById">-->
+<!--        update t_user-->
+<!--        set user_avatar = #{imageUrl}-->
+<!--        where user_id = #{userId}-->
+<!--    </update>-->
 
 </mapper>

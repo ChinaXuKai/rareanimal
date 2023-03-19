@@ -15,20 +15,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public Result handler(MethodArgumentNotValidException e) {
         log.error("实体校验异常：----------------{}", e);
         BindingResult bindingResult = e.getBindingResult();
         ObjectError objectError = bindingResult.getAllErrors().stream().findFirst().get();
-        return Result.fail(objectError.getDefaultMessage());
+        return Result.fail(Result.FORBIDDEN,objectError.getDefaultMessage(),e.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = IllegalArgumentException.class)
     public Result handler(IllegalArgumentException e) {
         log.error("Assert异常：----------------{}", e);
-        return Result.fail(e.getMessage());
+        return Result.fail(Result.FORBIDDEN,e.getMessage(),e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -45,10 +45,10 @@ public class GlobalExceptionHandler {
         return Result.fail(e.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(value = UnknownAccountException.class)
     public Result handler(UnknownAccountException e) {
         log.error("账号异常：----------------{}", e);
-        return Result.fail(401, "账号异常！", e.getMessage());
+        return Result.fail(Result.UNAUTHORIZED, "账号异常！", e.getMessage());
     }
 }

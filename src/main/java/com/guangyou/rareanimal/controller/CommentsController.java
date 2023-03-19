@@ -10,6 +10,7 @@ import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class CommentsController {
     public Result getCommentList(@PathVariable("id") Long articleId){
         List<CommentsVo> commentsVos = commentsService.findCommentsByArticleId(articleId);
         if (commentsVos.size() == 0){
-            return Result.succ("该文章目前还没有评论哦~");
+            return Result.succ(Result.FORBIDDEN,"该文章目前还没有评论哦~",null);
         }else {
             return Result.succ(200, "欢迎用户文明评论", commentsVos);
         }
@@ -50,7 +51,7 @@ public class CommentsController {
         String userAccount = ShiroUtil.getProfile().getUserAccount();
             //用户未登录不允许评论
         if (userAccount == null){
-            return Result.fail("请登录后再发表评论哦~");
+            throw new UnknownAccountException("当前还未登录，请登录后再发表评论哦");
         }
 
         //2、发表评论
@@ -60,7 +61,6 @@ public class CommentsController {
             if (comment.getLevel() == 1){
                 articleService.increaseCommentCountsByArticleId(commentDto.getArticleId());
             }
-
             return Result.succ(200, "发表评论成功", comment);
         }else {
             return Result.fail("发表评论失败");

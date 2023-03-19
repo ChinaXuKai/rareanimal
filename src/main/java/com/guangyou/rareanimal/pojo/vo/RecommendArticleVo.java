@@ -36,7 +36,7 @@ public class RecommendArticleVo {
     private String title;
 
     @ApiModelProperty(value = "作者的账号昵称")
-    private String authorName;
+    private AuthorInfoVo authorInfo;
 
     @ApiModelProperty(value = "评论数量")
     private Integer commentCounts;

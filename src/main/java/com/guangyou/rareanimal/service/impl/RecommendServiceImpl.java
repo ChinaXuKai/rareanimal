@@ -258,7 +258,13 @@ public class RecommendServiceImpl implements RecommendService {
             Long articleId = dbArticle.getArticleId();
             Article article = articleMapper.selectById(articleId);
             recommendArticleVo.setTitle(article.getTitle());
-            recommendArticleVo.setAuthorName(userMapper.getUsersByAccount(article.getAuthorAccount()).get(0).getUserName());
+            User author = userMapper.getUsersByAccount(article.getAuthorAccount()).get(0);
+            AuthorInfoVo authorInfoVo = new AuthorInfoVo();
+            recommendArticleVo.setAuthorInfo(authorInfoVo);
+            recommendArticleVo.getAuthorInfo().setAuthorName(author.getUserName());
+            recommendArticleVo.getAuthorInfo().setAuthorAccount(author.getUserAccount());
+            recommendArticleVo.getAuthorInfo().setAuthorId(author.getUserId().longValue());
+            recommendArticleVo.getAuthorInfo().setAuthorAvatarUrl(author.getUserAvatar());
             recommendArticleVo.setSaveCounts(article.getSaveCounts());
             recommendArticleVo.setSupportCounts(article.getSupportCounts());
             recommendArticleVo.setViewCounts(article.getViewCounts());

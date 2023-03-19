@@ -18,6 +18,6 @@ public interface UserService {
     UserVo selectUserByAccountAndPwd(String userAccount, String userPwd);
 
     //根据用户Id修改用户信息
-    int updateUserInfo(Integer userId, String userName);
+    int updateUserInfo(Integer userId, String userName, String imgUrl);
 
 }

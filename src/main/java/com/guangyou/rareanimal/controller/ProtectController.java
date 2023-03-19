@@ -43,7 +43,7 @@ public class ProtectController {
             phoneList = protectService.getAnimalRescuePhoneByAddress(address);
         }
         if (phoneList.size() == 0){
-            return Result.fail("该位置没有动物救助电话");
+            return Result.fail(Result.FORBIDDEN,"该位置没有动物救助电话",null);
         }
         //将该集合封装为结果集返回
         return Result.succ(200, "当遇到需救助的动物不知道如何处理时，可以联系这些电话", phoneList);
@@ -63,7 +63,7 @@ public class ProtectController {
         }
 
         if (phoneList.size() == 0){
-            return Result.fail("该位置没有林公安电话");
+            return Result.fail(Result.FORBIDDEN,"该位置没有林公安电话",null);
         }
         //将该集合封装为结果集返回
         return Result.succ(200,"当您发现有捕鸟、贩鸟等违法犯罪行为时，可以联系当地的森林公安",phoneList);

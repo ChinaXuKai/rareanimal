@@ -24,7 +24,7 @@ import java.util.List;
 @ApiModel(description = "动物信息")
 public class Animal {
     @JsonSerialize(using = ToStringSerializer.class)
-    @ApiModelProperty(value = "主键id")
+    @ApiModelProperty(value = "动物主键id")
     private Integer animalId;
 
     @ApiModelProperty(value = "动物名称")

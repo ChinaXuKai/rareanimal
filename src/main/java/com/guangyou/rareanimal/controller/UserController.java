@@ -61,7 +61,7 @@ public class UserController {
         //调用userService.addUser 添加用户，返回受影响的行数
         int result = userService.addUser(userName,userAccount,userPwd,userAvatar,System.currentTimeMillis());
         if (result == -1){//受影响的行数为-1时，则说明注册失败，返回失败的结果集
-            return Result.fail("注册失败，用户名和密码已存在，请重新注册");
+            return Result.fail(Result.FORBIDDEN,"注册失败，用户名和密码已存在，请重新注册",null);
         }else {//受影响的行数不为-1时，则说明注册成功，返回成功的结果集
             UserVo user = new UserVo();
             user.setUserName(userName);
@@ -139,7 +139,7 @@ public class UserController {
 
     @ApiOperation(value = "修改用户信息",notes = "修改用户信息：昵称，进行密码验证（需要传jwt）")
     @PutMapping("updateUserInfo")
-    public Result updateUserInfo(String password,String userName){
+    public Result updateUserInfo(String password,String userName,String imgUrl){
         //获取当前用户id 和 原先的账号
         Integer userId = ShiroUtil.getProfile().getUserId();
         String userAccount = ShiroUtil.getProfile().getUserAccount();
@@ -149,18 +149,18 @@ public class UserController {
         if(userId != null) {     //说明用户存在
                 //2、判断密码是否正确
             if (!userPwd.equals(password)){
-                return Result.fail("密码错误，请校验密码");
+                return Result.fail(Result.FORBIDDEN,"密码错误，请校验密码",null);
             }
                 //3、修改用户信息
-            int result = userService.updateUserInfo(userId,userName);
+            int result = userService.updateUserInfo(userId,userName,imgUrl);
             if (result == 1) {
                 UserVo user = userService.selectUserByAccountAndPwd(userAccount, userPwd);
                 return Result.succ(200, "修改信息成功", user);
             }
-            return Result.fail("修改信息失败");
+            return Result.fail(Result.BAD_REQUEST,"修改信息失败",null);
         }
         //用户不存在
-        return Result.fail("当前用户不存在，无法修改信息");
+        throw new UnknownAccountException("当前用户不存在，无法修改信息");
     }
 
 }

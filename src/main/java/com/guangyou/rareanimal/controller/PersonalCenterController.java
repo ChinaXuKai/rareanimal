@@ -11,6 +11,7 @@ import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +38,7 @@ public class PersonalCenterController {
         //获取当前的用户id为作者id
         Integer authorId = ShiroUtil.getProfile().getUserId();
         if (authorId == null){
-            return Result.fail("当前还未登录，请先登录再访问该页面");
+            throw new UnknownAccountException("当前还未登录，请先登录再访问该页面");
         }
 
         //根据作者id查询粉丝数
@@ -55,7 +56,7 @@ public class PersonalCenterController {
     public Result getMyArticles(PageDto pageDto){
         String userAccount = ShiroUtil.getProfile().getUserAccount();
         if (userAccount == null){
-            return Result.fail("当前还未登录，请先登录再访问该页面");
+            throw new UnknownAccountException("当前还未登录，请先登录再访问该页面");
         }
 
         PageDataVo<ArticleVo> pageDataVo = personalCenterService.getMyArticles(pageDto,userAccount);
@@ -76,7 +77,7 @@ public class PersonalCenterController {
     public Result getMySaveArticles(PageDto pageDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("当前还未登录，请先登录再访问该页面");
+            throw new UnknownAccountException("当前还未登录，请先登录再访问该页面");
         }
 
         PageDataVo<ArticleVo> pageDataVo = articleService.listSaveArticles(pageDto,userId);
@@ -95,7 +96,7 @@ public class PersonalCenterController {
         //获取当前用户id
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("当前还未登录，请先登录再访问该页面");
+            throw new UnknownAccountException("当前还未登录，请先登录再访问该页面");
         }
 
         //根据userId 查询用户关注的博主用户

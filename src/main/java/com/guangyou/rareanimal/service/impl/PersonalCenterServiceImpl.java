@@ -127,7 +127,12 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
                 String existUserAccount = user.getUserAccount();
                 //若数据库中已存在的用户账号与该文章发表的用户账号大小写完全一致的话，则就是该用户
                 if (existUserAccount.equals(article.getAuthorAccount())){
-                    articleVo.setAuthorName(user.getUserName());
+                    AuthorInfoVo authorInfoVo = new AuthorInfoVo();
+                    articleVo.setAuthorInfo(authorInfoVo);
+                    articleVo.getAuthorInfo().setAuthorName(user.getUserName());
+                    articleVo.getAuthorInfo().setAuthorAccount(user.getUserAccount());
+                    articleVo.getAuthorInfo().setAuthorId(user.getUserId().longValue());
+                    articleVo.getAuthorInfo().setAuthorAvatarUrl(user.getUserAvatar());
                 }
             }
         }

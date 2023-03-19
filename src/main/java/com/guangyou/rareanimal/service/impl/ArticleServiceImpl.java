@@ -8,12 +8,9 @@ import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.mapper.*;
 import com.guangyou.rareanimal.pojo.*;
 import com.guangyou.rareanimal.pojo.dto.ArticleDto;
-import com.guangyou.rareanimal.pojo.vo.ArticleVo;
-import com.guangyou.rareanimal.pojo.vo.CategoryVo;
-import com.guangyou.rareanimal.pojo.vo.CustomTagVo;
+import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.pojo.User;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
-import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.ThreadService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
@@ -193,13 +190,12 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
-    public String deleteArticleToUser(Long articleId) {
+    public int deleteArticleToUser(Long articleId) {
         //要删除文章就要 根据 articleId 删除对应t_article、t_article_body、t_article_tag、t_comment中的数据
         articleMapper.delete(new LambdaQueryWrapper<Article>().eq(Article::getId, articleId));
         articleBodyMapper.delete(new LambdaQueryWrapper<ArticleBody>().eq(ArticleBody::getArticleId,articleId));
         articleCustomTagMapper.delete(new LambdaQueryWrapper<ArticleCustomTag>().eq(ArticleCustomTag::getArticleId, articleId));
-        commentsMapper.delete(new LambdaQueryWrapper<Comment>().eq(Comment::getArticleId, articleId));
-        return "删除成功";
+        return commentsMapper.delete(new LambdaQueryWrapper<Comment>().eq(Comment::getArticleId, articleId));
     }
 
 
@@ -288,7 +284,12 @@ public class ArticleServiceImpl implements ArticleService {
             queryWrapper.eq(User::getUserAccount, saveArticle.getAuthorAccount());
             User author = userMapper.selectOne(queryWrapper);
             //获取到作者后赋值作者昵称并添加进 saveArticlesVo集合
-            articleVo.setAuthorName(author.getUserName());
+            AuthorInfoVo authorInfoVo = new AuthorInfoVo();
+            articleVo.setAuthorInfo(authorInfoVo);
+            articleVo.getAuthorInfo().setAuthorId(author.getUserId().longValue());
+            articleVo.getAuthorInfo().setAuthorName(author.getUserName());
+            articleVo.getAuthorInfo().setAuthorAccount(author.getUserAccount());
+            articleVo.getAuthorInfo().setAuthorAvatarUrl(author.getUserAvatar());
             //根据文章id 获取文章封面url地址集合
             List<String> coverImgList = articleCoverImgMapper.selectCoverImgByArticleId(saveArticle.getId());
             articleVo.setCoverImg(coverImgList);
@@ -452,7 +453,7 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleVo articleVo = new ArticleVo();
         BeanUtils.copyProperties(article, articleVo);
         /**
-         * createDate、authorName、tag、category、body、coverImg都不能被复制属性，所以要单独拿出来赋值
+         * createDate、authorAccount、authorAvatarUrl、authorName、tag、category、body、coverImg都不能被复制属性，所以要单独拿出来赋值
          */
         //authorName可以先根据article 的authorAccount 查询出 具体用户信息，从中可获取用户昵称
         List<User> userList = userMapper.getUsersByAccount(article.getAuthorAccount());
@@ -461,7 +462,12 @@ public class ArticleServiceImpl implements ArticleService {
                 String existUserAccount = user.getUserAccount();
                 //若数据库中已存在的用户账号与该文章发表的用户账号大小写完全一致的话，则就是该用户
                 if (existUserAccount.equals(article.getAuthorAccount())){
-                    articleVo.setAuthorName(user.getUserName());
+                    AuthorInfoVo authorInfoVo = new AuthorInfoVo();
+                    articleVo.setAuthorInfo(authorInfoVo);
+                    articleVo.getAuthorInfo().setAuthorId(user.getUserId().longValue());
+                    articleVo.getAuthorInfo().setAuthorName(user.getUserName());
+                    articleVo.getAuthorInfo().setAuthorAccount(user.getUserAccount());
+                    articleVo.getAuthorInfo().setAuthorAvatarUrl(user.getUserAvatar());
                 }
             }
         }
@@ -502,21 +508,39 @@ public class ArticleServiceImpl implements ArticleService {
         return articleVo;
     }
 
+
+    /**
+     * 分页查询article数据库表
+     */
     @Override
     public Result listArticle(PageDto pageDto) {
-        /**
-         * 分页查询article数据库表
-         */
+        PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
         Page<Article> page = new Page<>(pageDto.getPage(), pageDto.getPageSize());
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        //先置顶排序，在按照时间
-        //order by weight desc, create_date desc
-        queryWrapper.orderByDesc(Article::getWeight,Article::getCreateDate);
+        //先置顶排序
+        //order by weight desc
+        queryWrapper.orderByDesc(Article::getWeight);
         Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);
         List<Article> articleList = articlePage.getRecords();
         //将 articleList 转为 articleVoList 返回
         List<ArticleVo> articleVoList = copyList(articleList,true,true,false,false);
-        return Result.succ(200,"分页成功", articleVoList);
+        pageDataVo.setPageData(articleVoList);
+        //设置 数据库中文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
+        int total = articleMapper.selectList(null).size();
+        pageDataVo.setTotal(total);
+        int isRemainZero = total%pageDto.getPageSize();
+        if (isRemainZero != 0){
+            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
+        }else {
+            pageDataVo.setPages( total/pageDto.getPageSize() );
+        }
+        pageDataVo.setSize(pageDto.getPageSize());
+        pageDataVo.setCurrent(pageDto.getPage());
+
+        if (pageDataVo.getPageData().isEmpty()){
+            return Result.fail("分页出现错误");
+        }
+        return Result.succ(200,"分页成功", pageDataVo);
     }
 
 

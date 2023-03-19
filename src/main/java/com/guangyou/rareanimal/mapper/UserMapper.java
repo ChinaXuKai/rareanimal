@@ -61,7 +61,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param userName 用户昵称
      * @return 影响的行数
      */
-    int updateUserInfoById(Integer userId, String userName);
+    int updateUserInfoById(Integer userId, String userName, String imgUrl);
 
     /**
      * 根据主键id 查询用户
@@ -70,10 +70,10 @@ public interface UserMapper extends BaseMapper<User> {
      */
     User getUsersByUid(Long toUid);
 
-    /**
-     * 根据 用户id 修改 用户头像
-     * @param userId 用户id
-     * @param imageUrl 用户头像url地址
-     */
-    void updateAvatarById(int userId, String imageUrl);
+//    /**
+//     * 根据 用户id 修改 用户头像
+//     * @param userId 用户id
+//     * @param imageUrl 用户头像url地址
+//     */
+//    void updateAvatarById(int userId, String imageUrl);
 }

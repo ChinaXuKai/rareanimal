@@ -2,14 +2,12 @@ package com.guangyou.rareanimal.pojo.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -54,8 +52,8 @@ public class ArticleVo {
     @ApiModelProperty(value = "该文章的发表时间")
     private String createDate;
 
-    @ApiModelProperty(value = "作者的账号昵称")
-    private String authorName;
+    @ApiModelProperty(value = "作者信息")
+    private AuthorInfoVo authorInfo;
 
     @ApiModelProperty(value = "文章内容")
     private ArticleBodyVo body;

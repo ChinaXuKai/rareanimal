@@ -69,7 +69,7 @@ public interface ArticleService {
      * @param articleId
      * @return
      */
-    String deleteArticleToUser(Long articleId);
+    int deleteArticleToUser(Long articleId);
 
     /**
      * 用户userId 收藏文章articleId

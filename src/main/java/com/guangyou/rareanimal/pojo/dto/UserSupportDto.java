@@ -18,9 +18,6 @@ import lombok.ToString;
 @ApiModel(description = "用户为文章或评论的点赞所需要传的参数")
 public class UserSupportDto {
 
-//    @ApiModelProperty(value = "用户id")
-//    private Long userId;
-
     @ApiModelProperty(value = "被点赞的文章id，为null说明用户点赞的是评论")
     private Long articleId;
 

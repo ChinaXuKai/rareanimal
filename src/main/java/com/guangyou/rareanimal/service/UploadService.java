@@ -1,7 +1,5 @@
 package com.guangyou.rareanimal.service;
 
-import cn.hutool.core.map.MapUtil;
-import com.guangyou.rareanimal.pojo.dto.UploadImgDto;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -11,10 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 public interface UploadService {
     /**
      * 上传图片
-     * @param uploadImgDto 上传图片的参数
      * @return 上传图片的url地址
      */
-    String uploadImg(UploadImgDto uploadImgDto, MultipartFile img);
+    String uploadImg(MultipartFile img);
 
     /**
      * 上传视频

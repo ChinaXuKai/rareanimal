@@ -125,8 +125,8 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public int updateUserInfo(Integer userId, String userName) {
-        return userMapper.updateUserInfoById(userId,userName);
+    public int updateUserInfo(Integer userId, String userName, String imgUrl) {
+        return userMapper.updateUserInfoById(userId,userName,imgUrl);
     }
 
 

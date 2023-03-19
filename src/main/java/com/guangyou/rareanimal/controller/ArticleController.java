@@ -94,7 +94,7 @@ public class ArticleController {
         //获取文章访问权限，若不是 “全部可见” ，则不允许访问
         String visitPermission = articleMapper.selectVisitPermission(articleId);
         if (!ArticleUtil.VISIT_PERMISSION_ALL.equals(visitPermission)){
-            return Result.fail("该博主设置了文章访问权限，你当前还没权限访问哦");
+            return Result.fail(Result.FORBIDDEN,"该博主设置了文章访问权限，你当前还没权限访问哦",null);
         }
 
         ArticleVo articleVo = articleService.findArticleById(articleId);

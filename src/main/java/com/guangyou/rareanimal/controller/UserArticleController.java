@@ -12,6 +12,7 @@ import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class UserArticleController {
     public Result publishArticle(@Validated ArticleDto articleDto){
         String userAccount = ShiroUtil.getProfile().getUserAccount();
         if (userAccount == null){
-            return Result.fail("登录后才能发表文章哦~");
+            throw new UnknownAccountException("你当前还没登录，登录后才能发表文章哦~");
         }
 
         Map map = articleService.addArticleToUser(articleDto,userAccount);
@@ -56,7 +57,7 @@ public class UserArticleController {
     public Result updateArticle(@Validated ArticleDto articleDto){
         String userAccount = ShiroUtil.getProfile().getUserAccount();
         if (userAccount == null){
-            return Result.fail("登录后才能修改文章哦~");
+            throw new UnknownAccountException("你当前还没登录，登录后才能修改文章哦~");
         }
 
         Map map = articleService.updateArticleToUser(articleDto);
@@ -73,16 +74,19 @@ public class UserArticleController {
     public Result deleteArticle(Long articleId,String password){
         String userAccount = ShiroUtil.getProfile().getUserAccount();
         if (userAccount == null){
-            return Result.fail("登录后才能删除文章哦~");
+            throw new UnknownAccountException("你当前还没登录，登录后才能删除文章哦~");
         }
 
         //先判断用户输入密码是否有误，错误不让删除，正确允许删除
         String userPwd = ShiroUtil.getProfile().getUserPwd();
         if (!userPwd.equals(password)){
-            return Result.fail("密码错误，请校验密码");
+            return Result.fail(Result.FORBIDDEN,"密码错误，请校验密码",null);
         }
 
-        String deleteResult = articleService.deleteArticleToUser(articleId);
+        int deleteResult = articleService.deleteArticleToUser(articleId);
+        if (deleteResult == 0){
+            return Result.fail("删除失败");
+        }
         return Result.succ(200, "删除成功", articleId);
     }
 
@@ -95,19 +99,19 @@ public class UserArticleController {
     public Result save(@PathVariable("articleId") Long articleId){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("登录后才能收藏文章哦~");
+            throw new UnknownAccountException("你当前还没登录，登录后才能收藏文章哦~");
         }
 
         //判断用户是否有权限访问该文章，没有则不允许收藏
         if (!articleUtil.haveArticleVisitPermission(userId.longValue(), articleId)){
-            return Result.fail("该博主设置了访问权限，你当前还没权限收藏哦");
+            return Result.fail(Result.FORBIDDEN,"该博主设置了访问权限，你当前还没权限收藏哦",null);
         }
 
         int saveResult = articleService.saveArticleToUser(articleId,userId);
         if (saveResult == 0){
             return Result.fail("收藏失败");
         }else if (saveResult == -1){
-            return Result.fail("已经在收藏文章列表了，不能重复收藏哦~");
+            return Result.fail(Result.FORBIDDEN,"已经在收藏文章列表了，不能重复收藏哦~",null);
         }else {
             return Result.succ(200, "收藏成功，可以在收藏列表中查看", userId);
         }
@@ -119,14 +123,14 @@ public class UserArticleController {
     public Result disSave(@PathVariable("articleId") Long articleId){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("登录后才能收藏文章哦~");
+            throw new UnknownAccountException("你当前还没登录，登录后才能取消收藏文章哦~");
         }
 
         int disSaveResult = articleService.disSaveArticleToUser(articleId,userId);
         if (disSaveResult == 0){
             return Result.fail("取消收藏失败");
         }else if (disSaveResult == -1){
-            return Result.fail("该文章还未收藏，不能进行该操作");
+            return Result.fail(Result.FORBIDDEN,"该文章还未收藏，不能进行该操作",null);
         }else {
             return Result.succ(200, "取消收藏成功", userId);
         }
@@ -138,14 +142,14 @@ public class UserArticleController {
     public Result support(UserSupportDto supportDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("你当前还未登录，不能进行该操作");
+            throw new UnknownAccountException("你当前还没登录，登录后才能点赞哦~");
         }
 
         Long commentId = supportDto.getCommentId();
         Long articleId = supportDto.getArticleId();
         //articleId、commentId参数不能同时为null，也不能同时不为null
         if ((articleId == null && commentId == null) || (articleId != null && commentId != null)){
-            return Result.fail("参数错误");
+            return Result.fail(Result.FORBIDDEN,"参数错误",null);
         }
 
         int supportResult;
@@ -158,7 +162,7 @@ public class UserArticleController {
         }else {                     //说明点赞的是文章
             //先判断用户是否有权限访问该文章，没有则不允许收藏
             if (!articleUtil.haveArticleVisitPermission(userId.longValue(), articleId)){
-                return Result.fail("该博主设置了访问权限，你当前还没权限点赞哦");
+                return Result.fail(Result.FORBIDDEN,"该博主设置了访问权限，你当前还没权限点赞哦",null);
             }
 
             //根据userId、articleId查询 t_user_support表中 是否已经有数据，若有，则不允许点赞
@@ -177,13 +181,13 @@ public class UserArticleController {
     public Result disSupport(UserSupportDto disSupportDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("你当前还未登录，不能进行该操作");
+            throw new UnknownAccountException("你当前还没登录，登录后才能取消点赞哦~");
         }
 
         Long articleId = disSupportDto.getArticleId();
         Long commentId = disSupportDto.getCommentId();
         if ((articleId == null && commentId == null) || (articleId != null && commentId != null)){
-            return Result.fail("参数错误");
+            return Result.fail(Result.FORBIDDEN,"参数错误",null);
         }
 
         int disSupportResult;
@@ -208,7 +212,7 @@ public class UserArticleController {
     public Result careAuthor(@PathVariable("authorId") Integer authorId){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("你当前还未登录，不能进行该操作");
+            throw new UnknownAccountException("你当前还没登录，登录后才能关注该博主哦~");
         }
 
         int careResult = articleService.careAuthorByArticleId(authorId,userId);
@@ -221,11 +225,11 @@ public class UserArticleController {
 
 
     @ApiOperation(value = "取消关注博主",notes = "用户通过此接口取消关注博主（需要传jwt）")
-    @DeleteMapping("/disCareAuhtor/{authorId}")
-    public Result disCareAuhtor(@PathVariable("authorId") Integer authorId){
+    @DeleteMapping("/disCareAuthor/{authorId}")
+    public Result disCareAuthor(@PathVariable("authorId") Integer authorId){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
-            return Result.fail("你当前还未登录，不能进行该操作");
+            throw new UnknownAccountException("你当前还没登录，登录后才能取消关注哦~");
         }
 
         int disCareResult = articleService.disCareAuthorByAuthorId(authorId,userId);

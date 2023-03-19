@@ -44,7 +44,7 @@ public class AnimalController {
         List<Animal> likeAnimals = animalService.selectAnimalByLike(animalLike);
 
         if (likeAnimals.isEmpty()){
-            return Result.fail("未查找到你指定的动物");
+            return Result.fail(Result.FORBIDDEN,"未查找到你指定的动物",null);
         }else {
             setAnimalListSimpInfo(likeAnimals);
             return Result.succ(200,"已查找到你指定的动物",likeAnimals);
