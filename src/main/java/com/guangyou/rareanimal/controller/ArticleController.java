@@ -91,12 +91,15 @@ public class ArticleController {
     @ApiOperation(value = "文章详情",notes = "可以查看文章的具体信息")
     @GetMapping("viewArticle/{id}")
     public Result viewArticleById(@PathVariable("id") Long articleId){
+        //若文章id错误（数据不存在），则 直接返回
+        if (articleMapper.selectById(articleId) == null){
+            return Result.fail(Result.FORBIDDEN,"文章id错误，数据不存在",null);
+        }
         //获取文章访问权限，若不是 “全部可见” ，则不允许访问
         String visitPermission = articleMapper.selectVisitPermission(articleId);
         if (!ArticleUtil.VISIT_PERMISSION_ALL.equals(visitPermission)){
             return Result.fail(Result.FORBIDDEN,"该博主设置了文章访问权限，你当前还没权限访问哦",null);
         }
-
         ArticleVo articleVo = articleService.findArticleById(articleId);
         if (articleVo == null){
             return Result.fail("未查询到该文章");

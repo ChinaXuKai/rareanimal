@@ -23,18 +23,8 @@ public class RecommendUserVo {
     @ApiModelProperty(value = "主键id")
     private Long id;
 
-    @JsonSerialize(using = ToStringSerializer.class)
-    @ApiModelProperty(value = "用户id")
-    private Long userId;
-
-    @ApiModelProperty(value = "用户昵称")
-    private String userName;
-
-    @ApiModelProperty(value = "用户密码")
-    private String userAvatar;
-
-    @ApiModelProperty(value = "用户的粉丝数")
-    private Integer carerCount;
+    @ApiModelProperty(value = "推荐用户作展示的相关数据")
+    private UserInfoVo recommendUserInfo;
 
     @ApiModelProperty(value = "推荐时间")
     private String recommendTime;

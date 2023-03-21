@@ -15,7 +15,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@ApiModel("作者的相关信息")
+@ApiModel("作者作展示的相关信息")
 public class AuthorInfoVo {
 
     @ApiModelProperty(value = "作者id")

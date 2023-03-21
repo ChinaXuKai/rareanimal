@@ -29,9 +29,9 @@ import java.util.List;
 @Api(tags = "推荐系统控制器")
 public class RecommendController {
 
-    private final static Integer RECOMMEND_ARTICLE_CATEGORY_NUMBER = 5;
-    private final static Integer RECOMMEND_USER_NUMBER = 3;
-    private final static Integer RECOMMEND_ARTICLE_NUMBER = 3;
+    private final static Integer RECOMMEND_ARTICLE_CATEGORY_NUMBER = 8;
+    private final static Integer RECOMMEND_USER_NUMBER = 6;
+    private final static Integer RECOMMEND_ARTICLE_NUMBER = 8;
 
     @Autowired
     private RecommendService recommendService;

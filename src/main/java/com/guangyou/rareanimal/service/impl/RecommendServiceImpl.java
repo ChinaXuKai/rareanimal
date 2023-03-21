@@ -71,6 +71,7 @@ public class RecommendServiceImpl implements RecommendService {
             recommendCategory.setCategoryLabel(category.getCategoryLabel());
             recommendCategory.setArticleCount(articleCount);
             recommendCategory.setRecommendTime(System.currentTimeMillis());
+            recommendCategory.setCategoryAvatar(category.getCategoryAvatar());
             recommendCategoryMapper.insert(recommendCategory);
         }
     }
@@ -167,10 +168,19 @@ public class RecommendServiceImpl implements RecommendService {
     private void copyUser(List<RecommendUser> dbRecommendUsers, List<RecommendUserVo> recommendUserVos,String recommendTime) {
         for (int i = 0;i <dbRecommendUsers.size(); i++){
             RecommendUserVo recommendUserVo = new RecommendUserVo();
+            UserInfoVo recommendUserInfo = new UserInfoVo();
             RecommendUser dbUser = dbRecommendUsers.get(i);
             BeanUtils.copyProperties(dbUser,recommendUserVo);
+            //为 recommendUserVo 赋值，最后添加进 recommendUserVos
+            User user = userMapper.getUsersByUid(dbUser.getUserId());
+            recommendUserInfo.setUserAccount(user.getUserAccount());
+            recommendUserInfo.setCreateTime(new DateTime(user.getCreateTime()).toString("yyyy-MM-dd HH:mm"));
+            recommendUserInfo.setFansCount(userCarerMapper.getCarerCountByUserId(dbUser.getUserId()));
+            recommendUserInfo.setUserId(dbUser.getUserId());
+            recommendUserInfo.setUserName(dbUser.getUserName());
+            recommendUserInfo.setUserAvatar(dbUser.getUserAvatar());
+            recommendUserVo.setRecommendUserInfo(recommendUserInfo);
             recommendUserVo.setRecommendTime(recommendTime);
-            recommendUserVo.setCarerCount(userCarerMapper.getCarerCountByUserId(dbUser.getUserId()));
             recommendUserVos.add(recommendUserVo);
         }
     }

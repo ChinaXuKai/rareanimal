@@ -70,10 +70,4 @@ public interface UserMapper extends BaseMapper<User> {
      */
     User getUsersByUid(Long toUid);
 
-//    /**
-//     * 根据 用户id 修改 用户头像
-//     * @param userId 用户id
-//     * @param imageUrl 用户头像url地址
-//     */
-//    void updateAvatarById(int userId, String imageUrl);
 }

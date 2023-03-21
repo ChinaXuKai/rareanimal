@@ -19,6 +19,10 @@ public class ArticleUtil {
     public final static String VISIT_PERMISSION_CARER = "关注可见";
     public final static String VISIT_PERMISSION_MY = "仅我可见";
 
+    public final static int NOT_FOUND_ARTICLE = -1;
+    public final static int NOT_PERMISSION_VIEW_ARTICLE = 0;
+    public final static int HAVE_PERMISSION_VIEW_ARTICLE = 1;
+
     @Autowired
     private ArticleMapper articleMapper;
     @Autowired
@@ -34,6 +38,7 @@ public class ArticleUtil {
     public boolean haveArticleVisitPermission(Long userId,Long articleId){
         //1、先从 t_article 中查询该文章的访问权限
         String visitPermission = articleMapper.selectVisitPermission(articleId);
+//        if (visitPermission.)
         //若访问权限为仅我可见
         if (VISIT_PERMISSION_MY.equals(visitPermission)){
             //查看该用户是否就是该文章作者
@@ -56,6 +61,4 @@ public class ArticleUtil {
         //若访问权限为全部可见，则直接返回true
         return true;
     }
-
-
 }
