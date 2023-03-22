@@ -2,6 +2,7 @@ package com.guangyou.rareanimal.controller;
 
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.mapper.ArticleMapper;
+import com.guangyou.rareanimal.pojo.CategoryTheme;
 import com.guangyou.rareanimal.pojo.vo.ArticleCategoriesVo;
 import com.guangyou.rareanimal.pojo.vo.ArticleVo;
 import com.guangyou.rareanimal.pojo.vo.CustomTagVo;
@@ -108,6 +109,20 @@ public class ArticleController {
         }
     }
 
+    @ApiOperation(value = "获取文章圈子的主题集合",notes = "获取文章圈子的主题集合")
+    @GetMapping("/getCategoryTheme")
+    public Result getCategoryTheme(){
+        List<CategoryTheme> categoryThemes = categoryService.getAllTheme();
+        return Result.succ(200,"",categoryThemes);
+    }
+
+
+    @ApiOperation(value = "获取主题id对应的文章圈子集合",notes = "获取主题id对应的文章圈子集合")
+    @GetMapping("/getArticleCategory/{themeId}")
+    public Result getAllArticleCategory(@PathVariable("themeId") Long themeId){
+        ArticleCategoriesVo articleCategories = categoryService.getCategoryByThemeId(themeId);
+        return Result.succ(200, "请在下列文章圈子中选择一样", articleCategories);
+    }
 
     @ApiOperation(value = "文章分类圈子",notes = "获取所有的文章圈子")
     @GetMapping("getAllArticleCategory")
@@ -115,6 +130,5 @@ public class ArticleController {
         List<ArticleCategoriesVo> articleCategories = categoryService.findArticleCategories();
         return Result.succ(200, "请在下列文章圈子中选择一样", articleCategories);
     }
-
 
 }

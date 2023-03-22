@@ -55,7 +55,7 @@ public class ArticleDto {
     @ApiModelProperty(value = "文章标签（可多个）")
     private List<String> tagsName;
 
-    @ApiModelProperty(value = "文章类型")
+    @ApiModelProperty(value = "文章类型：原创、转载")
     private String articleType;
 
     @ApiModelProperty(value = "阅读许可：全部可见、仅我可见、关注可见")

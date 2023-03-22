@@ -34,5 +34,11 @@
         where id = #{categoryId}
     </select>
 
+<!--    CategoryTheme selectThemeByThemeId(Long themeId);-->
+    <select id="selectThemeByThemeId" resultType="com.guangyou.rareanimal.pojo.CategoryTheme">
+        select * from t_category_theme
+        where id = #{themeId}
+    </select>
+
 
 </mapper>

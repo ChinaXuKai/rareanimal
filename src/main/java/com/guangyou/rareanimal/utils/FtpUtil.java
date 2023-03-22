@@ -39,12 +39,6 @@ public class FtpUtil {
     private String rootPath;
 
     /**
-     * 存放视频的根目录
-     */
-    @Value("${ftp.videoPath}")
-    private String videoPath;
-
-    /**
      * 存放图片的路径：返回给前端图片地址
      */
     @Value("${ftp.img.url}")
@@ -127,39 +121,6 @@ public class FtpUtil {
         }
     }
 
-    /**
-     * ftp上传视频
-     * @param inputStream
-     * @param videoPath
-     * @param videoName
-     * @return
-     */
-    public String putVideo(InputStream inputStream,String videoPath,String videoName){
-        try {
-            //调用getChannel() 获取连接
-            ChannelSftp sftp = getChannel();
-            String path = this.videoPath + videoPath + "/";
-            //创建目录
-            createDir(path, sftp);
-
-            //上传文件
-            sftp.put(inputStream, path + videoName);
-            sftp.quit();
-            sftp.exit();
-
-            //处理返回的路径
-            String resultFile;
-            resultFile = imgUrl + videoPath + videoName;
-
-            log.info("path={}",path);
-            log.info("path+imagesName={}",path + videoName);
-            log.info("resultFile={}",resultFile);
-            return resultFile;
-        }catch (Exception e){
-            e.printStackTrace();
-            return e.getMessage();
-        }
-    }
 
 }
 

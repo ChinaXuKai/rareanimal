@@ -30,4 +30,7 @@ public interface CategoryMapper extends BaseMapper<Category> {
 
     //根据圈子id查询 对应的文章数量
     int selectArticleCount(Long categoryId);
+
+    //根据主题id查询 对应主题信息
+    CategoryTheme selectThemeByThemeId(Long themeId);
 }

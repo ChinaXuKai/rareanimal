@@ -13,10 +13,10 @@ public interface UploadService {
      */
     String uploadImg(MultipartFile img);
 
-    /**
-     * 上传视频
-     * @param video 上传的视频
-     * @return
-     */
-    String uploadVideo(MultipartFile video);
+//    /**
+//     * 上传视频
+//     * @param video 上传的视频
+//     * @return
+//     */
+//    String uploadVideo(MultipartFile video);
 }

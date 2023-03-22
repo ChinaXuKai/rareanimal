@@ -11,6 +11,7 @@ import com.guangyou.rareanimal.utils.ArticleUtil;
 import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class UserArticleController {
 
     @ApiOperation(value = "发布文章",notes = "用户通过此接口发布文章（需要传jwt）")
     @PostMapping("/publish")
-    public Result publishArticle(@Validated ArticleDto articleDto){
+    public Result publishArticle(@RequestBody @Validated ArticleDto articleDto){
         String userAccount = ShiroUtil.getProfile().getUserAccount();
         if (userAccount == null){
             throw new UnknownAccountException("你当前还没登录，登录后才能发表文章哦~");

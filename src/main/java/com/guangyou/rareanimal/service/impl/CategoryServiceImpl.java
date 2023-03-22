@@ -46,4 +46,21 @@ public class CategoryServiceImpl implements CategoryService {
         return articleCategoriesVos;
     }
 
+    @Override
+    public List<CategoryTheme> getAllTheme() {
+        return categoryMapper.selectAllCategoryTheme();
+    }
+
+
+    @Override
+    public ArticleCategoriesVo getCategoryByThemeId(Long themeId) {
+        ArticleCategoriesVo articleCategoriesVo = new ArticleCategoriesVo();
+        List<CategoryVo> categoryVos = categoryMapper.selectCategoryByThemeId(themeId);
+        articleCategoriesVo.setThemeId(themeId);
+        CategoryTheme theme = categoryMapper.selectThemeByThemeId(themeId);
+        articleCategoriesVo.setTheme(theme.getThemeName());
+        articleCategoriesVo.setArticleCategories(categoryVos);
+        return articleCategoriesVo;
+    }
+
 }
