@@ -16,25 +16,28 @@ import java.util.Map;
 public interface ArticleService {
 
     /**
-     * 分页查询文章列表
-     * @param pageDto
+     * 查询官方发布的文章列表
      * @return
      */
-    Result listArticle();
+    Result getOfficialArticles();
 
     /**
-     * 查询最热文章
-     * @param hotArticleLimit
+     * 查询用户发布的文章列表
      * @return
      */
-    List<ArticleVo> getHotArticle(int hotArticleLimit);
+    Result getUserArticles();
 
     /**
-     * 查询最新文章
-     * @param newArticleLimit
+     * 查询非官方发布的最热文章
      * @return
      */
-    List<ArticleVo> getNewArticle(int newArticleLimit);
+    List<ArticleVo> getHotArticle();
+
+    /**
+     * 查询非官方发布的最新文章
+     * @return
+     */
+    List<ArticleVo> getNewArticle();
 
     /**
      * 根据 articleId 查看相应的文章信息
@@ -126,4 +129,5 @@ public interface ArticleService {
      * @return
      */
     int disCareAuthorByAuthorId(Integer authorId, Integer userId);
+
 }

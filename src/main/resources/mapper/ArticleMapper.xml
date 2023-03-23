@@ -69,4 +69,27 @@
         where article.id >= (RAND()*(select MAX(id) from t_article))
         LIMIT #{randArticleNumber}
     </select>
+
+<!--    List<Article> selectOfficialArticles(Integer officialArticleNumber);-->
+    <select id="selectOfficialArticles" resultType="com.guangyou.rareanimal.pojo.Article">
+        select * from t_article
+        where weight = 1
+        limit #{officialArticleNumber}
+    </select>
+
+<!--    List<Article> selectHotArticle(int hotArticleLimit);-->
+    <select id="selectHotArticle" resultType="com.guangyou.rareanimal.pojo.Article">
+        select * from t_article
+        where weight = 0
+        order by view_counts desc
+        limit #{hotArticleLimit}
+    </select>
+
+<!--    List<Article> selectNewArticle(int newArticleLimit);-->
+    <select id="selectNewArticle" resultType="com.guangyou.rareanimal.pojo.Article">
+        select * from t_article
+        where weight = 0
+        order by create_date desc
+        limit #{newArticleLimit}
+    </select>
 </mapper>

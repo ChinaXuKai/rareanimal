@@ -509,75 +509,83 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
+//    private final static Integer USER_ARTICLE_NUMBER = 5;
+    private final static Integer OFFICIAL_ARTICLE_NUMBER = 3;
 
-    private final static Integer RAND_ARTICLE_NUMBER = 3;
     /**
-     * 获取 articleList：
-     * 1、优先获取官方POEAzsyxk（weight == 1）
-     * 2、再获取 3 条文章（）
-     * 3、将 步骤1 和 步骤2获取 到的数据添加到 articleList中
+     * 获取 官方发表的前 OFFICIAL_ARTICLE_NUMBER 条文章
+     *      官方POEAzsyxk、weight == 1、前 OFFICIAL_ARTICLE_NUMBER 条
+     * @return
      */
     @Override
-    public Result listArticle() {
+    public Result getOfficialArticles() {
+        //1、获取官方POEAzsyxk（where weight == 1 limit OFFICIAL_ARTICLE_NUMBER）
+        List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_NUMBER);
+        //2、将 articleList 转为 articleVoList 返回
+        List<ArticleVo> officialArticlesVo = copyList(officialArticles,true,true,false,false);
+        if (officialArticlesVo.isEmpty()){
+            return Result.fail("获取官方文章失败");
+        }
+        return Result.succ(200,"官方文章列表如下",officialArticlesVo);
+    }
+
+
+    private static final int NEW_ARTICLE_LIMIT = 8;
+    private static final int HOT_ARTICLE_LIMIT = 8;
+    /**
+     * 获取 USER_ARTICLE_NUMBER 条用户发表的文章（每次获取的文章都不相同）
+     *      用户、weight == 0、前 USER_ARTICLE_NUMBER 条
+     * 方案二：可能重复出现
+     * 1、用的当前最热前2条、当前最新前2条、当前评论最多前1条做为 用户发表的文章的展示
+     */
+    @Override
+    public Result getUserArticles() {
         List<ArticleVo> resultArticleVoList = new ArrayList<>();
-        //1、优先获取官方POEAzsyxk（weight == 1）
+        //1、获取当前最热 前2条、当前最新前2条、当前评论最多前1条做为 用户发表的文章的展示
+        List<Article> hotArticles = articleMapper.selectHotArticle(HOT_ARTICLE_LIMIT - 6);
+        List<Article> newArticles = articleMapper.selectNewArticle(NEW_ARTICLE_LIMIT - 6);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Article::getWeight,1);
-        List<Article> articleList = articleMapper.selectList(queryWrapper);
-        //将 articleList 转为 articleVoList 返回
-        List<ArticleVo> articleVoList = copyList(articleList,true,true,false,false);
-        //2、再获取 RAND_ARTICLE_NUMBER 条随机数据
-        List<Article> randArticles = articleMapper.selectRandArticles(RAND_ARTICLE_NUMBER);
-        //将 randArticles 转为 randArticleVoList 返回
-        List<ArticleVo> randArticleVoList = copyList(randArticles, true, true, false, false);
-        //3、将 articleVoList 和 randArticleVoList 获取到的数据添加到 resultArticleVoList中
-        resultArticleVoList.addAll(articleVoList);
-        resultArticleVoList.addAll(randArticleVoList);
+        queryWrapper.orderByDesc(Article::getCreateDate);
+        queryWrapper.last("limit 1");
+        Article commentArticle = articleMapper.selectOne(queryWrapper);
+        //将 ArticleList 转为 ArticleVoList，并添加进 resultArticleVoList中
+        resultArticleVoList.addAll(copyList(hotArticles, true, true, false, true));
+        resultArticleVoList.addAll(copyList(newArticles, true, true, false, true));
+        resultArticleVoList.add(copy(commentArticle, true, true, false, true));
         if (resultArticleVoList.isEmpty()){
-            return Result.fail("获取文章出现错误");
+            return Result.fail("获取用户文章出现错误");
         }
         return Result.succ(200,"获取文章成功", resultArticleVoList);
     }
 
-
     @Override
-    public List<ArticleVo> getHotArticle(int hotArticleLimit) {
-        //select id,title from t_article order by view_counts desc
-        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(Article::getViewCounts);
-        queryWrapper.select(Article::getId,Article::getTitle,Article::getAuthorAccount);
-        queryWrapper.last("limit " + hotArticleLimit);
-        List<Article> hotArticles = articleMapper.selectList(queryWrapper);
-        return copyList(hotArticles, true,false,false,false);
+    public List<ArticleVo> getHotArticle() {
+        List<Article> hotArticles = articleMapper.selectHotArticle(HOT_ARTICLE_LIMIT);
+        return copyList(hotArticles, true,false,false,true);
     }
 
-
     @Override
-    public List<ArticleVo> getNewArticle(int newArticleLimit) {
-        //select id,title from t_article order by create_date desc
-        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(Article::getCreateDate);
-        queryWrapper.select(Article::getId,Article::getTitle,Article::getAuthorAccount);
-        queryWrapper.last("limit " + newArticleLimit);
-        List<Article> newArticles = articleMapper.selectList(queryWrapper);
-        return copyList(newArticles, true,false,false,false);
+    public List<ArticleVo> getNewArticle() {
+        List<Article> newArticles = articleMapper.selectNewArticle(NEW_ARTICLE_LIMIT);
+        return copyList(newArticles, true,false,false,true);
     }
 
 
     @Autowired
     private ThreadService threadService;
 
-
+    /**
+     * 查看完文章，不能直接增加阅读数量。
+     * 因为MySQL在做更新操作时是加写锁的，会阻塞其他的操作，性能较低，
+     * 但我们希望 文章详情的展示操作 不受 阅读数量 的更新而影响，即使更新出了问题也不能影响查看文章的操作
+     * 所以需要线程池（不同线程）来操作
+     * @param articleId 文章id
+     * @return
+     */
     @Override
     public ArticleVo findArticleById(Long articleId) {
         Article article = articleMapper.selectById(articleId);
         ArticleVo articleVo = copy(article, true,true,true,true);
-        /**
-         * 查看完文章，不能直接增加阅读数量。
-         * 因为MySQL在做更新操作时是加写锁的，会阻塞其他的操作，性能较低，
-         * 但我们希望 文章详情的展示操作 不受 阅读数量 的更新而影响，即使更新出了问题也不能影响查看文章的操作
-         * 所以需要线程池（不同线程）来操作
-         */
         threadService.updateArticleViewCount(articleMapper, article);
         return articleVo;
     }

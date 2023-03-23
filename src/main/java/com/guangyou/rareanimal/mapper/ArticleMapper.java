@@ -86,5 +86,26 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     List<Article> selectRandArticles(Integer randArticleNumber);
+
+    /**
+     * 获取官方发表的前 OFFICIAL_ARTICLE_NUMBER 条文章
+     * @param officialArticleNumber
+     * @return
+     */
+    List<Article> selectOfficialArticles(Integer officialArticleNumber);
+
+    /**
+     * 获取当前最热（阅读最多）的前 hotArticleLimit 篇文章
+     * @param hotArticleLimit
+     * @return
+     */
+    List<Article> selectHotArticle(int hotArticleLimit);
+
+    /**
+     * 获取当前最新（日期最新）的前 newArticleLimit 篇文章
+     * @param newArticleLimit
+     * @return
+     */
+    List<Article> selectNewArticle(int newArticleLimit);
 }
 

@@ -37,14 +37,17 @@ public class ArticleController {
     private CategoryService categoryService;
 
     private static final int TAG_LIMIT = 5;
-    private static final int HOT_ARTICLE_LIMIT = 8;
-    private static final int NEW_ARTICLE_LIMIT = 8;
 
+    @ApiOperation(value = "官方文章集合显示",notes = "返回官方发布的文章")
+    @GetMapping("getOfficialArticles")
+    public Result getOfficialArticles(){
+        return articleService.getOfficialArticles();
+    }
 
-    @ApiOperation(value = "文章集合显示",notes = "显示文章集合")
-    @GetMapping("listArticles")
-    public Result listArticles(){
-        return articleService.listArticle();
+    @ApiOperation(value = "用户文章集合显示",notes = "返回用户发布的文章")
+    @GetMapping("getUserArticles")
+    public Result getUserArticles(){
+        return articleService.getUserArticles();
     }
 
 
@@ -63,10 +66,10 @@ public class ArticleController {
     }
 
 
-    @ApiOperation(value = "最热文章",notes = "可以获取最热文章")
+    @ApiOperation(value = "查询非官方发布的最热文章",notes = "可以获取非官方发布的最热文章")
     @GetMapping("getHotArticle")
     public Result getHotArticle(){
-        List<ArticleVo> hotArticles = articleService.getHotArticle(HOT_ARTICLE_LIMIT);
+        List<ArticleVo> hotArticles = articleService.getHotArticle();
         if (hotArticles.size() == 0){
             return Result.succ(200, "当前还没有最热文章", null);
         }else {
@@ -75,10 +78,10 @@ public class ArticleController {
     }
 
 
-    @ApiOperation(value = "最新文章",notes = "可以获取最新文章")
+    @ApiOperation(value = "查询非官方发布的最新文章",notes = "可以获取非官方发布的最新文章")
     @GetMapping("getNewArticle")
     public Result getNewArticle(){
-        List<ArticleVo> newArticles = articleService.getNewArticle(NEW_ARTICLE_LIMIT);
+        List<ArticleVo> newArticles = articleService.getNewArticle();
         if (newArticles.size() == 0){
             return Result.succ(200, "当前还没有最热文章", null);
         }else {
