@@ -1,5 +1,6 @@
 package com.guangyou.rareanimal.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.guangyou.rareanimal.mapper.*;
 import com.guangyou.rareanimal.pojo.*;
@@ -290,13 +291,15 @@ public class RecommendServiceImpl implements RecommendService {
         return recommendArticleMapper.getRecommendArticles(recommendUserNumber);
     }
     /**
-     * 计算 所有用户的推荐系数 ，封装成RecommendUser类型的list对象并添加进行 t_recommend_user 表中
+     * 计算 所有文章的推荐系数 ，封装成RecommendUser类型的list对象并添加进行 t_recommend_user 表中
      * 推荐系数 =（ （点赞数/阅读数）* 0.3 + 评论数*0.3 + 收藏数*0.4 ） *100
      */
     private void computeAndInsertArticlesRecommendFactor(){
         List<RecommendArticle> recommendArticles = new ArrayList<>();
-        //1、获取到 用户集合
-        List<Article> articles = articleMapper.selectList(null);
+        //1、获取到 非官方没逻辑删除 的文章集合
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getIsDelete, 0);
+        List<Article> articles = articleMapper.selectList(queryWrapper);
         //2、for循环 依次封装对象并添加进数据库
         for (int i = 0; i < articles.size(); i++){
             //获取相应的 article对象，添加并获取recommendArticle对象

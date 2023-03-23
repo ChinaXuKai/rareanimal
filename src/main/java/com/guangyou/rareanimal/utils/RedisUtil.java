@@ -2,6 +2,7 @@ package com.guangyou.rareanimal.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.DataType;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -28,6 +29,25 @@ public class RedisUtil {
     public RedisTemplate<String, String> getRedisTemplate() {
         return this.redisTemplate;
     }
+
+    /** -------------------数据库相关操作------------------ */
+
+    /**
+     * 设置数据库索引
+     *
+     * @param dbIndex
+     */
+    public void select(Integer dbIndex) {
+        if (dbIndex == null || dbIndex > 15 || dbIndex < 0) {
+            dbIndex = 0;
+        }
+        LettuceConnectionFactory jedisConnectionFactory = (LettuceConnectionFactory) redisTemplate
+                .getConnectionFactory();
+        jedisConnectionFactory.setDatabase(dbIndex);
+        redisTemplate.setConnectionFactory(jedisConnectionFactory);
+        jedisConnectionFactory.afterPropertiesSet();
+    }
+
 
     /** -------------------key相关操作--------------------- */
 

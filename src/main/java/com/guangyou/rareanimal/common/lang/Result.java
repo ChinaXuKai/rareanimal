@@ -24,7 +24,7 @@ public class Result implements Serializable {
     public final static int UNAUTHORIZED = 401;
     /**
      * 403 Forbidden
-     * 服务器收到请求，但拒绝执行，这个请求也应该被重复提交。
+     * 服务器收到请求，但拒绝执行，这个请求也不应该被重复提交。
      */
     public final static int FORBIDDEN = 403;
     /**

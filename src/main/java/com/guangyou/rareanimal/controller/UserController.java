@@ -18,6 +18,8 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,6 +77,8 @@ public class UserController {
     }
 
 
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
     @SneakyThrows
     @ApiOperation(value = "用户登录，生成jwt",notes = "用户登录，生成jwt信息，封装至响应头中，有效期为7天（不需要传jwt）")
     @PostMapping("/loginUser")
@@ -88,11 +92,11 @@ public class UserController {
         String jwt = jwtUtil.generateToken(user.getUserId());
         response.setHeader("token", jwt);
         response.setHeader("Access-control-Expose-Headers", "token");
-        // 将 JWT 信息存储至redis中，并设置过期时间
+        // 将 JWT 信息存储至 redis 的 库0 中，并设置过期时间
         String jsonUser = new ObjectMapper().writeValueAsString(user);
+        redisUtil.select(0);
         redisUtil.set(jwt, jsonUser);           //jwt:jsonUser
         redisUtil.expire(jwt, 7, TimeUnit.DAYS);
-
         log.info("jwtUtil.generateTokenById={}",jwt);
         log.info("jsonUser={}",jsonUser);
         return Result.succ(200, "登录成功", user);

@@ -95,10 +95,15 @@ public class ArticleController {
     @ApiOperation(value = "文章详情",notes = "可以查看文章的具体信息")
     @GetMapping("viewArticle/{id}")
     public Result viewArticleById(@PathVariable("id") Long articleId){
-        //若文章id错误（数据不存在），则 直接返回
+        //若文章id错误（数据不存在），则 不允许访问
         if (articleMapper.selectById(articleId) == null){
             return Result.fail(Result.FORBIDDEN,"文章id错误，数据不存在",null);
         }
+        //若文章已被逻辑删除，则 不允许访问
+        if (articleMapper.selectById(articleId).getIsDelete() == 1){
+            return Result.fail(Result.FORBIDDEN,"该文章已被逻辑删除，不可访问",null);
+        }
+
         //获取文章访问权限，若不是 “全部可见” ，则不允许访问
         String visitPermission = articleMapper.selectVisitPermission(articleId);
         if (!ArticleUtil.VISIT_PERMISSION_ALL.equals(visitPermission)){

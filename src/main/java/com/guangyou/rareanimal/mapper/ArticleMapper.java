@@ -107,5 +107,12 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     List<Article> selectNewArticle(int newArticleLimit);
+
+    /**
+     * 将 articleId 对应的文章 进行逻辑删除
+     * @param articleId 文章id
+     * @return
+     */
+    int deleteArticleById(Long articleId);
 }
 

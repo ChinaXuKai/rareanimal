@@ -11,5 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserArticleMapper extends BaseMapper<UserArticle> {
 
-
+    /**
+     *
+     * @param userId
+     * @return
+     */
+    int selectSaveArticleCount(Integer userId);
 }

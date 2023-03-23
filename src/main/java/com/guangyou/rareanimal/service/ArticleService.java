@@ -90,13 +90,6 @@ public interface ArticleService {
      */
     int disSaveArticleToUser(Long articleId, Integer userId);
 
-    /**
-     * 用户userId 查看收藏文章列表
-     * @param pageDto
-     * @param userId
-     * @return
-     */
-    PageDataVo<ArticleVo> listSaveArticles(PageDto pageDto, Integer userId);
 
     /**
      * 用户userId 点赞文章或评论

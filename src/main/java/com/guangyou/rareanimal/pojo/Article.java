@@ -57,10 +57,18 @@ public class Article {
      * 置顶
      */
     private Integer weight = Article_Common;
-
-
     /**
      * 创建时间
      */
     private Long createDate;
+    /**
+     * 逻辑删除
+     * 1：逻辑删除
+     */
+    private Integer isDelete;
+    /**
+     * 是否已经展示
+     * 1：已经展示
+     */
+    private Integer isRead;
 }

@@ -38,11 +38,23 @@
         where id = #{articleId}
     </update>
 
+<!--    int deleteArticleById(Long articleId);-->
+    <update id="deleteArticleById">
+        update t_article set is_delete = 1
+        where id = #{articleId}
+    </update>
+
     <!--    List<Article> selectSaveArticles(Integer userId, Integer initialDataLocation, Integer pageSize);-->
     <select id="selectSaveArticles" resultType="com.guangyou.rareanimal.pojo.Article">
-        select id,author_account,title,comment_counts,view_counts,support_counts,save_counts from t_article where id in (
-            select article_id from t_user_article where user_id = #{userId}
-        ) LIMIT #{initialDataLocation}, #{pageSize}
+        select id,author_account,title,comment_counts,view_counts,support_counts,save_counts
+        from t_article
+        where id in (
+            select article_id
+            from t_user_article
+            where user_id = #{userId}
+        )
+        and is_delete = 0
+        LIMIT #{initialDataLocation}, #{pageSize}
     </select>
 
 <!--    int selectSupportCountsByArticleId(Long articleId);-->
@@ -72,8 +84,11 @@
 
 <!--    List<Article> selectOfficialArticles(Integer officialArticleNumber);-->
     <select id="selectOfficialArticles" resultType="com.guangyou.rareanimal.pojo.Article">
-        select * from t_article
+        select *
+        from t_article
         where weight = 1
+        and is_delete = 0
+        order by create_date desc
         limit #{officialArticleNumber}
     </select>
 
@@ -81,6 +96,7 @@
     <select id="selectHotArticle" resultType="com.guangyou.rareanimal.pojo.Article">
         select * from t_article
         where weight = 0
+        and is_delete = 0
         order by view_counts desc
         limit #{hotArticleLimit}
     </select>
@@ -89,6 +105,7 @@
     <select id="selectNewArticle" resultType="com.guangyou.rareanimal.pojo.Article">
         select * from t_article
         where weight = 0
+        and is_delete = 0
         order by create_date desc
         limit #{newArticleLimit}
     </select>

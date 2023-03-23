@@ -14,6 +14,7 @@ import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.ThreadService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
+import com.guangyou.rareanimal.utils.RedisUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,11 +192,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public int deleteArticleToUser(Long articleId) {
-        //要删除文章就要 根据 articleId 删除对应t_article、t_article_body、t_article_tag、t_comment中的数据
-        articleMapper.delete(new LambdaQueryWrapper<Article>().eq(Article::getId, articleId));
-        articleBodyMapper.delete(new LambdaQueryWrapper<ArticleBody>().eq(ArticleBody::getArticleId,articleId));
-        articleCustomTagMapper.delete(new LambdaQueryWrapper<ArticleCustomTag>().eq(ArticleCustomTag::getArticleId, articleId));
-        return commentsMapper.delete(new LambdaQueryWrapper<Comment>().eq(Comment::getArticleId, articleId));
+        //删除文章：逻辑删除直接设置 t_article 的 is_delete 字段为 1
+        return articleMapper.deleteArticleById(articleId);
     }
 
 
@@ -264,58 +262,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
-    @Override
-    public PageDataVo<ArticleVo> listSaveArticles(PageDto pageDto, Integer userId) {
-        /*
-         * 1、在t_user_article表中按照 user_id 查询 article_id 集合
-         * 2、根据 article_id 集合在 t_article表中查询如下字段信息：
-         *      id、author_name、title、comment_counts、view_counts、support_counts、
-         *      save_counts
-         * 3、设置 数据库中收藏文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
-         */
-        PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
-        ArrayList<ArticleVo> saveArticlesVo = new ArrayList<>();
-        List<Article> saveArticles = articleMapper.selectSaveArticles(userId, pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
-        for (Article saveArticle : saveArticles){
-            ArticleVo articleVo = new ArticleVo();
-            BeanUtils.copyProperties(saveArticle, articleVo);
-            //author_name需要通过 根据author_account 查询t_user表 获取作者
-            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getUserAccount, saveArticle.getAuthorAccount());
-            User author = userMapper.selectOne(queryWrapper);
-            //获取到作者后赋值作者昵称并添加进 saveArticlesVo集合
-            AuthorInfoVo authorInfoVo = new AuthorInfoVo();
-            articleVo.setAuthorInfo(authorInfoVo);
-            articleVo.getAuthorInfo().setAuthorId(author.getUserId().longValue());
-            articleVo.getAuthorInfo().setAuthorName(author.getUserName());
-            articleVo.getAuthorInfo().setAuthorAccount(author.getUserAccount());
-            articleVo.getAuthorInfo().setAuthorAvatarUrl(author.getUserAvatar());
-            //根据文章id 获取文章封面url地址集合
-            List<String> coverImgList = articleCoverImgMapper.selectCoverImgByArticleId(saveArticle.getId());
-            articleVo.setCoverImg(coverImgList);
-            saveArticlesVo.add(articleVo);
-        }
-
-        LambdaQueryWrapper<UserArticle> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserArticle::getUserId, userId);
-        int total = userArticleMapper.selectCount(queryWrapper).intValue();
-        pageDataVo.setTotal(total);
-        pageDataVo.setPageData(saveArticlesVo);
-        pageDataVo.setSize(pageDto.getPageSize());
-        pageDataVo.setCurrent(pageDto.getPage());
-        int isRemainZero = total%pageDto.getPageSize();
-        if (isRemainZero != 0){
-            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
-        }else {
-            pageDataVo.setPages( total/pageDto.getPageSize() );
-        }
-        return pageDataVo;
-    }
-
-
     @Autowired
     private UserSupportMapper userSupportMapper;
-
 
     @Override
     public int supportArticleOrComment(Integer userId, Long articleId, Long commentId) {
@@ -515,11 +463,12 @@ public class ArticleServiceImpl implements ArticleService {
     /**
      * 获取 官方发表的前 OFFICIAL_ARTICLE_NUMBER 条文章
      *      官方POEAzsyxk、weight == 1、前 OFFICIAL_ARTICLE_NUMBER 条
+     *  每次访问就设置 redis库1 isFirstReq 为 1，取一次后为 0
      * @return
      */
     @Override
     public Result getOfficialArticles() {
-        //1、获取官方POEAzsyxk（where weight == 1 limit OFFICIAL_ARTICLE_NUMBER）
+        //1、获取官方POEAzsyxk（where weight == 1 and is_delete = 0 order by create_date desc limit OFFICIAL_ARTICLE_NUMBER）
         List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_NUMBER);
         //2、将 articleList 转为 articleVoList 返回
         List<ArticleVo> officialArticlesVo = copyList(officialArticles,true,true,false,false);
@@ -532,30 +481,52 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static final int NEW_ARTICLE_LIMIT = 8;
     private static final int HOT_ARTICLE_LIMIT = 8;
-    /**
-     * 获取 USER_ARTICLE_NUMBER 条用户发表的文章（每次获取的文章都不相同）
-     *      用户、weight == 0、前 USER_ARTICLE_NUMBER 条
-     * 方案二：可能重复出现
-     * 1、用的当前最热前2条、当前最新前2条、当前评论最多前1条做为 用户发表的文章的展示
-     */
+    private static final int USER_ARTICLE_SHOW = 5;
+    @Autowired
+    private RedisUtil redisUtil;
+/**
+ * 获取 USER_ARTICLE_NUMBER 条用户发表的文章（每次获取的文章都不相同）
+ *      weight == 0、前 USER_ARTICLE_NUMBER 条
+ * 方案三：性能太差
+ * 1、对数据库表 t_article 做新增字段 is_read
+ *     第一次获取 USER_ARTICLE_NUMBER 条文章数据时，对 t_article 表中所有数据做 is_read = 0操作，
+ *     随机获取 is_read = 0 的5条数据，将获取到的数据修改为 is_read = 1
+ *         非第一次获取 USER_ARTICLE_NUMBER 条文章数据时，随机获取 is_read = 0 的随机5条数据，将获取到的数据修改为 is_read = 1
+ * 2、以此反复
+ *
+ * 方案五：性能最好
+ * 1、获取 USER_ARTICLE_NUMBER 条 用户文章id 集合，判断 redis库1 中 officialArticleShow 的长度 是否为0，
+ *     若没有则为第一次请求，都添加进去（右边插入：rpush）
+ *     若有则不是第一次请求，则写一个递归的私有方法，方法内容如下：
+ *          将 用户文章id 与 redis库1 的 文章id 进行比对，List<Long> repeatIds 记录 一致的id
+ *          若 repeatIds.size() != 0，
+ *              则重新获取 repeatIds.size() 条 用户文章id ，递归
+ *          若 repeatIds.size() == 0
+ *              退出递归
+ * 2、此时，redis库1 中的文章id 即为要展示的 文章，取出 id集合（左边取出：lpop）
+ */
     @Override
     public Result getUserArticles() {
-        List<ArticleVo> resultArticleVoList = new ArrayList<>();
-        //1、获取当前最热 前2条、当前最新前2条、当前评论最多前1条做为 用户发表的文章的展示
-        List<Article> hotArticles = articleMapper.selectHotArticle(HOT_ARTICLE_LIMIT - 6);
-        List<Article> newArticles = articleMapper.selectNewArticle(NEW_ARTICLE_LIMIT - 6);
+        List<ArticleVo> userArticlesVo = new ArrayList<>();
+        //获取为被查看的文章数，若为0则说明需要重置 t_article 中的 is_read
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(Article::getCreateDate);
-        queryWrapper.last("limit 1");
-        Article commentArticle = articleMapper.selectOne(queryWrapper);
-        //将 ArticleList 转为 ArticleVoList，并添加进 resultArticleVoList中
-        resultArticleVoList.addAll(copyList(hotArticles, true, true, false, true));
-        resultArticleVoList.addAll(copyList(newArticles, true, true, false, true));
-        resultArticleVoList.add(copy(commentArticle, true, true, false, true));
-        if (resultArticleVoList.isEmpty()){
+        queryWrapper.eq(Article::getIsRead, 0);
+        int notViewed = articleMapper.selectCount(queryWrapper).intValue();
+        if (notViewed == 0){
+            //重置数据库中 t_article 中的 is_read 为 0
+            articleMapper.update(null, new LambdaUpdateWrapper<Article>().setSql("is_read = 0"));
+        }
+        //从 is_read 为 0 的数据中随机获取数据，获取到的数据设置 is_read = 1
+        List<Article> articles = articleMapper.selectRandArticles(USER_ARTICLE_SHOW);
+        for (Article article : articles){
+            article.setIsRead(1);
+            articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
+        }
+        userArticlesVo.addAll(copyList(articles, true, true, false, true));
+        if (userArticlesVo.isEmpty()){
             return Result.fail("获取用户文章出现错误");
         }
-        return Result.succ(200,"获取文章成功", resultArticleVoList);
+        return Result.succ(200,"获取文章成功", userArticlesVo);
     }
 
     @Override

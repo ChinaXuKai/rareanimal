@@ -69,9 +69,6 @@ public class PersonalCenterController {
     }
 
 
-    @Autowired
-    private ArticleService articleService;
-
     @ApiOperation(value = "我的收藏文章列表",notes = "用户通过此接口查看自己的收藏文章列表（需要传jwt）")
     @GetMapping("/getMySaveArticles")
     public Result getMySaveArticles(PageDto pageDto){
@@ -80,7 +77,7 @@ public class PersonalCenterController {
             throw new UnknownAccountException("当前还未登录，请先登录再访问该页面");
         }
 
-        PageDataVo<ArticleVo> pageDataVo = articleService.listSaveArticles(pageDto,userId);
+        PageDataVo<ArticleVo> pageDataVo = personalCenterService.listSaveArticles(pageDto,userId);
 
         if (pageDataVo.getPageData().isEmpty()){
             return Result.succ(200, "当前还没有收藏文章哦~", null);
