@@ -482,8 +482,6 @@ public class ArticleServiceImpl implements ArticleService {
     private static final int NEW_ARTICLE_LIMIT = 8;
     private static final int HOT_ARTICLE_LIMIT = 8;
     private static final int USER_ARTICLE_SHOW = 5;
-    @Autowired
-    private RedisUtil redisUtil;
 /**
  * 获取 USER_ARTICLE_NUMBER 条用户发表的文章（每次获取的文章都不相同）
  *      weight == 0、前 USER_ARTICLE_NUMBER 条
