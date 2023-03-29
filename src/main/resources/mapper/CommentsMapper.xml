@@ -6,24 +6,37 @@
 
 <!--    void increaseSupportCounts(Long commentId,int beforeSupportCounts);-->
     <update id="increaseSupportCounts">
-        update t_comment set support_counts = #{beforeSupportCounts} + 1
+        update t_comment
+        set support_counts = #{beforeSupportCounts} + 1
         where id = #{commentId}
     </update>
 
 <!--    void decreaseSupportCounts(Long commentId, int beforeSupportCounts);-->
     <update id="decreaseSupportCounts">
-        update t_comment set support_counts = #{beforeSupportCounts} - 1
+        update t_comment
+        set support_counts = #{beforeSupportCounts} - 1
         where id = #{commentId}
+    </update>
+
+<!--    int deleteByCommentId(Long commentId);-->
+    <update id="deleteByCommentId">
+        update t_comment set is_delete = 1
     </update>
 
     <!--    List<Comment> selectFirstFloorCommentsByArticleId(Long articleId);-->
     <select id="selectFirstFloorCommentsByArticleId" resultType="com.guangyou.rareanimal.pojo.Comment">
-        select * from t_comment where article_id = #{articleId} and level = 1
+        select *
+        from t_comment
+        where article_id = #{articleId}
+        and is_delete = 0
+        and level = 1
     </select>
 
 <!--    int selectSupportCountsByCommentId(Long commentId);-->
     <select id="selectSupportCountsByCommentId" resultType="java.lang.Integer">
-        SELECT support_counts FROM t_comment WHERE id = #{commentId}
+        SELECT support_counts
+        FROM t_comment
+        WHERE id = #{commentId}
     </select>
 
 </mapper>

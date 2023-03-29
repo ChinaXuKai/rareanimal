@@ -30,17 +30,16 @@ public class CommentsServiceImpl implements CommentsService {
     @Autowired
     private UserMapper userMapper;
 
+    /**
+     * 1、根据文章id 查询评论列表集合
+     * 2、根据作者账号 查询作者信息
+     * 3、判断 若level = 1，则要去查询有没有子评论
+     *          若有，则根据to_uid字段进行查询
+     */
     @Override
     public List<CommentsVo> findCommentsByArticleId(Long articleId) {
         List<Comment> comments = commentsMapper.selectFirstFloorCommentsByArticleId(articleId);
-        List<CommentsVo> commentsVos = copyList(comments);
-        /**
-         * 1、根据文章id 查询评论列表集合
-         * 2、根据作者账号 查询作者信息
-         * 3、判断 若level = 1，则要去查询有没有子评论
-         *          若有，则根据to_uid字段进行查询
-         */
-        return commentsVos;
+        return copyList(comments);
     }
 
 
@@ -56,7 +55,7 @@ public class CommentsServiceImpl implements CommentsService {
         comment.setArticleId(commentDto.getArticleId());
         comment.setAuthorAccount(userAccount);
         comment.setParentId(parentId == null ? 0 : parentId);
-
+        comment.setIsDelete(0);
         //设置level、toUid
         if (parentId == null || parentId == 0){     //没有父评论，说明是第一层，也没有给谁评论
             comment.setLevel(1);
@@ -71,6 +70,12 @@ public class CommentsServiceImpl implements CommentsService {
         }
         commentsMapper.insert(comment);
         return copy(comment);
+    }
+
+
+    @Override
+    public int deleteCommentById(Long commentId) {
+        return commentsMapper.deleteByCommentId(commentId);
     }
 
 

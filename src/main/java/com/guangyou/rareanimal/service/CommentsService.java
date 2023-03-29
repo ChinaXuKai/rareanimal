@@ -25,4 +25,11 @@ public interface CommentsService {
      * @return
      */
     CommentsVo publishComment(CommentDto commentDto, String userAccount);
+
+    /**
+     * 用户自发删除评论（逻辑删除）
+     * @param commentId
+     * @return
+     */
+    int deleteCommentById(Long commentId);
 }

@@ -82,10 +82,12 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     /**
      * 随机获取 randArticleNumber 个文章
+     * 要求：用户文章、访问权限不能是仅我可见
      * @param randArticleNumber 获取个数
+     * @param visitPermission 访问权限
      * @return
      */
-    List<Article> selectRandArticles(Integer randArticleNumber);
+    List<Article> selectRandUserArticles(Integer randArticleNumber,String visitPermission);
 
     /**
      * 获取官方发表的前 OFFICIAL_ARTICLE_NUMBER 条文章
@@ -114,5 +116,11 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     int deleteArticleById(Long articleId);
+
+    /**
+     * 获取当前最大的主键id 值
+     * @return
+     */
+    Long selectMaxId();
 }
 

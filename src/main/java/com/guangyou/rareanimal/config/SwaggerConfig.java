@@ -35,12 +35,12 @@ public class SwaggerConfig {
                         .description("")
                         .contact(   //配置swagger文档的主体内容
                                 new Contact(
-                                        "Swagger开发文档", //文档发布者的名称
-                                        "http://www.baidu.com", //文档发布者的官网
+                                        "xukai", //文档发布者的名称
+                                        "https://github.com/ChinaXuKai", //文档发布者的官网
                                         "1825913894@qq.com")//文档发布者的邮箱
                         )
-                        .title("swagger-xukai")
-                        .description("swagger框架开发学习文档-详细描述信息：swagger是一个帮助接口文档开发的框架")
+                        .title("xukai-swagger接口文档")
+                        .description("rareanimal前台程序的接口文档")
                         .version("v1.0")
                         .build();
 

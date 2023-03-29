@@ -10,7 +10,7 @@ import lombok.ToString;
 import java.io.Serializable;
 
 /**
- * @Description 自定义authentication对象
+ * @Description 自定义 authentication 对象
  * @author xukai
  * @create 2022-11-05 13:03
  */

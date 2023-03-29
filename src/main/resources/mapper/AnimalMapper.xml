@@ -5,8 +5,9 @@
 <mapper namespace="com.guangyou.rareanimal.mapper.AnimalMapper">
 
     <sql id="animal-complete-field">
-        t_animal.animal_id, animal_name, alias, animal_img, animal_model_url, is_vertebrates, is_suckle, is_birds, is_creep, animal_classification, distribution_area, protect_grade,
-        morphology, habitat, habits, population_status, protection_level, else_info, animal_label
+        t_animal.animal_id, animal_name, alias, animal_img, animal_model_url,
+        is_vertebrates, is_suckle, is_birds, is_creep, is_fish, is_amphibian,
+        animal_classification, distribution_area, protect_grade, animal_label
     </sql>
 
     <sql id="t_animal_introduce-field">
@@ -25,8 +26,8 @@
     <select id="selectVertebratesAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
         select
         <include refid="animal-complete-field"></include>
-        from t_animal,t_animal_introduce,t_animal_label
-        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
         and  is_vertebrates = 1
     </select>
 
@@ -34,8 +35,8 @@
     <select id="selectNoVertebratesAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
         select
         <include refid="animal-complete-field"></include>
-        from t_animal,t_animal_introduce,t_animal_label
-        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
         and is_vertebrates = 0
     </select>
 
@@ -43,8 +44,8 @@
     <select id="selectSuckleAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
         select
         <include refid="animal-complete-field"></include>
-        from t_animal,t_animal_introduce,t_animal_label
-        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
         and is_suckle = 1
     </select>
 
@@ -52,8 +53,8 @@
     <select id="selectBirdAnimalInfo" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
         select
         <include refid="animal-complete-field"></include>
-        from t_animal,t_animal_introduce,t_animal_label
-        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
         and  is_birds = 1
     </select>
 
@@ -61,12 +62,30 @@
     <select id="selectCreepAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
         select
         <include refid="animal-complete-field"></include>
-        from t_animal,t_animal_introduce,t_animal_label
-        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
         and  is_creep = 1
     </select>
 
-<!--    AnimalIntroduce selectAnimalIntroduceById(Integer animalId);-->
+    <!--    List<Animal> selectFishAnimals();-->
+    <select id="selectFishAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
+        and  is_fish = 1
+    </select>
+
+    <!--    List<Animal> selectAmphibianAnimals();-->
+    <select id="selectAmphibianAnimals" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select
+        <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
+        and  is_amphibian = 1
+    </select>
+
+    <!--    AnimalIntroduce selectAnimalIntroduceById(Integer animalId);-->
     <select id="selectAnimalIntroduceById" resultType="com.guangyou.rareanimal.pojo.vo.AnimalIntroduce">
         select
         <include refid="t_animal_introduce-field"></include>
@@ -74,7 +93,7 @@
         where animal_id = #{animalId}
     </select>
 
-<!--    Animal selectAnimalByLikeName(String animalName);-->
+    <!--    Animal selectAnimalByLikeName(String animalName);-->
     <select id="selectAnimalByLikeName" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
         select
         <include refid="animal-complete-field"></include>
@@ -82,5 +101,21 @@
         where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
         and (animal_name like #{animalName} or animal_label like #{animalName})
     </select>
+
+    <!--    Animal selectAnimalById(Long animalId);-->
+    <select id="selectAnimalById" resultType="com.guangyou.rareanimal.pojo.vo.Animal">
+        select <include refid="animal-complete-field"></include>
+        from t_animal,t_animal_label
+        where t_animal.animal_id = t_animal_label.animal_id
+        and t_animal.animal_id = #{animalId}
+    </select>
+
+    <!--    AnimalIntroduceImgVo selectAnimalInfoImgById(Integer animalId);-->
+    <select id="selectAnimalInfoImgById" resultType="com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo">
+        select *
+        from t_animal_introduce_img
+        where animal_id = #{animalId}
+    </select>
+
 
 </mapper>

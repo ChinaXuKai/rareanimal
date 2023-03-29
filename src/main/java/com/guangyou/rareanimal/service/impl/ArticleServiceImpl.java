@@ -74,11 +74,16 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCategoryId(categoryId);
         article.setSummary(articleDto.getSummary());
         article.setCommentCounts(0);
-        article.setWeight(0);
+        if (User.OFFICIAL_ACCOUNT.equals(userAccount)){
+            article.setWeight(1);
+        }else {
+            article.setWeight(0);
+        }
         article.setViewCounts(0);
         article.setCreateDate(System.currentTimeMillis());
         article.setBodyId(0L);
         article.setVisitPermission(articleDto.getVisitPermission());
+        article.setId(articleMapper.selectMaxId() + 1);
             //先进行添加
         articleMapper.insert(article);
             //添加后可以获取到其在数据库的主键id值
@@ -457,21 +462,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
-//    private final static Integer USER_ARTICLE_NUMBER = 5;
-    private final static Integer OFFICIAL_ARTICLE_NUMBER = 3;
+    private final static Integer OFFICIAL_ARTICLE_SHOW_NUMBER = 3;
 
     /**
      * 获取 官方发表的前 OFFICIAL_ARTICLE_NUMBER 条文章
-     *      官方POEAzsyxk、weight == 1、前 OFFICIAL_ARTICLE_NUMBER 条
-     *  每次访问就设置 redis库1 isFirstReq 为 1，取一次后为 0
+     *      官方POEAzsyxk、weight == 1、按发布时间、前 OFFICIAL_ARTICLE_NUMBER 条
      * @return
      */
     @Override
     public Result getOfficialArticles() {
-        //1、获取官方POEAzsyxk（where weight == 1 and is_delete = 0 order by create_date desc limit OFFICIAL_ARTICLE_NUMBER）
-        List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_NUMBER);
+        //1、获取官方（where weight == 1 and is_delete = 0 order by create_date desc limit OFFICIAL_ARTICLE_NUMBER）
+        List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_SHOW_NUMBER);
         //2、将 articleList 转为 articleVoList 返回
-        List<ArticleVo> officialArticlesVo = copyList(officialArticles,true,true,false,false);
+        List<ArticleVo> officialArticlesVo = copyList(officialArticles,true,true,false,true);
         if (officialArticlesVo.isEmpty()){
             return Result.fail("获取官方文章失败");
         }
@@ -481,7 +484,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static final int NEW_ARTICLE_LIMIT = 8;
     private static final int HOT_ARTICLE_LIMIT = 8;
-    private static final int USER_ARTICLE_SHOW = 5;
+    private static final int USER_ARTICLE_SHOW_NUMBER = 5;
 /**
  * 获取 USER_ARTICLE_NUMBER 条用户发表的文章（每次获取的文章都不相同）
  *      weight == 0、前 USER_ARTICLE_NUMBER 条
@@ -493,7 +496,7 @@ public class ArticleServiceImpl implements ArticleService {
  * 2、以此反复
  *
  * 方案五：性能最好
- * 1、获取 USER_ARTICLE_NUMBER 条 用户文章id 集合，判断 redis库1 中 officialArticleShow 的长度 是否为0，
+ * 1、获取 USER_ARTICLE_SHOW_NUMBER 条 用户文章id 集合，判断 redis库1 中 officialArticleShow 的长度 是否为0，
  *     若没有则为第一次请求，都添加进去（右边插入：rpush）
  *     若有则不是第一次请求，则写一个递归的私有方法，方法内容如下：
  *          将 用户文章id 与 redis库1 的 文章id 进行比对，List<Long> repeatIds 记录 一致的id
@@ -509,13 +512,14 @@ public class ArticleServiceImpl implements ArticleService {
         //获取为被查看的文章数，若为0则说明需要重置 t_article 中的 is_read
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getIsRead, 0);
+        queryWrapper.eq(Article::getWeight, 0);
         int notViewed = articleMapper.selectCount(queryWrapper).intValue();
         if (notViewed == 0){
             //重置数据库中 t_article 中的 is_read 为 0
             articleMapper.update(null, new LambdaUpdateWrapper<Article>().setSql("is_read = 0"));
         }
         //从 is_read 为 0 的数据中随机获取数据，获取到的数据设置 is_read = 1
-        List<Article> articles = articleMapper.selectRandArticles(USER_ARTICLE_SHOW);
+        List<Article> articles = articleMapper.selectRandUserArticles(USER_ARTICLE_SHOW_NUMBER,ArticleUtil.VISIT_PERMISSION_MY);
         for (Article article : articles){
             article.setIsRead(1);
             articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));

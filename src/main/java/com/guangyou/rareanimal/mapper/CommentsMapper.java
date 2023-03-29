@@ -37,4 +37,11 @@ public interface CommentsMapper extends BaseMapper<Comment> {
      * @param commentId
      */
     int decreaseSupportCounts(Long commentId, int beforeSupportCounts);
+
+    /**
+     * 根据 评论id 进行逻辑删除
+     * @param commentId 评论id
+     * @return
+     */
+    int deleteByCommentId(Long commentId);
 }

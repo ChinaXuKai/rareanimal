@@ -31,4 +31,6 @@ public class Comment {
 
     private Integer level;
 
+    private Integer isDelete;
+
 }

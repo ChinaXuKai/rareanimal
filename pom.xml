@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.guangyou</groupId>
     <artifactId>rareanimal</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <name>rareanimal</name>
-    <description>Demo project for Spring Boot</description>
+    <description>rareanimal project for Spring Boot</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -38,6 +38,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- thymeleaf视图 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
         <!-- threejs -->

@@ -74,11 +74,13 @@
         where id = #{articleId}
     </select>
 
-<!--    List<Article> selectRandArticles(Integer randArticleNumber);-->
-    <select id="selectRandArticles" resultType="com.guangyou.rareanimal.pojo.Article">
+<!--    List<Article> selectRandUserArticles(Integer randArticleNumber,String visitPermission);-->
+    <select id="selectRandUserArticles" resultType="com.guangyou.rareanimal.pojo.Article">
         select *
         from t_article as article
-        where article.id >= (RAND()*(select MAX(id) from t_article))
+        where weight = 0
+        and visit_permission != #{visitPermission}
+        and article.id >= (RAND()*(select MAX(id) from t_article))
         LIMIT #{randArticleNumber}
     </select>
 
@@ -108,5 +110,11 @@
         and is_delete = 0
         order by create_date desc
         limit #{newArticleLimit}
+    </select>
+
+<!--    Long selectMaxId();-->
+    <select id="selectMaxId" resultType="java.lang.Long">
+        select max(id)
+        from t_article
     </select>
 </mapper>

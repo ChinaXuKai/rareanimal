@@ -18,6 +18,8 @@ import lombok.ToString;
 @NoArgsConstructor
 public class User {
 
+    public static final String OFFICIAL_ACCOUNT = "POEAzsyxk";
+
     private Integer userId;
 
     private String userName;

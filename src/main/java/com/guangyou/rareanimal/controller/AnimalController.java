@@ -3,12 +3,13 @@ package com.guangyou.rareanimal.controller;
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.pojo.vo.Animal;
 import com.guangyou.rareanimal.pojo.vo.AnimalIntroduce;
+import com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo;
 import com.guangyou.rareanimal.service.AnimalService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,13 +47,21 @@ public class AnimalController {
         if (likeAnimals.isEmpty()){
             return Result.fail(Result.FORBIDDEN,"未查找到你指定的动物",null);
         }else {
-            setAnimalListSimpInfo(likeAnimals);
             return Result.succ(200,"已查找到你指定的动物",likeAnimals);
         }
     }
 
+    @ApiOperation(value = "根据动物id获取动物详情数据",notes = "根据动物id获取动物详情数据")
+    @GetMapping("/getAnimalById/{animalId}")
+    public Result getAnimalById(@PathVariable("animalId") Long animalId){
+        Animal animal = animalService.selectAnimalById(animalId);
+        setAnimalSimpInfo(animal);
+        return Result.succ(200, animal.getAnimalName() + "详情如下", animal);
+    }
+
     /**
-     * 为每个animal的animalIntroduce赋值
+     *
+     * 为每个animal的 animalIntroduce 赋值
      * @param animalList animalIntroduce需要被赋值的动物集合
      * @return
      */
@@ -64,25 +73,25 @@ public class AnimalController {
         return animalList;
     }
     /**
-     * 为单个animal的animalIntroduce赋值
+     * 为单个animal的 animalIntroduce 和 animalIntroduceImg 赋值
      * @param animal animalIntroduce需要被赋值的动物
      * @return
      */
     private Animal setAnimalSimpInfo(Animal animal){
         //根据animalId查询AnimalIntroduce的信息
         AnimalIntroduce animalIntroduce = animalService.selectAnimalsSimpInfo(animal.getAnimalId());
+        AnimalIntroduceImgVo animalIntroduceImg = animalService.getAnimalInfoImg(animal.getAnimalId());
+        animal.setAnimalIntroduceImg(animalIntroduceImg);
         animal.setAnimalIntroduce(animalIntroduce);
         log.info("info={}",animal.getAnimalIntroduce());
         return animal;
     }
 
-    @ApiOperation(value = "脊椎动物-info",notes = "一级保护动物-有脊椎动物的信息")
+    @ApiOperation(value = "脊椎动物",notes = "有脊椎动物")
     @GetMapping("/getVertebratesAnimalInfo")
     public Result getVertebratesAnimalInfo(){
         List<Animal> animalList = animalService.selectVertebratesAnimalsInfo();
 
-        setAnimalListSimpInfo(animalList);
-
         if (animalList.size() == 0){
             return Result.succ(200, "当前的后台还没添加相关的脊椎动物哦~", animalList);
         }else {
@@ -91,63 +100,78 @@ public class AnimalController {
     }
 
 
-    @ApiOperation(value = "无脊椎动物-info",notes = "一级保护动物-无脊椎动物的信息")
+    @ApiOperation(value = "无脊椎动物",notes = "无脊椎动物")
     @GetMapping("/getNoVertebratesAnimalInfo")
     public Result getNoVertebratesAnimalInfo(){
         List<Animal> animalList = animalService.selectNoVertebratesAnimalsInfo();
 
-        setAnimalListSimpInfo(animalList);
-
         if (animalList.size() == 0){
-            return Result.succ(200, "当前的后台还没添加相关的脊椎动物哦~", animalList);
+            return Result.succ(200, "当前的后台还没添加相关的无脊椎动物哦~", animalList);
         }else {
-            return Result.succ(200, "已查询到相关的脊椎动物~", animalList);
+            return Result.succ(200, "已查询到相关的无脊椎动物~", animalList);
         }
     }
 
 
-    @ApiOperation(value = "哺乳动物-info",notes = "一级保护动物-哺乳动物的信息")
+    @ApiOperation(value = "哺乳动物",notes = "哺乳动物")
     @GetMapping("/getSuckleAnimalInfo")
     public Result getSuckleAnimalInfo(){
         List<Animal> animalList = animalService.selectSuckleAnimalsInfo();
 
-        setAnimalListSimpInfo(animalList);
-
         if (animalList.size() == 0){
-            return Result.succ(200, "当前的后台还没添加相关的脊椎动物哦~", animalList);
+            return Result.succ(200, "当前的后台还没添加相关的哺乳动物哦~", animalList);
         }else {
-            return Result.succ(200, "已查询到相关的脊椎动物~", animalList);
+            return Result.succ(200, "已查询到相关的哺乳动物~", animalList);
         }
     }
 
 
-    @ApiOperation(value = "鸟类动物-info",notes = "一级保护动物-鸟类动物的信息")
+    @ApiOperation(value = "鸟类动物",notes = "鸟类动物")
     @GetMapping("/getBirdAnimalInfo")
     public Result getBirdAnimalInfo(){
         List<Animal> animalList = animalService.selectBirdAnimalsInfo();
 
-        setAnimalListSimpInfo(animalList);
-
         if (animalList.size() == 0){
-            return Result.succ(200, "当前的后台还没添加相关的脊椎动物哦~", animalList);
+            return Result.succ(200, "当前的后台还没添加相关的鸟类动物哦~", animalList);
         }else {
-            return Result.succ(200, "已查询到相关的脊椎动物~", animalList);
+            return Result.succ(200, "已查询到相关的鸟类动物~", animalList);
         }
     }
 
 
-    @ApiOperation(value = "爬行动物-info",notes = "一级保护动物-爬行动物的信息")
+    @ApiOperation(value = "爬行动物",notes = "爬行动物")
     @GetMapping("/getCreepAnimalInfo")
     public Result getCreepAnimalInfo(){
         List<Animal> animalList = animalService.selectCreepAnimalsInfo();
 
-        setAnimalListSimpInfo(animalList);
-
         if (animalList.size() == 0){
-            return Result.succ(200, "当前的后台还没添加相关的脊椎动物哦~", animalList);
+            return Result.succ(200, "当前的后台还没添加相关的爬行动物哦~", animalList);
         }else {
-            return Result.succ(200, "已查询到相关的脊椎动物~", animalList);
+            return Result.succ(200, "已查询到相关的爬行动物~", animalList);
         }
     }
 
+    @ApiOperation(value = "鱼类动物",notes = "鱼类动物")
+    @GetMapping("/getFishAnimal")
+    public Result getFishAnimal(){
+        List<Animal> animalList = animalService.selectFishAnimal();
+
+        if (animalList.size() == 0){
+            return Result.succ(200, "当前的后台还没添加相关的鱼类动物哦~", animalList);
+        }else {
+            return Result.succ(200, "已查询到相关的鱼类动物~", animalList);
+        }
+    }
+
+    @ApiOperation(value = "两栖类动物",notes = "两栖类动物")
+    @GetMapping("/getAmphibiansAnimal")
+    public Result getAmphibiansAnimal(){
+        List<Animal> animalList = animalService.selectAmphibiansAnimal();
+
+        if (animalList.size() == 0){
+            return Result.succ(200, "当前的后台还没添加相关的两栖类动物哦~", animalList);
+        }else {
+            return Result.succ(200, "已查询到相关的两栖类动物~", animalList);
+        }
+    }
 }

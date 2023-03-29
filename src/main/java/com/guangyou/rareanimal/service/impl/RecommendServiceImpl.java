@@ -222,16 +222,13 @@ public class RecommendServiceImpl implements RecommendService {
     @Autowired
     private RecommendArticleMapper recommendArticleMapper;
     /**
-     * 需求：返回 推荐文章集合 ，该集合每分钟获取一次（在一分钟内，第一次获取后，后续访问接口所获取的数据不能改变）
-     *          且 该集合 在所有用户的页面显示皆一致（该集合与用户无关）
+     * 需求：返回 推荐文章集合
      * 1、获取当前系统时间
      * 2、先判断 t_recommend_article 表中是否有数据：
      *      无数据：
      *          获取到 推荐用户集合 ，将该集合 存入 MySQL，记录 存入时间
      *      有数据：
-     *          判断当前系统时间 与 数据库时间 是否是同一分钟
-     *              是同一分钟：直接从 t_recommend_article 表中获取的数据
-     *              不是同一分钟：获取到 推荐用户集合 ，将 t_recommend_article 表中的数据做修改
+     *              删除原有数据，重新获取到 推荐用户集合 ，将 t_recommend_article 表中的数据做修改
      */
     @Override
     public List<RecommendArticleVo> getRecommendArticle(Integer recommendArticleNumber) {
@@ -246,17 +243,11 @@ public class RecommendServiceImpl implements RecommendService {
             return recommendArticleVos;
         }else {             //有数据
             List<RecommendArticle> dbRecommendArticles = recommendArticleMapper.selectList(null);
-            String saveTime = new DateTime(dbRecommendArticles.get(0).getRecommendTime()).toString("yyyy-MM-dd HH:mm");
-            if (saveTime.equals(recommendTime)){        //分钟一致，直接取数据
-                copyArticle(dbRecommendArticles, recommendArticleVos,recommendTime);
-                return recommendArticleVos;
-            }else {                                     //分钟不一致
-                //删除原有的数据
-                recommendArticleMapper.delete(null);
-                dbRecommendArticles = acquireRecommendArticle(recommendArticleNumber);
-                copyArticle(dbRecommendArticles, recommendArticleVos,recommendTime);
-                return recommendArticleVos;
-            }
+            //删除原有的数据
+            recommendArticleMapper.delete(null);
+            dbRecommendArticles = acquireRecommendArticle(recommendArticleNumber);
+            copyArticle(dbRecommendArticles, recommendArticleVos,recommendTime);
+            return recommendArticleVos;
         }
     }
     private void copyArticle(List<RecommendArticle> dbRecommendArticles, List<RecommendArticleVo> recommendArticleVos,String recommendTime) {

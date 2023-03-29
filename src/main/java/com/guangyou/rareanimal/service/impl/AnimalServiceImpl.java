@@ -6,6 +6,7 @@ import com.guangyou.rareanimal.mapper.AnimalMapper;
 import com.guangyou.rareanimal.pojo.AnimalLabel;
 import com.guangyou.rareanimal.pojo.vo.Animal;
 import com.guangyou.rareanimal.pojo.vo.AnimalIntroduce;
+import com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo;
 import com.guangyou.rareanimal.pojo.vo.AnimalLabelVo;
 import com.guangyou.rareanimal.service.AnimalService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,20 @@ public class AnimalServiceImpl implements AnimalService {
             List<String> labelList = new ArrayList<>(Arrays.asList(animalLabels));
             animal.setAnimalLabel(labelList);
         }
+    }
+
+    @Override
+    public List<Animal> selectAmphibiansAnimal() {
+        List<Animal> amphibianAnimals = animalMapper.selectAmphibianAnimals();
+        getAnimalLabels(amphibianAnimals);
+        return amphibianAnimals;
+    }
+
+    @Override
+    public List<Animal> selectFishAnimal() {
+        List<Animal> fishAnimals = animalMapper.selectFishAnimals();
+        getAnimalLabels(fishAnimals);
+        return fishAnimals;
     }
 
     @Override
@@ -95,5 +110,15 @@ public class AnimalServiceImpl implements AnimalService {
     @Override
     public List<Animal> selectRandAnimalInfo(Integer randAnimalNumber) {
         return animalMapper.selectRandAnimalInfo(randAnimalNumber);
+    }
+
+    @Override
+    public Animal selectAnimalById(Long animalId) {
+        return animalMapper.selectAnimalById(animalId);
+    }
+
+    @Override
+    public AnimalIntroduceImgVo getAnimalInfoImg(Integer animalId) {
+        return animalMapper.selectAnimalInfoImgById(animalId);
     }
 }

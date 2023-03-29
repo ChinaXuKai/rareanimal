@@ -42,7 +42,6 @@ public class UploadServiceImpl implements UploadService {
         }
         //2.2调用FtpUtil工具类进行上传，并返回图片地址
         return ftpUtil.putImages(input, filePath, newName);
-
     }
 
 

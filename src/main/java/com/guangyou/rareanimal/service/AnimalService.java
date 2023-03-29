@@ -2,6 +2,7 @@ package com.guangyou.rareanimal.service;
 
 import com.guangyou.rareanimal.pojo.vo.Animal;
 import com.guangyou.rareanimal.pojo.vo.AnimalIntroduce;
+import com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo;
 
 import java.util.List;
 
@@ -11,6 +12,17 @@ import java.util.List;
  */
 public interface AnimalService {
 
+    /**
+     *查询所有的两栖类动物的信息
+     * @return 所有的两栖类动物的信息的集合
+     */
+    List<Animal> selectAmphibiansAnimal();
+
+    /**
+     * 查询所有的鱼类动物的信息
+     * @return 所有的鱼类动物的信息的集合
+     */
+    List<Animal> selectFishAnimal();
 
     /**
      * 查询所有的脊椎动物的信息
@@ -62,4 +74,18 @@ public interface AnimalService {
      * @return
      */
     List<Animal> selectRandAnimalInfo(Integer randAnimalNumber);
+
+    /**
+     * 根据动物id 查询对应动物
+     * @param animalId
+     * @return
+     */
+    Animal selectAnimalById(Long animalId);
+
+    /**
+     * 根据动物id 获取对应的动物简介图片
+     * @param animalId
+     * @return
+     */
+    AnimalIntroduceImgVo getAnimalInfoImg(Integer animalId);
 }

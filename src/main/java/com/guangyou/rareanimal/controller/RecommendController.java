@@ -58,7 +58,7 @@ public class RecommendController {
     }
 
 
-    @ApiOperation(value = "推荐文章",notes = "推荐文章，每分钟刷新")
+    @ApiOperation(value = "推荐文章",notes = "推荐文章，可一直刷新")
     @GetMapping("/article")
     public Result article(){
         List<RecommendArticleVo> recommendArticleVos = recommendService.getRecommendArticle(RECOMMEND_ARTICLE_NUMBER);

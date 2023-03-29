@@ -67,4 +67,23 @@ public class CommentsController {
         }
     }
 
+
+    @ApiOperation(value = "删除评论",notes = "用户自发删除评论（需要传jwt）")
+    @DeleteMapping("/deleteComment/{commentId}")
+    public Result deleteComment(@PathVariable("commentId") Long commentId){
+        String authorAccount = ShiroUtil.getProfile().getUserAccount();
+        if (authorAccount == null){
+            throw new UnknownAccountException("当前还未登录，请登录后再删除评论哦");
+        }
+
+        //删除用户自己发表的评论
+        int deleteResult = commentsService.deleteCommentById(commentId);
+        if (deleteResult == 0){
+            return Result.fail("删除失败");
+        }else {
+            return Result.succ(200, "删除评论成功", commentId);
+        }
+
+    }
+
 }

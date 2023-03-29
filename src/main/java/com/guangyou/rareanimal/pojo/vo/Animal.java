@@ -51,6 +51,12 @@ public class Animal {
     @ApiModelProperty(value = "是否为爬行动物：1为爬行动物，0为非爬行动物")
     private Integer isCreep;
 
+    @ApiModelProperty(value = "是否为鱼类动物：1为鱼类动物，0为非鱼类动物")
+    private Integer isFish;
+
+    @ApiModelProperty(value = "是否为两栖类动物：1为两栖类动物，0为非两栖类动物")
+    private Integer isAmphibian;
+
     @ApiModelProperty(value = "生物分类：界门纲目科属种")
     private String animalClassification;
 
@@ -65,5 +71,8 @@ public class Animal {
 
     @ApiModelProperty(value = "动物标签")
     private List<String> animalLabel;
+
+    @ApiModelProperty(value = "动物简介对应的图片")
+    private AnimalIntroduceImgVo animalIntroduceImg;
 
 }
