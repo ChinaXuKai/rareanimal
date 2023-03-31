@@ -291,6 +291,9 @@ public class RecommendServiceImpl implements RecommendService {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getIsDelete, 0);
         List<Article> articles = articleMapper.selectList(queryWrapper);
+        if (articles.size() == 0){
+
+        }
         //2、for循环 依次封装对象并添加进数据库
         for (int i = 0; i < articles.size(); i++){
             //获取相应的 article对象，添加并获取recommendArticle对象

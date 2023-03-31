@@ -47,6 +47,7 @@
         from t_animal,t_animal_label
         where t_animal.animal_id = t_animal_label.animal_id
         and is_suckle = 1
+        order by animal_id desc
     </select>
 
 <!--    List<Animal> selectBirdAnimalInfo();-->

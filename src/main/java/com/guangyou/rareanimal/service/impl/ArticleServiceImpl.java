@@ -83,7 +83,6 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCreateDate(System.currentTimeMillis());
         article.setBodyId(0L);
         article.setVisitPermission(articleDto.getVisitPermission());
-        article.setId(articleMapper.selectMaxId() + 1);
             //先进行添加
         articleMapper.insert(article);
             //添加后可以获取到其在数据库的主键id值

@@ -80,7 +80,7 @@ public class UserController {
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
     @SneakyThrows
-    @ApiOperation(value = "用户登录，生成jwt",notes = "用户登录，生成jwt信息，封装至响应头中，有效期为7天（不需要传jwt）")
+    @ApiOperation(value = "用户登录，生成jwt",notes = "用户登录，有效期为7天（不需要传jwt）")
     @PostMapping("/loginUser")
     public Result loginUser(@RequestBody @Validated UserDto userDto, HttpServletResponse response){
         //调用userService层查询是否有该用户
