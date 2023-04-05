@@ -30,4 +30,13 @@ public class AuthorInfoVo {
     @ApiModelProperty(value = "作者的头像url地址")
     private String authorAvatarUrl;
 
+    @ApiModelProperty(value = "作者的粉丝数")
+    private Integer fansCount;
+
+    @ApiModelProperty(value = "作者的关注数")
+    private Integer careCount;
+
+    @ApiModelProperty(value = "作者的社交动态数",notes = "即所发表的文章、问题总数")
+    private Integer socialCount;
+
 }

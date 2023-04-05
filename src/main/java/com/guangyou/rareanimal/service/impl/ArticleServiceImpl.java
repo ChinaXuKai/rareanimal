@@ -36,15 +36,15 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private ArticleMapper articleMapper;
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private CustomTagMapper customTagMapper;
-    @Autowired
     private ArticleCustomTagMapper articleCustomTagMapper;
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
     private ArticleCoverImgMapper articleCoverImgMapper;
+    @Autowired
+    private ArticleUtil articleUtil;
+    @Autowired
+    private ArticleBodyMapper articleBodyMapper;
 
     /**
      * 为用户添加文章
@@ -87,7 +87,6 @@ public class ArticleServiceImpl implements ArticleService {
         articleMapper.insert(article);
             //添加后可以获取到其在数据库的主键id值
         Long articleId = article.getId();
-//        articleMapper.insertArticle(userAccount,0,System.currentTimeMillis(),articleDto.getSummary(),articleDto.getTitle(), 0, 0);
         //2、将标签加入到关联表中
         List<String> tagsName = articleDto.getTagsName();
         if (tagsName.size() != 0){
@@ -391,76 +390,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
-    @Autowired
-    private ArticleBodyMapper articleBodyMapper;
-
-    private List<ArticleVo> copyList(List<Article> articleList,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory) {
-        List<ArticleVo> articleVoList = new ArrayList<>();
-        for (Article article : articleList){
-            articleVoList.add(copy(article,isCreateTime,isTag,isBody,isCategory));
-        }
-        return articleVoList;
-    }
-    private ArticleVo copy(Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory){
-        ArticleVo articleVo = new ArticleVo();
-        BeanUtils.copyProperties(article, articleVo);
-        /**
-         * createDate、authorAccount、authorAvatarUrl、authorName、tag、category、body、coverImg都不能被复制属性，所以要单独拿出来赋值
-         */
-        //authorName可以先根据article 的authorAccount 查询出 具体用户信息，从中可获取用户昵称
-        List<User> userList = userMapper.getUsersByAccount(article.getAuthorAccount());
-        if (userList.size() != 0){
-            for (User user : userList){
-                String existUserAccount = user.getUserAccount();
-                //若数据库中已存在的用户账号与该文章发表的用户账号大小写完全一致的话，则就是该用户
-                if (existUserAccount.equals(article.getAuthorAccount())){
-                    AuthorInfoVo authorInfoVo = new AuthorInfoVo();
-                    articleVo.setAuthorInfo(authorInfoVo);
-                    articleVo.getAuthorInfo().setAuthorId(user.getUserId().longValue());
-                    articleVo.getAuthorInfo().setAuthorName(user.getUserName());
-                    articleVo.getAuthorInfo().setAuthorAccount(user.getUserAccount());
-                    articleVo.getAuthorInfo().setAuthorAvatarUrl(user.getUserAvatar());
-                }
-            }
-        }
-        //coverImg：根据articleId 从t_article_cover_img 中 获取coverImg 集合
-        List<String> coverImgs = new ArrayList<>();
-        LambdaQueryWrapper<ArticleCoverImg> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ArticleCoverImg::getArticleId, article.getId());
-        List<ArticleCoverImg> articleCoverImgs = articleCoverImgMapper.selectList(queryWrapper);
-
-        for (ArticleCoverImg articleCoverImg : articleCoverImgs){
-            coverImgs.add(articleCoverImg.getCoverImg());
-        }
-        articleVo.setCoverImg(coverImgs);
-        //不是所有的接口 都需要 tag
-        if (isTag){     //若需要 tag 属性
-            Long articleId = article.getId();
-            articleVo.setTags(customTagMapper.selectTagsByArticleId(articleId));
-        }
-        //若需要从数据库查询时间则从数据库中查询，否则设置为当前时间
-        if (isCreateTime){
-            Long articleId = article.getId();
-            String articleCreateTime = new DateTime(articleMapper.selectById(articleId).getCreateDate()).toString("yyyy-MM-dd HH:mm:ss");
-            articleVo.setCreateDate(articleCreateTime);
-        }else {
-            articleVo.setCreateDate(new DateTime(article.getCreateDate()).toString("yyyy-MM-dd HH:mm:ss"));
-        }
-        if (isBody){
-            Long bodyId = article.getBodyId();
-            articleVo.setBody(articleBodyMapper.findArticleBodyById(bodyId));
-        }
-        if (isCategory){
-            CategoryVo categoryVo = new CategoryVo();
-            Long categoryId = article.getCategoryId();
-            Category articleCategory = categoryMapper.findCategoryById(categoryId);
-            BeanUtils.copyProperties(articleCategory, categoryVo);
-            articleVo.setCategory(categoryVo);
-        }
-        return articleVo;
-    }
-
-
     private final static Integer OFFICIAL_ARTICLE_SHOW_NUMBER = 3;
 
     /**
@@ -473,7 +402,7 @@ public class ArticleServiceImpl implements ArticleService {
         //1、获取官方（where weight == 1 and is_delete = 0 order by create_date desc limit OFFICIAL_ARTICLE_NUMBER）
         List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_SHOW_NUMBER);
         //2、将 articleList 转为 articleVoList 返回
-        List<ArticleVo> officialArticlesVo = copyList(officialArticles,true,true,false,true);
+        List<ArticleVo> officialArticlesVo = articleUtil.copyList(officialArticles,true,true,false,true);
         if (officialArticlesVo.isEmpty()){
             return Result.fail("获取官方文章失败");
         }
@@ -523,7 +452,7 @@ public class ArticleServiceImpl implements ArticleService {
             article.setIsRead(1);
             articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
         }
-        userArticlesVo.addAll(copyList(articles, true, true, false, true));
+        userArticlesVo.addAll(articleUtil.copyList(articles, true, true, false, true));
         if (userArticlesVo.isEmpty()){
             return Result.fail("获取用户文章出现错误");
         }
@@ -533,13 +462,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<ArticleVo> getHotArticle() {
         List<Article> hotArticles = articleMapper.selectHotArticle(HOT_ARTICLE_LIMIT);
-        return copyList(hotArticles, true,false,false,true);
+        return articleUtil.copyList(hotArticles, true,false,false,true);
     }
 
     @Override
     public List<ArticleVo> getNewArticle() {
         List<Article> newArticles = articleMapper.selectNewArticle(NEW_ARTICLE_LIMIT);
-        return copyList(newArticles, true,false,false,true);
+        return articleUtil.copyList(newArticles, true,false,false,true);
     }
 
 
@@ -557,7 +486,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleVo findArticleById(Long articleId) {
         Article article = articleMapper.selectById(articleId);
-        ArticleVo articleVo = copy(article, true,true,true,true);
+        ArticleVo articleVo = articleUtil.copy(article, true,true,true,true);
         threadService.updateArticleViewCount(articleMapper, article);
         return articleVo;
     }

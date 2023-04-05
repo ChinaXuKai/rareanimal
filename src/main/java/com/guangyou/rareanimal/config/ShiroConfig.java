@@ -63,11 +63,15 @@ public class ShiroConfig {
         Map<String, String> filterMap = new LinkedHashMap<>();
 
         filterMap.put("/**", "jwt");
-        //放行用户登录、注册、动物数字文档库接口、文章相关接口-未登录可看
+        //放行 glb传输、上传、个人中心、动物档案库接口、推荐系统、文章-未登录可看、用户登录、注册、查看评论接口、
+        filterMap.put("/transmit/**", "anon");
+        filterMap.put("/upload/**", "anon");
+        filterMap.put("/personalCenter/**", "anon");
+        filterMap.put("/animal/**", "anon");
+        filterMap.put("/recommend/**", "anon");
+        filterMap.put("/article/**", "anon");
         filterMap.put("/user/loginUser", "anon");
         filterMap.put("/user/registerUser", "anon");
-        filterMap.put("/animal/**", "anon");
-        filterMap.put("/article/**", "anon");
         filterMap.put("/comments/getCommentList/{id}", "anon");
         chainDefinition.addPathDefinitions(filterMap);
         return chainDefinition;

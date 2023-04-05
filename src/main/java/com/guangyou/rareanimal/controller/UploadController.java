@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/upload")
 @Slf4j
-@Api(tags = "专门用于上传的上传接口系统")
+@Api(tags = "专门用于上传的上传接口系统（都不需要传jwt）")
 public class UploadController {
 
     @Autowired

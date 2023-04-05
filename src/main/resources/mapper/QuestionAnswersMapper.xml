@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.QuestionMapper">
+
+    <sql id="insert-question">
+        (user_id,question_title,question_describe,publish_time,is_urgent)
+    </sql>
+
+<!--addQuestionByUser(Integer userId, String questionTitle, String questionDescribe, Long sysTime, Integer isUrgent);-->
+    <insert id="addQuestionByUser">
+        insert into t_question <include refid="insert-question"/>
+        values(#{userId},#{questionTitle},#{questionDescribe},#{sysTime},#{isUrgent})
+    </insert>
+</mapper>

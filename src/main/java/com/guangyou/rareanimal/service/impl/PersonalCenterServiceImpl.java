@@ -6,6 +6,7 @@ import com.guangyou.rareanimal.pojo.*;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.service.PersonalCenterService;
+import com.guangyou.rareanimal.utils.ArticleUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,11 +75,13 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
 
     @Autowired
     private ArticleMapper articleMapper;
+    @Autowired
+    private ArticleUtil articleUtil;
     @Override
     public PageDataVo<ArticleVo> getMyArticles(PageDto pageDto,String userAccount) {
         PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
         List<Article> articleList = personalCenterMapper.selectMyArticles(userAccount, pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
-        List<ArticleVo> articleVoList = copyList(articleList, true, true, false, true);
+        List<ArticleVo> articleVoList = articleUtil.copyList(articleList, true, true, false, true);
         pageDataVo.setPageData(articleVoList);
         //设置 数据库中用户文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
         pageDataVo.setCurrent(pageDto.getPage());
@@ -99,6 +102,11 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
 
     @Autowired
     private UserArticleMapper userArticleMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private ArticleCoverImgMapper articleCoverImgMapper;
+
     @Override
     public PageDataVo<ArticleVo> listSaveArticles(PageDto pageDto, Integer userId) {
         /*
@@ -143,75 +151,6 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
             pageDataVo.setPages( total/pageDto.getPageSize() );
         }
         return pageDataVo;
-    }
-
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private CustomTagMapper customTagMapper;
-    @Autowired
-    private ArticleBodyMapper articleBodyMapper;
-    @Autowired
-    private CategoryMapper categoryMapper;
-    @Autowired
-    private ArticleCoverImgMapper articleCoverImgMapper;
-
-    private List<ArticleVo> copyList(List<Article> articleList,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory) {
-        List<ArticleVo> articleVoList = new ArrayList<>();
-        for (Article article : articleList){
-            articleVoList.add(copy(article,isCreateTime,isTag,isBody,isCategory));
-        }
-        return articleVoList;
-    }
-    private ArticleVo copy(Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory){
-        ArticleVo articleVo = new ArticleVo();
-        BeanUtils.copyProperties(article, articleVo);
-        /**
-         * coverImg、createDate、authorInfo、tag、category、body都不能被复制属性，所以要单独拿出来赋值
-         */
-        //authorInfo 可以先根据article 的authorAccount 查询出 具体用户信息
-        List<User> userList = userMapper.getUsersByAccount(article.getAuthorAccount());
-        if (userList.size() != 0){
-            for (User user : userList){
-                String existUserAccount = user.getUserAccount();
-                //若数据库中已存在的用户账号与该文章发表的用户账号大小写完全一致的话，则就是该用户
-                if (existUserAccount.equals(article.getAuthorAccount())){
-                    AuthorInfoVo authorInfoVo = new AuthorInfoVo();
-                    articleVo.setAuthorInfo(authorInfoVo);
-                    articleVo.getAuthorInfo().setAuthorName(user.getUserName());
-                    articleVo.getAuthorInfo().setAuthorAccount(user.getUserAccount());
-                    articleVo.getAuthorInfo().setAuthorId(user.getUserId().longValue());
-                    articleVo.getAuthorInfo().setAuthorAvatarUrl(user.getUserAvatar());
-                }
-            }
-        }
-        //coverImg：可以先从
-        Long articleId = article.getId();
-        List<String> coverImgs = articleCoverImgMapper.selectCoverImgByArticleId(articleId);
-        articleVo.setCoverImg(coverImgs);
-        //若需要从数据库查询时间则从数据库中查询，否则设置为当前时间
-        if (isCreateTime){
-            String articleCreateTime = new DateTime(articleMapper.selectById(articleId).getCreateDate()).toString("yyyy-MM-dd HH:mm:ss");
-            articleVo.setCreateDate(articleCreateTime);
-        }else {
-            articleVo.setCreateDate(new DateTime(article.getCreateDate()).toString("yyyy-MM-dd HH:mm:ss"));
-        }
-        //不是所有的接口 都需要 tag
-        if (isTag){     //若需要 tag 属性
-            articleVo.setTags(customTagMapper.selectTagsByArticleId(articleId));
-        }
-        if (isBody){
-            Long bodyId = article.getBodyId();
-            articleVo.setBody(articleBodyMapper.findArticleBodyById(bodyId));
-        }
-        if (isCategory){
-            CategoryVo categoryVo = new CategoryVo();
-            Long categoryId = article.getCategoryId();
-            Category articleCategory = categoryMapper.findCategoryById(categoryId);
-            BeanUtils.copyProperties(articleCategory, categoryVo);
-            articleVo.setCategory(categoryVo);
-        }
-        return articleVo;
     }
 
 }

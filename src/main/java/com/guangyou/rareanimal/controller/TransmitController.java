@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
-import java.nio.file.Files;
 
 /**
  * @author xukai
@@ -23,9 +22,9 @@ import java.nio.file.Files;
  */
 @Slf4j
 @RestController
-@RequestMapping("/download")
-@Api(tags = "用于下载的接口")
-public class DownloadController {
+@RequestMapping("/transmit")
+@Api(tags = "glb传输的接口（都不需要传jwt）")
+public class TransmitController {
 
     @Value("${animal-model-glb.URL-location}")
     private String glbFile;

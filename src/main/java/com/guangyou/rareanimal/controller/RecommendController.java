@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/recommend")
-@Api(tags = "推荐系统控制器")
+@Api(tags = "推荐系统控制器（都不需要传jwt）")
 public class RecommendController {
 
     private final static Integer RECOMMEND_ARTICLE_CATEGORY_NUMBER = 8;
