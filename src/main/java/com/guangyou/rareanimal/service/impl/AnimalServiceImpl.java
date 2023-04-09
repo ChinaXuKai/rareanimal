@@ -32,7 +32,7 @@ public class AnimalServiceImpl implements AnimalService {
     private AnimalLabelMapper animalLabelMapper;
 
     /**
-     *
+     * 将数据库里的 单个动物标签 拆分成 List<String>类型的多个动物标签
      * @param animalList
      * @return
      */

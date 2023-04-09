@@ -142,7 +142,7 @@ public class ArticleUtil {
         //若需要从数据库查询时间则从数据库中查询，否则设置为当前时间
         if (isCreateTime){
             Long articleId = article.getId();
-            String articleCreateTime = new DateTime(articleMapper.selectById(articleId).getCreateDate()).toString("yyyy-MM-dd HH:mm:ss");
+            String articleCreateTime = new DateTime(article.getCreateDate()).toString("yyyy-MM-dd HH:mm:ss");
             articleVo.setCreateDate(articleCreateTime);
         }else {
             articleVo.setCreateDate(new DateTime(article.getCreateDate()).toString("yyyy-MM-dd HH:mm:ss"));

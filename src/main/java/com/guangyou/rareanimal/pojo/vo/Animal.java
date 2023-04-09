@@ -36,9 +36,6 @@ public class Animal {
     @ApiModelProperty(value = "动物的图片地址")
     private String animalImg;
 
-    @ApiModelProperty(value = "动物3D模型的glb文件的url路径")
-    private String animalModelUrl;
-
     @ApiModelProperty(value = "是否为脊椎动物：1为脊椎动物，0为非脊椎动物")
     private Integer isVertebrates;
 

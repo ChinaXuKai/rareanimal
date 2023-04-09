@@ -46,7 +46,7 @@ public class CommentsController {
 
     @ApiOperation(value = "发表评论",notes = "在特定文章发表评论（需要传jwt）")
     @PostMapping("/publishComment")
-    public Result publishComment( CommentDto commentDto){
+    public Result publishComment(@RequestBody CommentDto commentDto){
         //1、获取当前用户账号
         String userAccount = ShiroUtil.getProfile().getUserAccount();
             //用户未登录不允许评论

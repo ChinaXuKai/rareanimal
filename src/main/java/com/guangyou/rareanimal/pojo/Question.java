@@ -1,5 +1,6 @@
 package com.guangyou.rareanimal.pojo;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
@@ -14,9 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Question {
-    @JsonSerialize(using = ToStringSerializer.class)
+
+    @TableId(value = "question_id")
     private Long questionId;
-    @JsonSerialize(using = ToStringSerializer.class)
+
     private Integer userId;
 
     private String questionTitle;

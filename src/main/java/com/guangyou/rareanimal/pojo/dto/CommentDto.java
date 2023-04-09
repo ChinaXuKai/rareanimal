@@ -25,10 +25,10 @@ public class CommentDto {
     @ApiModelProperty(value = "评论内容")
     private String content;
 
-    @ApiModelProperty(value = "父评论id")
+    @ApiModelProperty(value = "父评论的评论id")
     private Long parentId;
 
-    @ApiModelProperty(value = "被评论的用户id")
+    @ApiModelProperty(value = "父评论的用户id")
     private Long toUserId;
 
 }

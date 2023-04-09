@@ -36,5 +36,4 @@ public class PageDataVo<T> {
     @ApiModelProperty(value = "总多少页")
     private Integer pages;
 
-
 }

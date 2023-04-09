@@ -38,6 +38,8 @@ public class QuestionAnswersController {
         int questionId = questionAnswersService.publishQuestion(publishQuestionDto,userId);
         if (questionId == 0){
             return Result.fail("问题发表出现异常");
+        }else if (questionId == -1){
+            return Result.fail(Result.FORBIDDEN,"你发表过同标题的问题，请更换标题",null);
         }
         return Result.succ(200, "问题发表成功", questionId);
     }

@@ -13,5 +13,4 @@ import org.springframework.stereotype.Repository;
 public interface QuestionMapper extends BaseMapper<Question> {
 
 
-    void addQuestionByUser(Integer userId, String questionTitle, String questionDescribe, Long sysTime, Integer isUrgent);
 }

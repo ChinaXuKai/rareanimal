@@ -1,17 +1,16 @@
 package com.guangyou.rareanimal.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.guangyou.rareanimal.mapper.QuestionMapper;
 import com.guangyou.rareanimal.mapper.QuestionTagMapper;
 import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.QuestionTag;
-import com.guangyou.rareanimal.pojo.dto.QuestionDto;
 import com.guangyou.rareanimal.pojo.dto.QuestionDto;
 import com.guangyou.rareanimal.service.QuestionAnswersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +38,14 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
     @Transactional
     @Override
     public int publishQuestion(QuestionDto publishQuestionDto, Integer userId) {
-        //1、先将 PublishQuestionDto 中的问题添加到 t_question 表中
+        //1、根据userId 和 questionTitle 去数据库中查询，查询结果不为 0 则抛异常
+        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Question::getUserId, userId);
+        queryWrapper.eq(Question::getQuestionTitle, publishQuestionDto.getQuestionTitle());
+        if (questionMapper.selectCount(queryWrapper) != 0){
+            return -1;
+        }
+        //2、先将 PublishQuestionDto 中的问题添加到 t_question 表中
         Question question = new Question();
         question.setUserId(userId);
         question.setQuestionTitle(publishQuestionDto.getQuestionTitle());
@@ -47,11 +53,7 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
         question.setIsUrgent(publishQuestionDto.getIsUrgent());
         question.setPublishTime(System.currentTimeMillis());
         questionMapper.insert(question);
-//        String questionTitle = publishQuestionDto.getQuestionTitle();
-//        String questionDescribe = publishQuestionDto.getQuestionDescribe();
-//        Integer isUrgent = publishQuestionDto.getIsUrgent();
-//        questionMapper.addQuestionByUser(userId,questionTitle,questionDescribe, (Long)System.currentTimeMillis(),isUrgent);
-        //2、然后获取到 questionId
+        //3、然后获取到 questionId，创建 questionTag 对象，赋值进 t_question_tag
         Long questionId = question.getQuestionId();
         List<String> questionTagsInfo = publishQuestionDto.getQuestionTags();
         for (String questionTagInfo : questionTagsInfo){

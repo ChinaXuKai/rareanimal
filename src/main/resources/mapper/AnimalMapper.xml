@@ -5,7 +5,7 @@
 <mapper namespace="com.guangyou.rareanimal.mapper.AnimalMapper">
 
     <sql id="animal-complete-field">
-        t_animal.animal_id, animal_name, alias, animal_img, animal_model_url,
+        t_animal.animal_id, animal_name, alias, animal_img,
         is_vertebrates, is_suckle, is_birds, is_creep, is_fish, is_amphibian,
         animal_classification, distribution_area, protect_grade, animal_label
     </sql>
