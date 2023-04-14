@@ -1,9 +1,13 @@
 package com.guangyou.rareanimal.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.io.Serializable;
 
 /**
  * @author xukai
@@ -13,8 +17,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class Comment {
+public class Comment implements Serializable {
 
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
 
     private String content;

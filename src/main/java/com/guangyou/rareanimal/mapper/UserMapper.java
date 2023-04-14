@@ -70,4 +70,10 @@ public interface UserMapper extends BaseMapper<User> {
      */
     User getUsersByUid(Long toUid);
 
+    /**
+     * 根据用户id 查询用户
+     * @param userId 用户id
+     * @return 用户
+     */
+    User getUserById(Integer userId);
 }

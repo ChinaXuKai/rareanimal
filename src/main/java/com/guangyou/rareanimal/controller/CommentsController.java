@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -76,14 +77,15 @@ public class CommentsController {
             throw new UnknownAccountException("当前还未登录，请登录后再删除评论哦");
         }
 
+        //判断是否有权限做删除：该评论所属用户、该文章所属用户、管理员（等实现权限管理的时候再进行实现）
+
         //删除用户自己发表的评论
         int deleteResult = commentsService.deleteCommentById(commentId);
         if (deleteResult == 0){
             return Result.fail("删除失败");
         }else {
-            return Result.succ(200, "删除评论成功", commentId);
+            return Result.succ(200, "删除评论成功，已删除"+deleteResult+"条该评论及子评论", commentId);
         }
-
     }
 
 }

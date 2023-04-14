@@ -24,6 +24,13 @@
         select * from t_user where user_id = #{toUid}
     </select>
 
+<!--    User getUserById(Integer userId);-->
+    <select id="getUserById" resultType="com.guangyou.rareanimal.pojo.User">
+        select *
+        from t_user
+        where user_id = #{userId}
+    </select>
+
     <!--int insertUserByAccountAndPwd(String userName,String userAccount, String userPwd, String userAvatar, Long accountCreateTime)-->
     <insert id="insertUserByAccountAndPwd">
         insert into t_user <include refid="t_user-filed"></include>

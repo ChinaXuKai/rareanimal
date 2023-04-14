@@ -117,8 +117,4 @@ public class AnimalServiceImpl implements AnimalService {
         return animalMapper.selectAnimalById(animalId);
     }
 
-    @Override
-    public AnimalIntroduceImgVo getAnimalInfoImg(Integer animalId) {
-        return animalMapper.selectAnimalInfoImgById(animalId);
-    }
 }

@@ -4,8 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.CategoryMapper">
 
+<!--    void updateArticleCount(int articleCount, Long categoryId);-->
+    <update id="updateArticleCount">
+        update t_category
+        set article_count = #{articleCount}
+        where id = #{categoryId}
+    </update>
 
-<!--    CategoryVo findCategoryById(Long categoryId);-->
+    <!--    CategoryVo findCategoryById(Long categoryId);-->
     <select id="findCategoryById" resultType="com.guangyou.rareanimal.pojo.Category">
         select * from t_category
         where id = #{categoryId}

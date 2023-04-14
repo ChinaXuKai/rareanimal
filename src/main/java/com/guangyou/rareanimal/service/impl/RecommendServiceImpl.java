@@ -139,7 +139,7 @@ public class RecommendServiceImpl implements RecommendService {
      *              不是同一小时：获取到 推荐用户集合 ，将 t_recommend_user 表中的数据做修改
      */
     @Override
-    public List<RecommendUserVo> getRecommendUser(Integer recommendUserNumber) {
+    public List<RecommendUserVo> getRecommendUser(Integer recommendUserNumber,Integer userId) {
         List<RecommendUserVo> recommendUserVos = new ArrayList<>();
         //1、获取当前系统日期
         Long recommendTimeL = System.currentTimeMillis();
@@ -148,31 +148,32 @@ public class RecommendServiceImpl implements RecommendService {
         boolean isExist = recommendUserMapper.exists(null);
         if (!isExist){      //无数据
             List<RecommendUser> dbRecommendUsers = acquireRecommendUser(recommendUserNumber);
-            copyUser(dbRecommendUsers, recommendUserVos,recommendTimeS);
+            copyUser(dbRecommendUsers, recommendUserVos,recommendTimeS,userId);
             return recommendUserVos;
         }else {             //有数据
             List<RecommendUser> dbRecommendUsers = recommendUserMapper.selectList(null);
             String saveTime = new DateTime(dbRecommendUsers.get(0).getRecommendTime()).toString("yyyy-MM-dd HH");
             if (saveTime.equals(recommendTimeS)){        //小时一致，直接取数据
                 dbRecommendUsers = recommendUserMapper.getRecommendUser(recommendUserNumber);
-                copyUser(dbRecommendUsers, recommendUserVos,recommendTimeS);
+                copyUser(dbRecommendUsers, recommendUserVos,recommendTimeS,userId);
                 return recommendUserVos;
             }else {                                     //小时不一致
                 //删除原有的数据
                 recommendUserMapper.delete(null);
                 dbRecommendUsers = acquireRecommendUser(recommendUserNumber);
-                copyUser(dbRecommendUsers, recommendUserVos,recommendTimeS);
+                copyUser(dbRecommendUsers, recommendUserVos,recommendTimeS,userId);
                 return recommendUserVos;
             }
         }
     }
-    private void copyUser(List<RecommendUser> dbRecommendUsers, List<RecommendUserVo> recommendUserVos,String recommendTime) {
+    private void copyUser(List<RecommendUser> dbRecommendUsers, List<RecommendUserVo> recommendUserVos,String recommendTime,Integer userId) {
         for (int i = 0;i <dbRecommendUsers.size(); i++){
             RecommendUserVo recommendUserVo = new RecommendUserVo();
             UserInfoVo recommendUserInfo = new UserInfoVo();
             RecommendUser dbUser = dbRecommendUsers.get(i);
             BeanUtils.copyProperties(dbUser,recommendUserVo);
-            //为 recommendUserVo 赋值，最后添加进 recommendUserVos
+            //为 recommendUserVo 赋值（recommendUserInfo、recommendTime、isCared），最后添加进 recommendUserVos
+            //recommendUserInfo
             User user = userMapper.getUsersByUid(dbUser.getUserId());
             recommendUserInfo.setUserAccount(user.getUserAccount());
             recommendUserInfo.setCreateTime(new DateTime(user.getCreateTime()).toString("yyyy-MM-dd HH:mm"));
@@ -181,7 +182,17 @@ public class RecommendServiceImpl implements RecommendService {
             recommendUserInfo.setUserName(dbUser.getUserName());
             recommendUserInfo.setUserAvatar(dbUser.getUserAvatar());
             recommendUserVo.setRecommendUserInfo(recommendUserInfo);
+            //recommendTime
             recommendUserVo.setRecommendTime(recommendTime);
+            //isCared
+            if (userId == null){
+                recommendUserVo.setIsCared(0);
+            }else {
+                LambdaQueryWrapper<UserCarer> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(UserCarer::getUserId, userId);
+                queryWrapper.eq(UserCarer::getCarerId, dbUser.getUserId());
+                recommendUserVo.setIsCared(userCarerMapper.selectCount(queryWrapper).intValue());
+            }
             recommendUserVos.add(recommendUserVo);
         }
     }
@@ -192,7 +203,7 @@ public class RecommendServiceImpl implements RecommendService {
     }
     /**
      * 计算 所有用户的推荐系数 ，封装成RecommendUser类型的list对象并添加进行 t_recommend_user 表中
-     * 推荐系数 =（粉丝数*0.5 + 发表文章数*0.5） * 10
+     * 推荐系数 =（粉丝数*0.6 + 发表文章数*0.4） * 10
      */
     private void computeAndInsertUsersRecommendFactor(){
         List<RecommendUser> recommendUsers = new ArrayList<>();
@@ -209,8 +220,8 @@ public class RecommendServiceImpl implements RecommendService {
             recommendUser.setUserName(user.getUserName());
             recommendUser.setUserAvatar(user.getUserAvatar());
             recommendUser.setRecommendTime(System.currentTimeMillis());
-            int recommendFactor = (int) ((userCarerMapper.getCarerCountByUserId(user.getUserId().longValue()) * 0.5
-                                                + articleMapper.getArticleCountByUser(user.getUserAccount()) * 0.5 ) * 10);
+            int recommendFactor = (int) ((userCarerMapper.getCarerCountByUserId(user.getUserId().longValue()) * 0.55
+                                                + articleMapper.getArticleCountByUser(user.getUserAccount()) * 0.45 ) * 100);
             recommendUser.setRecommendFactor(recommendFactor);
             recommendUserMapper.insert(recommendUser);
         }

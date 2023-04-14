@@ -14,16 +14,14 @@ import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.ThreadService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
+import com.guangyou.rareanimal.utils.IDUtil;
 import com.guangyou.rareanimal.utils.RedisUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author xukai
@@ -442,17 +440,26 @@ public class ArticleServiceImpl implements ArticleService {
         queryWrapper.eq(Article::getIsRead, 0);
         queryWrapper.eq(Article::getWeight, 0);
         int notViewed = articleMapper.selectCount(queryWrapper).intValue();
-        if (notViewed == 0){
+        if (notViewed < 10){
             //重置数据库中 t_article 中的 is_read 为 0
             articleMapper.update(null, new LambdaUpdateWrapper<Article>().setSql("is_read = 0"));
         }
-        //从 is_read 为 0 的数据中随机获取数据，获取到的数据设置 is_read = 1
-        List<Article> articles = articleMapper.selectRandUserArticles(USER_ARTICLE_SHOW_NUMBER,ArticleUtil.VISIT_PERMISSION_MY);
-        for (Article article : articles){
+        //从 is_read 为 0 的数据中获取 用户的 可读的 文章集合
+        List<Article> articles = articleMapper.selectUserArticles(ArticleUtil.VISIT_PERMISSION_MY);
+        //获取范围为 0~该文章集合长度，USER_ARTICLE_SHOW_NUMBER 个 随机整数
+        List<Integer> randIntegerList = IDUtil.getRandIntegerList(USER_ARTICLE_SHOW_NUMBER, articles.size());
+        //依次获取该文章集合的第 随机整数 个文章，填入用户展示文章集合
+        List<Article> userShowArticles = new ArrayList<>();
+        for(int i = 0; i < USER_ARTICLE_SHOW_NUMBER; i++){
+            Article article = articles.get(randIntegerList.get(i));
+            userShowArticles.add(article);
+        }
+
+        for (Article article : userShowArticles){
             article.setIsRead(1);
             articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
         }
-        userArticlesVo.addAll(articleUtil.copyList(articles, true, true, false, true));
+        userArticlesVo.addAll(articleUtil.copyList(userShowArticles, true, true, false, true));
         if (userArticlesVo.isEmpty()){
             return Result.fail("获取用户文章出现错误");
         }

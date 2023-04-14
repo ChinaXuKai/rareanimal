@@ -18,10 +18,12 @@
         where id = #{commentId}
     </update>
 
-<!--    int deleteByCommentId(Long commentId);-->
-    <update id="deleteByCommentId">
-        update t_comment set is_delete = 1
-    </update>
+<!--&lt;!&ndash;    int deleteByCommentId(Long commentId);&ndash;&gt;-->
+<!--    <update id="deleteByCommentId">-->
+<!--        update t_comment-->
+<!--        set is_delete = 1-->
+<!--        where id = #{commentId}-->
+<!--    </update>-->
 
     <!--    List<Comment> selectFirstFloorCommentsByArticleId(Long articleId);-->
     <select id="selectFirstFloorCommentsByArticleId" resultType="com.guangyou.rareanimal.pojo.Comment">

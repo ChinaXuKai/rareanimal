@@ -1,6 +1,8 @@
 package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.guangyou.rareanimal.mapper.ArticleMapper;
+import com.guangyou.rareanimal.pojo.Article;
 import com.guangyou.rareanimal.pojo.Category;
 import com.guangyou.rareanimal.pojo.CategoryTheme;
 import com.guangyou.rareanimal.pojo.vo.ArticleCategoriesVo;
@@ -11,6 +13,7 @@ import com.guangyou.rareanimal.shiro.AccountProfile;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +27,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private ArticleMapper articleMapper;
 
+    @Transactional
     @Override
     public List<ArticleCategoriesVo> findArticleCategories() {
         List<ArticleCategoriesVo> articleCategoriesVos = new ArrayList<>();
-
-        //先查询到所有的文章圈子主题
+        List<CategoryVo> categoryVos = null;
+        //通过 t_article表 重新查询每个圈子有多少篇文章，并设置到 t_category表 中的 article_count字段
+        List<Category> categoryList = categoryMapper.selectList(null);
+        for (Category category : categoryList){
+            LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Article::getCategoryId, category.getId());
+            int articleCount = articleMapper.selectCount(queryWrapper).intValue();
+            categoryMapper.updateArticleCount(articleCount,category.getId());
+        }
+        //查询到所有的文章圈子主题
         List<CategoryTheme> categoryThemes = categoryMapper.selectAllCategoryTheme();
         for (int i = 0; i < categoryThemes.size(); i++){
             //每有一个文章圈子主题，就在 articleCategoriesVos 中添加一个元素 articleCategoriesVo
@@ -39,10 +53,10 @@ public class CategoryServiceImpl implements CategoryService {
             //通过 该圈子主题id 查询 对应所有的文章圈子，然后为 articleCategoriesVo 赋值
             articleCategoriesVo.setTheme(categoryTheme.getThemeName());
             articleCategoriesVo.setThemeId(categoryTheme.getId());
-            List<CategoryVo> categoryVos = categoryMapper.selectCategoryByThemeId(categoryTheme.getId());
+            //通过 t_article表 重新查询每个圈子有多少篇文章
+            categoryVos = categoryMapper.selectCategoryByThemeId(categoryTheme.getId());
             articleCategoriesVo.setArticleCategories(categoryVos);
         }
-
         return articleCategoriesVos;
     }
 

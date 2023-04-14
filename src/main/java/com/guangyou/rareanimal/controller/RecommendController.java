@@ -6,6 +6,7 @@ import com.guangyou.rareanimal.pojo.vo.RecommendArticleVo;
 import com.guangyou.rareanimal.pojo.vo.RecommendCategoryVo;
 import com.guangyou.rareanimal.pojo.vo.RecommendUserVo;
 import com.guangyou.rareanimal.service.RecommendService;
+import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,9 @@ public class RecommendController {
     @ApiOperation(value = "推荐博主用户",notes = "推荐博主用户，每小时刷新")
     @GetMapping("/user")
     public Result user(){
-        List<RecommendUserVo> recommendUsers = recommendService.getRecommendUser(RECOMMEND_USER_NUMBER);
+        Integer userId = ShiroUtil.getProfile().getUserId();
+
+        List<RecommendUserVo> recommendUsers = recommendService.getRecommendUser(RECOMMEND_USER_NUMBER,userId);
         if (recommendUsers.isEmpty()){
             return Result.fail("推荐异常");
         }
@@ -58,7 +61,7 @@ public class RecommendController {
     }
 
 
-    @ApiOperation(value = "推荐文章",notes = "推荐文章，可一直刷新")
+    @ApiOperation(value = "推荐文章",notes = "推荐文章，访问刷新")
     @GetMapping("/article")
     public Result article(){
         List<RecommendArticleVo> recommendArticleVos = recommendService.getRecommendArticle(RECOMMEND_ARTICLE_NUMBER);

@@ -73,15 +73,13 @@ public class AnimalController {
         return animalList;
     }
     /**
-     * 为单个animal的 animalIntroduce 和 animalIntroduceImg 赋值
+     * 为单个animal的 animalIntroduce 赋值
      * @param animal animalIntroduce需要被赋值的动物
      * @return
      */
     private Animal setAnimalSimpInfo(Animal animal){
         //根据animalId查询AnimalIntroduce的信息
         AnimalIntroduce animalIntroduce = animalService.selectAnimalsSimpInfo(animal.getAnimalId());
-        AnimalIntroduceImgVo animalIntroduceImg = animalService.getAnimalInfoImg(animal.getAnimalId());
-        animal.setAnimalIntroduceImg(animalIntroduceImg);
         animal.setAnimalIntroduce(animalIntroduce);
         log.info("info={}",animal.getAnimalIntroduce());
         return animal;

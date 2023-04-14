@@ -28,4 +28,7 @@ public class RecommendUserVo {
 
     @ApiModelProperty(value = "推荐时间")
     private String recommendTime;
+
+    @ApiModelProperty(value = "用于判别当前用户是否已经关注了该推荐用户",notes = "为1表示之前已经关注，为0表示之前并未关注")
+    private Integer isCared;
 }

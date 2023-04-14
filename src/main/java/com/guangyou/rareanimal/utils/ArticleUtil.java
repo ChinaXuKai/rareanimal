@@ -93,7 +93,12 @@ public class ArticleUtil {
         BeanUtils.copyProperties(article, articleVo);
         /**
          * createDate、authorAccount、authorAvatarUrl、authorName、tag、category、body、coverImg都不能被复制属性，所以要单独拿出来赋值
+         * 注：weight 也不能被赋值，因为要考虑到官方发表的文章被查看，
+         *          官方发表的weight == 1，而默认发表的weight == 0，因此官方文章的weight需要重新赋值
          */
+        if (User.OFFICIAL_ACCOUNT.equals(article.getAuthorAccount()) ){
+            articleVo.setWeight(1);
+        }
         //可以先根据article 的authorAccount 查询出 具体用户信息，从中可获取用户昵称
         List<User> userList = userMapper.getUsersByAccount(article.getAuthorAccount());
         for (User user : userList){

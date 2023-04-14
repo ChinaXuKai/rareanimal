@@ -9,10 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author xukai
@@ -46,8 +43,8 @@ public class QuestionAnswersController {
 
 
     @ApiOperation(value = "用户修改问答",notes = "用户登录后可修改自己提出的问答（需要传jwt）")
-    @PostMapping("/updateQuestion")
-    public Result updateQuestion(@RequestBody QuestionDto updateQuestionDto){
+    @PutMapping("/updateQuestion")
+    public Result updateQuestion( QuestionDto updateQuestionDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null) {
             throw new UnknownAccountException("当前还未登录，还不能修改问题哦~");
@@ -59,4 +56,14 @@ public class QuestionAnswersController {
         }
         return Result.succ(200, "问题修改成功", questionId);
     }
+
+
+    @ApiOperation(value = "用户回答问题",notes = "用户登录后可回答别人发表的问题")
+    @PostMapping("/answerQuestion")
+    public Result answerQuestion(){
+
+        return null;
+    }
+
+
 }

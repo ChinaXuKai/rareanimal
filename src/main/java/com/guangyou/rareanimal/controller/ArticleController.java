@@ -127,7 +127,7 @@ public class ArticleController {
 
     @ApiOperation(value = "获取主题id对应的文章圈子集合",notes = "获取主题id对应的文章圈子集合")
     @GetMapping("/getArticleCategory/{themeId}")
-    public Result getAllArticleCategory(@PathVariable("themeId") Long themeId){
+    public Result getArticleCategory(@PathVariable("themeId") Long themeId){
         ArticleCategoriesVo articleCategories = categoryService.getCategoryByThemeId(themeId);
         return Result.succ(200, "请在下列文章圈子中选择一样", articleCategories);
     }

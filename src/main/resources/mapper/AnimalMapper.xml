@@ -111,12 +111,4 @@
         and t_animal.animal_id = #{animalId}
     </select>
 
-    <!--    AnimalIntroduceImgVo selectAnimalInfoImgById(Integer animalId);-->
-    <select id="selectAnimalInfoImgById" resultType="com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo">
-        select *
-        from t_animal_introduce_img
-        where animal_id = #{animalId}
-    </select>
-
-
 </mapper>

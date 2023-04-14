@@ -17,7 +17,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@ApiModel(description = "用户作展示的相关信息")
+@ApiModel(description = "用户作展示的简易信息")
 public class UserInfoVo {
     @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "用户id")
@@ -37,4 +37,6 @@ public class UserInfoVo {
 
     @ApiModelProperty(value = "粉丝数")
     private Integer fansCount;
+
+
 }

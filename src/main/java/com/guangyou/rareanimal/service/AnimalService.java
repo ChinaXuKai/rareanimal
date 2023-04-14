@@ -82,10 +82,4 @@ public interface AnimalService {
      */
     Animal selectAnimalById(Long animalId);
 
-    /**
-     * 根据动物id 获取对应的动物简介图片
-     * @param animalId
-     * @return
-     */
-    AnimalIntroduceImgVo getAnimalInfoImg(Integer animalId);
 }

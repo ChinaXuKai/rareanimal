@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.OpinionMapper">
+
+<!--    Opinion getOpinionById(Long opinionId);-->
+    <select id="getOpinionById" resultType="com.guangyou.rareanimal.pojo.Opinion">
+        select *
+        from t_opinion
+        where opinion_id = #{opinionId}
+    </select>
+
+<!--    List<Opinion> getOpinionsByPageAndUid(Integer userId, Integer initialDataLocation, Integer pageSize);-->
+    <select id="getOpinionsByPageAndUid" resultType="com.guangyou.rareanimal.pojo.Opinion">
+        select *
+        from t_opinion
+        where user_id = #{userId}
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+</mapper>

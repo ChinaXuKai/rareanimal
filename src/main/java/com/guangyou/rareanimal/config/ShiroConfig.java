@@ -68,7 +68,8 @@ public class ShiroConfig {
         filterMap.put("/upload/**", "anon");
         filterMap.put("/personalCenter/**", "anon");
         filterMap.put("/animal/**", "anon");
-        filterMap.put("/recommend/**", "anon");
+        filterMap.put("/recommend/article", "anon");
+        filterMap.put("/recommend/articleCategory", "anon");
         filterMap.put("/article/**", "anon");
         filterMap.put("/user/loginUser", "anon");
         filterMap.put("/user/registerUser", "anon");

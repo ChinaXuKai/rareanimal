@@ -69,7 +69,4 @@ public class Animal {
     @ApiModelProperty(value = "动物标签")
     private List<String> animalLabel;
 
-    @ApiModelProperty(value = "动物简介对应的图片")
-    private AnimalIntroduceImgVo animalIntroduceImg;
-
 }

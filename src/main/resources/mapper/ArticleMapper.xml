@@ -74,14 +74,12 @@
         where id = #{articleId}
     </select>
 
-<!--    List<Article> selectRandUserArticles(Integer randArticleNumber,String visitPermission);-->
-    <select id="selectRandUserArticles" resultType="com.guangyou.rareanimal.pojo.Article">
+<!--    List<Article> selectUserArticles(String visitPermission);-->
+    <select id="selectUserArticles" resultType="com.guangyou.rareanimal.pojo.Article">
         select *
         from t_article as article
         where weight = 0
         and visit_permission != #{visitPermission}
-        and article.id >= (RAND()*(select MAX(id) from t_article))
-        LIMIT #{randArticleNumber}
     </select>
 
 <!--    List<Article> selectOfficialArticles(Integer officialArticleNumber);-->
