@@ -169,29 +169,29 @@ public class RecommendServiceImpl implements RecommendService {
     private void copyUser(List<RecommendUser> dbRecommendUsers, List<RecommendUserVo> recommendUserVos,String recommendTime,Integer userId) {
         for (int i = 0;i <dbRecommendUsers.size(); i++){
             RecommendUserVo recommendUserVo = new RecommendUserVo();
-            UserInfoVo recommendUserInfo = new UserInfoVo();
+            AuthorInfoVo recommendUserInfo = new AuthorInfoVo();
             RecommendUser dbUser = dbRecommendUsers.get(i);
             BeanUtils.copyProperties(dbUser,recommendUserVo);
             //为 recommendUserVo 赋值（recommendUserInfo、recommendTime、isCared），最后添加进 recommendUserVos
             //recommendUserInfo
             User user = userMapper.getUsersByUid(dbUser.getUserId());
-            recommendUserInfo.setUserAccount(user.getUserAccount());
+            recommendUserInfo.setAuthorAccount(user.getUserAccount());
             recommendUserInfo.setCreateTime(new DateTime(user.getCreateTime()).toString("yyyy-MM-dd HH:mm"));
             recommendUserInfo.setFansCount(userCarerMapper.getCarerCountByUserId(dbUser.getUserId()));
-            recommendUserInfo.setUserId(dbUser.getUserId());
-            recommendUserInfo.setUserName(dbUser.getUserName());
-            recommendUserInfo.setUserAvatar(dbUser.getUserAvatar());
+            recommendUserInfo.setAuthorId(dbUser.getUserId());
+            recommendUserInfo.setAuthorName(dbUser.getUserName());
+            recommendUserInfo.setAuthorAvatarUrl(dbUser.getUserAvatar());
             recommendUserVo.setRecommendUserInfo(recommendUserInfo);
             //recommendTime
             recommendUserVo.setRecommendTime(recommendTime);
             //isCared
             if (userId == null){
-                recommendUserVo.setIsCared(0);
+                recommendUserInfo.setIsCared(0);
             }else {
                 LambdaQueryWrapper<UserCarer> queryWrapper = new LambdaQueryWrapper<>();
                 queryWrapper.eq(UserCarer::getUserId, userId);
                 queryWrapper.eq(UserCarer::getCarerId, dbUser.getUserId());
-                recommendUserVo.setIsCared(userCarerMapper.selectCount(queryWrapper).intValue());
+                recommendUserInfo.setIsCared(userCarerMapper.selectCount(queryWrapper).intValue());
             }
             recommendUserVos.add(recommendUserVo);
         }

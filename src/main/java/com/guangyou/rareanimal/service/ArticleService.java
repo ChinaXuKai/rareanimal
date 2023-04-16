@@ -3,8 +3,6 @@ package com.guangyou.rareanimal.service;
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.pojo.dto.ArticleDto;
 import com.guangyou.rareanimal.pojo.vo.ArticleVo;
-import com.guangyou.rareanimal.pojo.dto.PageDto;
-import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 
 import java.util.List;
 import java.util.Map;
@@ -19,32 +17,33 @@ public interface ArticleService {
      * 查询官方发布的文章列表
      * @return
      */
-    Result getOfficialArticles();
+    Result getOfficialArticles(Integer userId);
 
     /**
      * 查询用户发布的文章列表
      * @return
      */
-    Result getUserArticles();
+    Result getUserArticles(Integer userId);
 
     /**
      * 查询非官方发布的最热文章
      * @return
      */
-    List<ArticleVo> getHotArticle();
+    List<ArticleVo> getHotArticle(Integer userId);
 
     /**
      * 查询非官方发布的最新文章
      * @return
+     * @param userId
      */
-    List<ArticleVo> getNewArticle();
+    List<ArticleVo> getNewArticle(Integer userId);
 
     /**
      * 根据 articleId 查看相应的文章信息
      * @param articleId
      * @return
      */
-    ArticleVo findArticleById(Long articleId);
+    ArticleVo findArticleById(Integer userId,Long articleId);
 
     /**
      * 修改t_article表中的comment_counts字段值 + 1

@@ -7,7 +7,6 @@ import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.service.PersonalCenterService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
-import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,10 +77,10 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
     @Autowired
     private ArticleUtil articleUtil;
     @Override
-    public PageDataVo<ArticleVo> getMyArticles(PageDto pageDto,String userAccount) {
+    public PageDataVo<ArticleVo> getMyArticles(PageDto pageDto, String userAccount, Integer userId) {
         PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
         List<Article> articleList = personalCenterMapper.selectMyArticles(userAccount, pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
-        List<ArticleVo> articleVoList = articleUtil.copyList(articleList, true, true, false, true);
+        List<ArticleVo> articleVoList = articleUtil.copyList(userId,articleList, true, true, false, true);
         pageDataVo.setPageData(articleVoList);
         //设置 数据库中用户文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
         pageDataVo.setCurrent(pageDto.getPage());

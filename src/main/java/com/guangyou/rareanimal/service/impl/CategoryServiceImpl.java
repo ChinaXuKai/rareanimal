@@ -35,11 +35,12 @@ public class CategoryServiceImpl implements CategoryService {
     public List<ArticleCategoriesVo> findArticleCategories() {
         List<ArticleCategoriesVo> articleCategoriesVos = new ArrayList<>();
         List<CategoryVo> categoryVos = null;
-        //通过 t_article表 重新查询每个圈子有多少篇文章，并设置到 t_category表 中的 article_count字段
+        //通过 t_article表 重新查询每个圈子有多少篇文章（is_delete=0），并设置到 t_category表 中的 article_count字段
         List<Category> categoryList = categoryMapper.selectList(null);
         for (Category category : categoryList){
             LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Article::getCategoryId, category.getId());
+            queryWrapper.eq(Article::getIsDelete, 0);
             int articleCount = articleMapper.selectCount(queryWrapper).intValue();
             categoryMapper.updateArticleCount(articleCount,category.getId());
         }

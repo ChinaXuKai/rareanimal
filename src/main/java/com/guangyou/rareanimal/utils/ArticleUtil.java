@@ -81,14 +81,14 @@ public class ArticleUtil {
     @Autowired
     private QuestionMapper questionMapper;
 
-    public List<ArticleVo> copyList(List<Article> articleList, boolean isCreateTime, boolean isTag, boolean isBody, boolean isCategory) {
+    public List<ArticleVo> copyList(Integer userId,List<Article> articleList, boolean isCreateTime, boolean isTag, boolean isBody, boolean isCategory) {
         List<ArticleVo> articleVoList = new ArrayList<>();
         for (Article article : articleList){
-            articleVoList.add(copy(article,isCreateTime,isTag,isBody,isCategory));
+            articleVoList.add(copy(userId,article,isCreateTime,isTag,isBody,isCategory));
         }
         return articleVoList;
     }
-    public ArticleVo copy(Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory){
+    public ArticleVo copy(Integer userId,Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory){
         ArticleVo articleVo = new ArticleVo();
         BeanUtils.copyProperties(article, articleVo);
         /**
@@ -107,7 +107,7 @@ public class ArticleUtil {
             if (existUserAccount.equals(article.getAuthorAccount())){
                 AuthorInfoVo authorInfoVo = new AuthorInfoVo();
                 articleVo.setAuthorInfo(authorInfoVo);
-                //设置 ArticleVo 的属性：作者id、作者名称、作者账号、作者头像、粉丝数、关注数、社交动态数
+                //设置 ArticleVo 的属性：作者id、作者名称、作者账号、作者头像、粉丝数、关注数、社交动态数、注册时间、是否已关注
                 articleVo.getAuthorInfo().setAuthorId(user.getUserId().longValue());
                 articleVo.getAuthorInfo().setAuthorName(user.getUserName());
                 articleVo.getAuthorInfo().setAuthorAccount(user.getUserAccount());
@@ -127,6 +127,15 @@ public class ArticleUtil {
                 questionQueryWrapper.eq(Question::getUserId, user.getUserId());
                 int questionCount = questionMapper.selectCount(questionQueryWrapper).intValue();
                 articleVo.getAuthorInfo().setSocialCount(articleCount + questionCount);
+                //注册时间：
+                articleVo.getAuthorInfo().setCreateTime(new DateTime(user.getCreateTime()).toString("yyyy-MM-dd HH:mm:ss"));
+                //是否已关注：若当前用户id 非空
+                if (userId != null){
+                    int caredCount = userCarerMapper.selectCountById(userId.longValue(),articleVo.getAuthorInfo().getAuthorId());
+                    articleVo.getAuthorInfo().setIsCared(caredCount);
+                }else {
+                    articleVo.getAuthorInfo().setIsCared(0);
+                }
             }
         }
         //coverImg：根据articleId 从t_article_cover_img 中 获取coverImg 集合

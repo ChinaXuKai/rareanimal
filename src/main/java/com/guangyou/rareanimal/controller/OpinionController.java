@@ -28,7 +28,7 @@ public class OpinionController {
 
     @ApiOperation(value = "用户提交意见")
     @PostMapping("/submit")
-    public Result submit(OpinionDto opinionDto){
+    public Result submit(@RequestBody OpinionDto opinionDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
             return Result.fail(Result.FORBIDDEN,"当前未登录，还不能发表意见哦",null);

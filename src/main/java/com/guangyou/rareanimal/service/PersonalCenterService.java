@@ -14,9 +14,10 @@ public interface PersonalCenterService {
     /**
      * 用户userAccount 获取所发表过的所有文章
      * @param userAccount
+     * @param userId
      * @return
      */
-    PageDataVo<ArticleVo> getMyArticles(PageDto pageDto,String userAccount);
+    PageDataVo<ArticleVo> getMyArticles(PageDto pageDto,String userAccount,Integer userId);
 
     /**
      * 根据authorId 查询粉丝数

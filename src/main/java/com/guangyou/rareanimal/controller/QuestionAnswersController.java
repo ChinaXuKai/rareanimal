@@ -24,7 +24,7 @@ public class QuestionAnswersController {
     @Autowired
     private QuestionAnswersService questionAnswersService;
 
-    @ApiOperation(value = "用户提出问答",notes = "用户登录后可提出问答（需要传jwt）")
+    @ApiOperation(value = "用户提出问题",notes = "用户登录后可提出问答（需要传jwt）")
     @PostMapping("/publishQuestion")
     public Result publishQuestion(@RequestBody QuestionDto publishQuestionDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
@@ -42,7 +42,7 @@ public class QuestionAnswersController {
     }
 
 
-    @ApiOperation(value = "用户修改问答",notes = "用户登录后可修改自己提出的问答（需要传jwt）")
+    @ApiOperation(value = "用户修改问题",notes = "用户登录后可修改自己提出的问答（需要传jwt）")
     @PutMapping("/updateQuestion")
     public Result updateQuestion( QuestionDto updateQuestionDto){
         Integer userId = ShiroUtil.getProfile().getUserId();

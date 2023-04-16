@@ -11,6 +11,7 @@ import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.CategoryService;
 import com.guangyou.rareanimal.service.CustomTagService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
+import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -41,13 +42,15 @@ public class ArticleController {
     @ApiOperation(value = "官方文章集合显示",notes = "返回官方发布的文章")
     @GetMapping("getOfficialArticles")
     public Result getOfficialArticles(){
-        return articleService.getOfficialArticles();
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        return articleService.getOfficialArticles(userId);
     }
 
     @ApiOperation(value = "用户文章集合显示",notes = "返回用户发布的文章")
     @GetMapping("getUserArticles")
     public Result getUserArticles(){
-        return articleService.getUserArticles();
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        return articleService.getUserArticles(userId);
     }
 
 
@@ -69,7 +72,8 @@ public class ArticleController {
     @ApiOperation(value = "查询非官方发布的最热文章",notes = "可以获取非官方发布的最热文章")
     @GetMapping("getHotArticle")
     public Result getHotArticle(){
-        List<ArticleVo> hotArticles = articleService.getHotArticle();
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        List<ArticleVo> hotArticles = articleService.getHotArticle(userId);
         if (hotArticles.size() == 0){
             return Result.succ(200, "当前还没有最热文章", null);
         }else {
@@ -81,7 +85,8 @@ public class ArticleController {
     @ApiOperation(value = "查询非官方发布的最新文章",notes = "可以获取非官方发布的最新文章")
     @GetMapping("getNewArticle")
     public Result getNewArticle(){
-        List<ArticleVo> newArticles = articleService.getNewArticle();
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        List<ArticleVo> newArticles = articleService.getNewArticle(userId);
         if (newArticles.size() == 0){
             return Result.succ(200, "当前还没有最热文章", null);
         }else {
@@ -104,12 +109,14 @@ public class ArticleController {
             return Result.fail(Result.FORBIDDEN,"该文章已被逻辑删除，不可访问",null);
         }
 
+        Integer userId = ShiroUtil.getProfile().getUserId();
+
         //获取文章访问权限，若不是 “全部可见” ，则不允许访问
         String visitPermission = articleMapper.selectVisitPermission(articleId);
         if (!ArticleUtil.VISIT_PERMISSION_ALL.equals(visitPermission)){
             return Result.fail(Result.FORBIDDEN,"该博主设置了文章访问权限，你当前还没权限访问哦",null);
         }
-        ArticleVo articleVo = articleService.findArticleById(articleId);
+        ArticleVo articleVo = articleService.findArticleById(userId,articleId);
         if (articleVo == null){
             return Result.fail("未查询到该文章");
         }else {

@@ -59,7 +59,8 @@ public class PersonalCenterController {
             throw new UnknownAccountException("当前还未登录，请先登录再访问该页面");
         }
 
-        PageDataVo<ArticleVo> pageDataVo = personalCenterService.getMyArticles(pageDto,userAccount);
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        PageDataVo<ArticleVo> pageDataVo = personalCenterService.getMyArticles(pageDto,userAccount,userId);
 
         if (pageDataVo.getPageData().isEmpty()){
             return Result.succ(200,"当前还未发表过文章，快来发表文章让大家知道你吧~",null);

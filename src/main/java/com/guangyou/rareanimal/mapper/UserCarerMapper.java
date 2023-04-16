@@ -40,4 +40,12 @@ public interface UserCarerMapper extends BaseMapper<UserCarer> {
      * @return
      */
     UserCarer selectCarerById(Long userId, String authorAccount);
+
+    /**
+     * 根据 当前用户id 和 别的用户author的id 去查询是否有记录
+     * @param userId 当前用户
+     * @param authorId 别的用户
+     * @return 记录数
+     */
+    int selectCountById(Long userId, Long authorId);
 }

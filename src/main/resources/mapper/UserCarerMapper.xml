@@ -33,4 +33,12 @@
         select carer_id from t_user_carer
         where user_id = #{userId}
     </select>
+
+<!--    int selectCountById(Long userId, Long authorId)-->
+    <select id="selectCountById" resultType="java.lang.Integer">
+        select count(*)
+        from t_user_carer
+        where user_id = #{userId}
+        and carer_id = #{authorId}
+    </select>
 </mapper>

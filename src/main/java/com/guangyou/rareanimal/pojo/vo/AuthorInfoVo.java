@@ -39,4 +39,9 @@ public class AuthorInfoVo {
     @ApiModelProperty(value = "作者的社交动态数",notes = "即所发表的文章、问题总数")
     private Integer socialCount;
 
+    @ApiModelProperty(value = "该用户的创建时间")
+    private String createTime;
+
+    @ApiModelProperty(value = "用于判别该用户是否已经被当前用户所关注",notes = "为1表示之前已经关注，为0表示之前并未关注")
+    private Integer isCared;
 }

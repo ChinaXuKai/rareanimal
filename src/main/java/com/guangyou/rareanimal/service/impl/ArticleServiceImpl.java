@@ -1,23 +1,17 @@
 package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.mapper.*;
 import com.guangyou.rareanimal.pojo.*;
 import com.guangyou.rareanimal.pojo.dto.ArticleDto;
 import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.pojo.User;
-import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.ThreadService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
 import com.guangyou.rareanimal.utils.IDUtil;
-import com.guangyou.rareanimal.utils.RedisUtil;
-import org.joda.time.DateTime;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -396,11 +390,11 @@ public class ArticleServiceImpl implements ArticleService {
      * @return
      */
     @Override
-    public Result getOfficialArticles() {
+    public Result getOfficialArticles(Integer userId) {
         //1、获取官方（where weight == 1 and is_delete = 0 order by create_date desc limit OFFICIAL_ARTICLE_NUMBER）
         List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_SHOW_NUMBER);
         //2、将 articleList 转为 articleVoList 返回
-        List<ArticleVo> officialArticlesVo = articleUtil.copyList(officialArticles,true,true,false,true);
+        List<ArticleVo> officialArticlesVo = articleUtil.copyList(userId,officialArticles,true,true,false,true);
         if (officialArticlesVo.isEmpty()){
             return Result.fail("获取官方文章失败");
         }
@@ -433,7 +427,7 @@ public class ArticleServiceImpl implements ArticleService {
  * 2、此时，redis库1 中的文章id 即为要展示的 文章，取出 id集合（左边取出：lpop）
  */
     @Override
-    public Result getUserArticles() {
+    public Result getUserArticles(Integer userId) {
         List<ArticleVo> userArticlesVo = new ArrayList<>();
         //获取为被查看的文章数，若为0则说明需要重置 t_article 中的 is_read
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
@@ -459,7 +453,7 @@ public class ArticleServiceImpl implements ArticleService {
             article.setIsRead(1);
             articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
         }
-        userArticlesVo.addAll(articleUtil.copyList(userShowArticles, true, true, false, true));
+        userArticlesVo.addAll(articleUtil.copyList(userId,userShowArticles, true, true, false, true));
         if (userArticlesVo.isEmpty()){
             return Result.fail("获取用户文章出现错误");
         }
@@ -467,15 +461,15 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleVo> getHotArticle() {
+    public List<ArticleVo> getHotArticle(Integer userId) {
         List<Article> hotArticles = articleMapper.selectHotArticle(HOT_ARTICLE_LIMIT);
-        return articleUtil.copyList(hotArticles, true,false,false,true);
+        return articleUtil.copyList(userId,hotArticles, true,false,false,true);
     }
 
     @Override
-    public List<ArticleVo> getNewArticle() {
+    public List<ArticleVo> getNewArticle(Integer userId) {
         List<Article> newArticles = articleMapper.selectNewArticle(NEW_ARTICLE_LIMIT);
-        return articleUtil.copyList(newArticles, true,false,false,true);
+        return articleUtil.copyList(userId,newArticles, true,false,false,true);
     }
 
 
@@ -488,12 +482,13 @@ public class ArticleServiceImpl implements ArticleService {
      * 但我们希望 文章详情的展示操作 不受 阅读数量 的更新而影响，即使更新出了问题也不能影响查看文章的操作
      * 所以需要线程池（不同线程）来操作
      * @param articleId 文章id
+     * @param userId 当前用户id
      * @return
      */
     @Override
-    public ArticleVo findArticleById(Long articleId) {
+    public ArticleVo findArticleById(Integer userId,Long articleId) {
         Article article = articleMapper.selectById(articleId);
-        ArticleVo articleVo = articleUtil.copy(article, true,true,true,true);
+        ArticleVo articleVo = articleUtil.copy(userId,article, true,true,true,true);
         threadService.updateArticleViewCount(articleMapper, article);
         return articleVo;
     }
