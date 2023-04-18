@@ -4,7 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.ActivityMapper">
 
-<!--    List<ActivityVo> getActivitiesByPage(Integer initialDataLocation, Integer pageSize);-->
+<!--    void updateActivityAuditById(String auditState,Long activityId);-->
+    <update id="updateActivityAuditById">
+        update t_activity
+        set audit_state = #{auditState}, audit_time = null
+        where activity_id = #{activityId}
+    </update>
+
+    <!--    List<ActivityVo> getActivitiesByPage(Integer initialDataLocation, Integer pageSize);-->
     <select id="getActivitiesByPage" resultType="com.guangyou.rareanimal.pojo.Activity">
         select *
         from t_activity

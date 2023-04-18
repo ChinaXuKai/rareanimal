@@ -26,4 +26,11 @@ public interface ActivityMapper extends BaseMapper<Activity> {
      * @return 活动
      */
     Activity getActivityById(Long activityId);
+
+    /**
+     * 根据 活动id 修改 活动审核
+     * @param auditState 审核状态
+     * @param activityId 活动id
+     */
+    void updateActivityAuditById(String auditState,Long activityId);
 }

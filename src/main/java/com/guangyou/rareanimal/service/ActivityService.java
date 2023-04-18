@@ -14,7 +14,7 @@ public interface ActivityService {
      * @param activityDto 活动信息参数
      * @return 活动id
      */
-    int publishActivity(Integer userId, ActivityDto activityDto);
+    Long publishActivity(Integer userId, ActivityDto activityDto);
 
     /**
      * 用户修改活动信息

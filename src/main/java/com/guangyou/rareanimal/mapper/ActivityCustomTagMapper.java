@@ -20,10 +20,4 @@ public interface ActivityCustomTagMapper extends BaseMapper<ActivityCustomTag> {
      */
     List<String> getTagById(Long activityId);
 
-    /**
-     * 根据 活动id 修改 活动标签
-     * @param activityId 活动id
-     * @param tag 活动标签
-     */
-    void updateTagById(Long activityId, String tag);
 }

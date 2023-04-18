@@ -30,7 +30,7 @@ public class Activity {
 
     private String activityPlace;
 
-    private String activityCoverUrl;
+    private String coverUrl;
 
     private Long requestTime;
 

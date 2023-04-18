@@ -306,7 +306,7 @@ public class CopyUtils {
         //coversUrl
         LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Activity::getActivityId, activity.getActivityId());
-        String coversUrl = activityMapper.selectOne(queryWrapper).getActivityCoverUrl();
+        String coversUrl = activityMapper.selectOne(queryWrapper).getCoverUrl();
         activityVo.setCoversUrl(coversUrl);
         //tagsDescribe
         List<String> tags = activityCustomTagMapper.getTagById(activity.getActivityId());

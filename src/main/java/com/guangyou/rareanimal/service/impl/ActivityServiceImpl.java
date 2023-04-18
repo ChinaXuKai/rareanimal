@@ -10,7 +10,6 @@ import com.guangyou.rareanimal.pojo.dto.ActivityDto;
 import com.guangyou.rareanimal.service.ActivityService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +35,7 @@ public class ActivityServiceImpl implements ActivityService {
     @SneakyThrows
     @Transactional
     @Override
-    public int publishActivity(Integer userId, ActivityDto activityDto) {
+    public Long publishActivity(Integer userId, ActivityDto activityDto) {
         //1、先 添加到 t_activity 表中，获取到 活动id
         Activity activity = new Activity();
         activity.setActivityTitle( activityDto.getActivityTitle());
@@ -47,21 +46,21 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setStartTime( sdf.parse(activityDto.getStartTime()).getTime());
         activity.setEndTime( sdf.parse(activityDto.getEndTime()).getTime());
         activity.setUpdateTime(null);
-        activity.setActivityCoverUrl(activityDto.getCoverUrl());
+        activity.setCoverUrl(activityDto.getCoverUrl());
         activity.setAuditState(Activity.WAIT_AUDIT);
         activity.setAuditTime(null);
-        Integer activityId = activityMapper.insert(activity);
+        activityMapper.insert(activity);
+        Long activityId = activity.getActivityId();
         //2、添加到 t_activity_custom_tag 表中
         List<String> tagList = activityDto.getActivityTags();
         for (String tag : tagList) {
             ActivityCustomTag activityCustomTag = new ActivityCustomTag();
-            activityCustomTag.setActivityId(activityId.longValue());
+            activityCustomTag.setActivityId(activityId);
             activityCustomTag.setTagDescribe(tag);
             activityCustomTagMapper.insert(activityCustomTag);
         }
         return activityId;
     }
-
 
 
     @SneakyThrows
@@ -80,16 +79,22 @@ public class ActivityServiceImpl implements ActivityService {
         updateActivity.setStartTime( sdf.parse(activityDto.getStartTime()).getTime());
         updateActivity.setEndTime( sdf.parse(activityDto.getEndTime()).getTime());
         updateActivity.setUpdateTime(System.currentTimeMillis());
-        updateActivity.setActivityCoverUrl(activityDto.getCoverUrl());
-        //审核状态重新置为待审核
-        updateActivity.setAuditState(Activity.WAIT_AUDIT);
-        updateActivity.setAuditTime(null);
+        updateActivity.setCoverUrl(activityDto.getCoverUrl());
         activityMapper.update(updateActivity, activityUpdateWrapper);
-        //2、根据 活动id 修改 t_activity_custom_tag 表中
+        //审核状态 和 审核时间 重新置为 待审核 和 null
+        activityMapper.updateActivityAuditById(Activity.WAIT_AUDIT,activityId);
+        //2、根据 活动id 删除 t_activity_custom_tag 表中数据，后添加 数据
+        LambdaQueryWrapper<ActivityCustomTag> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ActivityCustomTag::getActivityId,activityId );
+        activityCustomTagMapper.delete(queryWrapper);
         List<String> activityTags = activityDto.getActivityTags();
         for (String tag : activityTags) {
-            activityCustomTagMapper.updateTagById(activityId,tag);
+            ActivityCustomTag customTag = new ActivityCustomTag();
+            customTag.setActivityId(activityId);
+            customTag.setTagDescribe(tag);
+            activityCustomTagMapper.insert(customTag);
         }
         return activityId;
     }
+
 }
