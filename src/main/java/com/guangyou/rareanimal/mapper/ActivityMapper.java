@@ -19,4 +19,11 @@ public interface ActivityMapper extends BaseMapper<Activity> {
      * @return 活动分页数据集
      */
     List<Activity> getActivitiesByPage(Integer initialDataLocation, Integer pageSize);
+
+    /**
+     * 根据 活动id 查询到 活动
+     * @param activityId 活动id
+     * @return 活动
+     */
+    Activity getActivityById(Long activityId);
 }

@@ -30,12 +30,17 @@ public class ActivityVo {
     @ApiModelProperty(value = "活动地址")
     private String activityPlace;
 
+    @ApiModelProperty(value = "活动封面url地址")
+    private String activityCoverUrl;
 
     @ApiModelProperty(value = "活动发布者的信息")
     private UserVo publisherVo;
 
-    @ApiModelProperty(value = "发布时间")
-    private String publishTime;
+    @ApiModelProperty(value = "申请时间")
+    private String requestTime;
+
+    @ApiModelProperty(value = "活动开始时间")
+    private String startTime;
 
     @ApiModelProperty(value = "截止时间")
     private String endTime;
@@ -44,7 +49,7 @@ public class ActivityVo {
     private String updateTime;
 
     @ApiModelProperty(value = "活动封面集合")
-    private List<String> coversUrl;
+    private String coversUrl;
 
     @ApiModelProperty(value = "标签描述集合")
     private List<String> tagsDescribe;
@@ -55,4 +60,6 @@ public class ActivityVo {
     @ApiModelProperty(value = "是否火热")
     private Boolean isHot;
 
+    @ApiModelProperty(value = "审核状态：待审核、审核通过、审核不通过")
+    private String auditState;
 }

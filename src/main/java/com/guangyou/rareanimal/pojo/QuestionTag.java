@@ -14,8 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class QuestionTag {
+
     @JsonSerialize(using = ToStringSerializer.class)
     private Long questionTagId;
+
     @JsonSerialize(using = ToStringSerializer.class)
     private Long questionId;
 

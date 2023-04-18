@@ -4,7 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.ActivityCustomTagMapper">
 
-<!--    List<String> getTagById(Long activityId);-->
+<!--    void updateTagById(Long activityId, String tag);-->
+    <update id="updateTagById">
+        update t_activity_custom_tag
+        set tag_describe = #{tag}
+        where activity_id = #{activityId}
+    </update>
+
+    <!--    List<String> getTagById(Long activityId);-->
     <select id="getTagById" resultType="java.lang.String">
         select tag_describe
         from t_activity_custom_tag

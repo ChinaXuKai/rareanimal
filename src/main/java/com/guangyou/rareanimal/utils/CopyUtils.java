@@ -261,7 +261,7 @@ public class CopyUtils {
 
 
     @Autowired
-    private ActivityCoverMapper activityCoverMapper;
+    private ActivityMapper activityMapper;
     @Autowired
     private ActivityCustomTagMapper activityCustomTagMapper;
     @Autowired
@@ -288,22 +288,25 @@ public class CopyUtils {
     private ActivityVo activityCopy(Activity activity) {
         ActivityVo activityVo = new ActivityVo();
         BeanUtils.copyProperties(activity, activityVo);
-        //publisherVo、publishTime、endTime、updateTime、coversUrl、tagsDescribe、joinCount、isHot、
+        //publisherVo、requestTime、startTime、endTime、updateTime、coversUrl、tagsDescribe、joinCount、isHot
         //publisherVo
         User publisher = userMapper.getUserById(activity.getPublishUid().intValue());
         UserVo publisherVo = new UserVo();
         BeanUtils.copyProperties(publisher, publisherVo);
         activityVo.setPublisherVo(publisherVo);
-        //publishTime、endTime、updateTime
-
-        String publishTime = new DateTime(activity.getPublishTime()).toString("yyyy-MM-dd HH:mm:ss");
+        //requestTime、startTime、endTime、updateTime
+        String requestTime = new DateTime(activity.getRequestTime()).toString("yyyy-MM-dd HH:mm:ss");
+        String startTime = new DateTime(activity.getStartTime()).toString("yyyy-MM-dd HH:mm:ss");
         String endTime = new DateTime(activity.getEndTime()).toString("yyyy-MM-dd HH:mm:ss");
         String updateTime = new DateTime(activity.getUpdateTime()).toString("yyyy-MM-dd HH:mm:ss");
-        activityVo.setPublishTime(publishTime);
+        activityVo.setRequestTime(requestTime);
+        activityVo.setStartTime(startTime);
         activityVo.setEndTime(endTime);
         activityVo.setUpdateTime(updateTime);
         //coversUrl
-        List<String> coversUrl = activityCoverMapper.getActivityCoverById(activity.getActivityId());
+        LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Activity::getActivityId, activity.getActivityId());
+        String coversUrl = activityMapper.selectOne(queryWrapper).getActivityCoverUrl();
         activityVo.setCoversUrl(coversUrl);
         //tagsDescribe
         List<String> tags = activityCustomTagMapper.getTagById(activity.getActivityId());
@@ -334,11 +337,6 @@ public class CopyUtils {
         }
         return opinionVoList;
     }
-    /**
-     *
-     * @param opinion
-     * @return
-     */
     private OpinionVo opinionCopy(Opinion opinion) {
         OpinionVo opinionVo = new OpinionVo();
         BeanUtils.copyProperties(opinion, opinionVo);
@@ -355,4 +353,51 @@ public class CopyUtils {
         opinionVo.setUpdateTime(updateTime);
         return opinionVo;
     }
+
+
+    @Autowired
+    private QuestionTagMapper questionTagMapper;
+
+    public List<QuestionVo> questionListCopy(Integer userId,List<Question> questionList) {
+        List<QuestionVo> questionVoList = new ArrayList<>();
+        for (Question question : questionList){
+            QuestionVo questionVo = questionCopy(userId,question);
+            questionVoList.add(questionVo);
+        }
+        return questionVoList;
+    }
+    private QuestionVo questionCopy(Integer userId,Question question) {
+        QuestionVo questionVo = new QuestionVo();
+        BeanUtils.copyProperties(question, questionVo);
+        Long questionId = question.getQuestionId();
+        Integer publisherId = question.getUserId();
+        //authorInfo、questionTags、publishTime、updateTime
+        //authorInfo
+        AuthorInfoVo authorInfo = new AuthorInfoVo();
+        authorInfo.setAuthorId(publisherId.longValue());
+        User user = userMapper.selectById(publisherId);
+        authorInfo.setAuthorName(user.getUserName());
+        authorInfo.setAuthorAccount(user.getUserAccount());
+        authorInfo.setAuthorAvatarUrl(user.getUserAvatar());
+        authorInfo.setCreateTime(new DateTime(user.getCreateTime()).toString("yyyy-MM-dd"));
+
+        authorInfo.setFansCount(userCarerMapper.selectCount(new LambdaQueryWrapper<UserCarer>().eq(UserCarer::getCarerId, userId)).intValue());
+
+        //authorInfo:isCared
+        if (userId == null){
+            authorInfo.setIsCared(0);
+        }else {
+            LambdaQueryWrapper<UserCarer> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserCarer::getUserId, userId);
+            queryWrapper.eq(UserCarer::getCarerId, publisherId);
+            authorInfo.setIsCared(userCarerMapper.selectCount(queryWrapper).intValue());
+        }
+        //questionTags：根据问题id 在 t_question_tag表 中查找集合
+        questionVo.setQuestionTags(questionTagMapper.selectTagsById(questionId));
+        //publishTime、updateTime
+        questionVo.setPublishTime(new DateTime(question.getPublishTime()).toString("yyyy-MM-dd HH:mm:ss"));
+        questionVo.setUpdateTime(new DateTime(question.getUpdateTime()).toString("yyyy-MM-dd HH:mm:ss"));
+        return questionVo;
+    }
+
 }

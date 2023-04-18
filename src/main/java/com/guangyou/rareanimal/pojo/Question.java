@@ -31,4 +31,5 @@ public class Question {
 
     private Integer isUrgent;
 
+    private Integer isFinish;
 }

@@ -122,4 +122,10 @@ public interface ArticleService {
      */
     int disCareAuthorByAuthorId(Integer authorId, Integer userId);
 
+    /**
+     * 根据圈子id 获取对应的 文章集合
+     * @param categoryId 圈子id
+     * @return 文章集合
+     */
+    Result getArticlesByCategoryId(Integer userId,Integer categoryId);
 }

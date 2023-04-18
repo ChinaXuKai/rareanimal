@@ -59,7 +59,9 @@
 
 <!--    int selectSupportCountsByArticleId(Long articleId);-->
     <select id="selectSupportCountsByArticleId" resultType="java.lang.Integer">
-        select support_counts from t_article where id = #{articleId}
+        select support_counts
+        from t_article
+        where id = #{articleId}
     </select>
 
 <!--    int getArticleCountByUser(String userAccount);-->
@@ -79,6 +81,7 @@
         select *
         from t_article as article
         where weight = 0
+        and is_delete = 0
         and visit_permission != #{visitPermission}
     </select>
 
@@ -114,5 +117,15 @@
     <select id="selectMaxId" resultType="java.lang.Long">
         select max(id)
         from t_article
+    </select>
+
+<!--    List<Article> selectArticlesByCategoryId(String visitPermission,Integer categoryId);-->
+    <select id="selectArticlesByCategoryId" resultType="com.guangyou.rareanimal.pojo.Article">
+        select *
+        from t_article
+        where category_id = #{categoryId}
+        and is_delete = 0
+        and is_read = 0
+        and visit_permission != #{visitPermission}
     </select>
 </mapper>

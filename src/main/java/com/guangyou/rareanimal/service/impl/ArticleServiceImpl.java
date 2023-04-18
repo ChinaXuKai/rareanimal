@@ -14,6 +14,7 @@ import com.guangyou.rareanimal.utils.ArticleUtil;
 import com.guangyou.rareanimal.utils.IDUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -183,7 +184,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private CommentsMapper commentsMapper;
-
 
     @Override
     public int deleteArticleToUser(Long articleId) {
@@ -371,10 +371,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public int disCareAuthorByAuthorId(Integer authorId, Integer userId) {
-        /**
-         * 1、删除数据库表 t_user_carer 对应的数据
-         * 2、在表 t_user 中减小 authorId 对应的userId 的 carer_counts 字段值（暂且不增加carer_counts字段）
-         */
+        //删除数据库表 t_user_carer 对应的数据
         LambdaQueryWrapper<UserCarer> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserCarer::getUserId,userId);
         queryWrapper.eq(UserCarer::getCarerId,authorId);
@@ -382,6 +379,48 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
+    /**
+     * 根据圈子id获取对应的文章集合
+     * @param categoryId 圈子id
+     * @return
+     */
+    @Override
+    public Result getArticlesByCategoryId(Integer userId,Integer categoryId) {
+        //圈子id、逻辑删除、是否已读
+        //获取 指定圈子的 已被查看 的文章数，若小于10则说明需要重置 t_article 中的 is_read
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getIsRead, 0);
+        queryWrapper.eq(Article::getCategoryId, categoryId);
+        int notViewed = articleMapper.selectCount(queryWrapper).intValue();
+        if (notViewed < USER_ARTICLE_SHOW_NUMBER){
+            //重置数据库中 t_article 中的 is_read 为 0
+            articleMapper.update(null, new LambdaUpdateWrapper<Article>().setSql("is_read = 0"));
+        }
+        //根据 圈子id、逻辑删除、是否已读 获取文章集合
+        List<Article> categoryArticles = articleMapper.selectArticlesByCategoryId(ArticleUtil.VISIT_PERMISSION_MY,categoryId);
+        //获取范围为 0~该文章集合长度，USER_ARTICLE_SHOW_NUMBER 个 随机整数
+        List<Integer> randIntegerList = IDUtil.getRandIntegerList(USER_ARTICLE_SHOW_NUMBER, categoryArticles.size());
+        //依次获取该文章集合的第 随机整数 个文章，填入用户展示文章集合
+        List<Article> categoryShowArticles = new ArrayList<>();
+        for(int i = 0; i < USER_ARTICLE_SHOW_NUMBER; i++){
+            Article article = categoryArticles.get(randIntegerList.get(i));
+            categoryShowArticles.add(article);
+        }
+
+        for (Article article : categoryShowArticles) {
+            article.setIsRead(1);
+            articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
+        }
+        List<ArticleVo> categoryArticlesVo = new ArrayList<>
+                (articleUtil.copyList(userId, categoryShowArticles, true, true, false, true));
+        if (categoryArticlesVo.isEmpty()){
+            return Result.succ("当前圈子还没有人发布文章哦~");
+        }
+        return Result.succ(200,"获取圈子文章成功，当前圈子为："+categoryId, categoryArticlesVo);
+    }
+
+
+    //官方文章一次展示数量
     private final static Integer OFFICIAL_ARTICLE_SHOW_NUMBER = 3;
 
     /**
@@ -402,8 +441,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
 
+    //最新文章一次展示数量
     private static final int NEW_ARTICLE_LIMIT = 8;
+    //最热文章一次展示数量
     private static final int HOT_ARTICLE_LIMIT = 8;
+    //用户文章一次展示数量
     private static final int USER_ARTICLE_SHOW_NUMBER = 5;
 /**
  * 获取 USER_ARTICLE_NUMBER 条用户发表的文章（每次获取的文章都不相同）
@@ -429,7 +471,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Result getUserArticles(Integer userId) {
         List<ArticleVo> userArticlesVo = new ArrayList<>();
-        //获取为被查看的文章数，若为0则说明需要重置 t_article 中的 is_read
+        //获取为 已被查看的 文章数，若小于10则说明需要重置 t_article 中的 is_read
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getIsRead, 0);
         queryWrapper.eq(Article::getWeight, 0);

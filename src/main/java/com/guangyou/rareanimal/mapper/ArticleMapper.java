@@ -121,5 +121,13 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     Long selectMaxId();
+
+    /**
+     * 根据 圈子id、逻辑删除、是否已读 获取文章集合
+     * @param categoryId 圈子id
+     * @param visitPermission 阅读权限不能是该权限
+     * @return 文章集合
+     */
+    List<Article> selectArticlesByCategoryId(String visitPermission,Integer categoryId);
 }
 

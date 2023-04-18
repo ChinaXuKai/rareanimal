@@ -10,4 +10,11 @@
         from t_activity
         LIMIT #{initialDataLocation},#{pageSize}
     </select>
+
+<!--    Activity getActivityById(Long activityId);-->
+    <select id="getActivityById" resultType="com.guangyou.rareanimal.pojo.Activity">
+        select *
+        from t_activity
+        where activity_id = #{activityId}
+    </select>
 </mapper>

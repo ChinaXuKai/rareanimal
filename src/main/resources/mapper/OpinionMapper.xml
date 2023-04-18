@@ -4,7 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.OpinionMapper">
 
-<!--    Opinion getOpinionById(Long opinionId);-->
+<!--    Integer deleteByOpinionId(Long opinionId);-->
+    <update id="deleteByOpinionId">
+        update t_opinion
+        set is_delete = 1
+        where opinion_id = #{opinionId}
+    </update>
+
+    <!--    Opinion getOpinionById(Long opinionId);-->
     <select id="getOpinionById" resultType="com.guangyou.rareanimal.pojo.Opinion">
         select *
         from t_opinion
@@ -16,6 +23,7 @@
         select *
         from t_opinion
         where user_id = #{userId}
+        and is_delete = 0
         limit #{initialDataLocation},#{pageSize}
     </select>
 </mapper>

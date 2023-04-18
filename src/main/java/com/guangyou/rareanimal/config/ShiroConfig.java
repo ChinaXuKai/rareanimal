@@ -64,16 +64,15 @@ public class ShiroConfig {
 
         filterMap.put("/**", "jwt");
         //放行 glb传输、上传、个人中心、动物档案库接口、推荐系统、文章-未登录可看、用户登录、注册、查看评论接口、
-//        filterMap.put("/transmit/**", "anon");
-//        filterMap.put("/upload/**", "anon");
-//        filterMap.put("/personalCenter/**", "anon");
-//        filterMap.put("/animal/**", "anon");
-//        filterMap.put("/recommend/article", "anon");
-//        filterMap.put("/recommend/articleCategory", "anon");
-//        filterMap.put("/article/**", "anon");
-//        filterMap.put("/user/loginUser", "anon");
-//        filterMap.put("/user/registerUser", "anon");
-//        filterMap.put("/comments/getCommentList/{id}", "anon");
+        filterMap.put("/transmit/**", "anon");
+        filterMap.put("/upload/**", "anon");
+        filterMap.put("/animal/**", "anon");
+        filterMap.put("/recommend/article", "anon");
+        filterMap.put("/recommend/articleCategory", "anon");
+        filterMap.put("/article/**", "anon");
+        filterMap.put("/user/loginUser", "anon");
+        filterMap.put("/user/registerUser", "anon");
+        filterMap.put("/comments/getCommentList/{id}", "anon");
         chainDefinition.addPathDefinitions(filterMap);
         return chainDefinition;
     }

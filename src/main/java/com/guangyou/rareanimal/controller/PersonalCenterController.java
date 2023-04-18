@@ -1,12 +1,14 @@
 package com.guangyou.rareanimal.controller;
 
 import com.guangyou.rareanimal.common.lang.Result;
+import com.guangyou.rareanimal.mapper.QuestionMapper;
+import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
-import com.guangyou.rareanimal.pojo.vo.ArticleVo;
-import com.guangyou.rareanimal.pojo.vo.PageDataVo;
-import com.guangyou.rareanimal.pojo.vo.UserCarerVo;
+import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.service.ArticleService;
+import com.guangyou.rareanimal.service.OpinionService;
 import com.guangyou.rareanimal.service.PersonalCenterService;
+import com.guangyou.rareanimal.service.QuestionAnswersService;
 import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -105,4 +107,43 @@ public class PersonalCenterController {
             return Result.succ(200, "下列为你所关注的博主", myCarers);
         }
     }
+
+
+    @Autowired
+    private OpinionService opinionService;
+
+    @ApiOperation(value = "我的意见")
+    @GetMapping("/getOpinionsByPage")
+    public Result getOpinionsByPage(PageDto pageDto){
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        if (userId == null){
+            return Result.fail(Result.FORBIDDEN,"当前未登录，还不能发表意见哦",null);
+        }
+
+        PageDataVo<OpinionVo> opinionVoPage = opinionService.getOpinionsByPage(pageDto,userId);
+        if (opinionVoPage.getPageData().isEmpty()){
+            return Result.succ("你当前还没提交过意见哦");
+        }
+        return Result.succ(200, "你发表过的意见如下", opinionVoPage);
+    }
+
+
+    @Autowired
+    private QuestionAnswersService questionAnswersService;
+
+    @ApiOperation(value = "我的问题")
+    @GetMapping("/getMyQuestionsByPage")
+    public Result getMyQuestionsByPage(PageDto pageDto){
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        if (userId == null){
+            return Result.fail(Result.FORBIDDEN,"当前未登录，还不能发表意见哦",null);
+        }
+
+        PageDataVo<QuestionVo> questionVoPage = questionAnswersService.getMyQuestionsByPage(pageDto,userId);
+        if (questionVoPage.getPageData().isEmpty()){
+            return Result.succ("你当前还没提出过问题哦");
+        }
+        return Result.succ(200, "你提出过的问题如下", questionVoPage);
+    }
+
 }

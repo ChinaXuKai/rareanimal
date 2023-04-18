@@ -4,5 +4,10 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.QuestionTagMapper">
 
-
+<!--    List<String> selectTagsById(Long questionId);-->
+    <select id="selectTagsById" resultType="java.lang.String">
+        select tag_info
+        from t_question_tag
+        where question_id = #{questionId}
+    </select>
 </mapper>

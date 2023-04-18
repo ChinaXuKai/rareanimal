@@ -29,4 +29,10 @@ public interface OpinionMapper extends BaseMapper<Opinion> {
      */
     List<Opinion> getOpinionsByPageAndUid(Integer userId, Integer initialDataLocation, Integer pageSize);
 
+    /**
+     * 根据 意见id 逻辑删除 意见
+     * @param opinionId 意见id
+     * @return
+     */
+    Integer deleteByOpinionId(Long opinionId);
 }

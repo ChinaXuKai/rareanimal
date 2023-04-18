@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/protect")
-@Api(tags = "保护热线相关接口")
+@Api(tags = "保护热线相关接口（都不需要传jwt）")
 public class ProtectController {
 
     @Autowired
@@ -31,7 +31,7 @@ public class ProtectController {
      * 若用户没登录 或 用户没定位，则默认返回全国的 野生动物救护中心电话/森林公安电话
      * 若用户有定位，则返回当地的 野生动物救护中心电话/森林公安电话
      */
-    @ApiOperation(value = "全国野生动物救护中心电话",notes = "全国野生动物救护中心电话集合（用户有登录则传jwt，没登录可不传）")
+    @ApiOperation(value = "全国野生动物救护中心电话",notes = "全国野生动物救护中心电话集合")
     @GetMapping("/getAnimalRescuePhoneList")
     public Result getAnimalRescuePhoneList(String address){
         List<AnimalRescuePhoneVo> phoneList;
@@ -50,7 +50,7 @@ public class ProtectController {
     }
 
 
-    @ApiOperation(value = "全国森林公安电话",notes = "全国森林公安电话集合（用户有登录则传jwt，没登录可不传）")
+    @ApiOperation(value = "全国森林公安电话",notes = "全国森林公安电话集合")
     @GetMapping("/getForestPolicePhoneList")
     public Result getForestPolicePhoneList(String address){
         List<ForestPolicePhoneVo> phoneList;

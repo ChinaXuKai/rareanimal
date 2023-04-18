@@ -68,27 +68,10 @@ public class OpinionController {
 
         Integer deleteResult = opinionService.deleteOpinion(opinionId,userId);
         if (deleteResult == null){
-            return Result.fail("修改意见出现异常");
+            return Result.fail("删除意见出现异常");
         }
-        return Result.succ(200, "修改意见成功", opinionId);
+        return Result.succ(200, "删除意见成功", opinionId);
     }
-
-
-    @ApiOperation(value = "分页查看意见")
-    @GetMapping("/getOpinionsByPage")
-    public Result getOpinionsByPage(PageDto pageDto){
-        Integer userId = ShiroUtil.getProfile().getUserId();
-        if (userId == null){
-            return Result.fail(Result.FORBIDDEN,"当前未登录，还不能发表意见哦",null);
-        }
-
-        PageDataVo<OpinionVo> opinionVoPage = opinionService.getOpinionsByPage(pageDto,userId);
-        if (opinionVoPage.getPageData().isEmpty()){
-            return Result.succ("你当前还没提交过意见哦");
-        }
-        return Result.succ(200, "你发表过的意见如下", opinionVoPage);
-    }
-
 
 
 }

@@ -1,12 +1,21 @@
 package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.guangyou.rareanimal.mapper.AnswerMapper;
 import com.guangyou.rareanimal.mapper.QuestionMapper;
 import com.guangyou.rareanimal.mapper.QuestionTagMapper;
+import com.guangyou.rareanimal.pojo.Answer;
+import com.guangyou.rareanimal.pojo.Opinion;
 import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.QuestionTag;
+import com.guangyou.rareanimal.pojo.dto.AnswerDto;
+import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.dto.QuestionDto;
+import com.guangyou.rareanimal.pojo.vo.OpinionVo;
+import com.guangyou.rareanimal.pojo.vo.PageDataVo;
+import com.guangyou.rareanimal.pojo.vo.QuestionVo;
 import com.guangyou.rareanimal.service.QuestionAnswersService;
+import com.guangyou.rareanimal.utils.CopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +60,7 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
         question.setQuestionTitle(publishQuestionDto.getQuestionTitle());
         question.setQuestionDescribe(publishQuestionDto.getQuestionDescribe());
         question.setIsUrgent(publishQuestionDto.getIsUrgent());
+        question.setIsFinish(0);
         question.setPublishTime(System.currentTimeMillis());
         questionMapper.insert(question);
         //3、然后获取到 questionId，创建 questionTag 对象，赋值进 t_question_tag
@@ -69,19 +79,98 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
     /**
      * 修改问题（开启事务）：
      * 1、根据 question_id 修改 t_question 表中的数据
-     * 2、根据 question_id 修改 t_answer_question 表中的数据
+     * 2、根据 question_id 修改 t_question_tag 表中的数据
      * @param updateQuestionDto 修改问题需要的参数
      * @param userId 修改的用户的 id
      * @return 被修改的问题 id
      */
+    @Transactional
     @Override
     public int updateQuestion(QuestionDto updateQuestionDto, Integer userId) {
-        //1、获取问题id，根据问题id 修改 t_question 表中的数据
         Long questionId = updateQuestionDto.getQuestionId();
-
-
-        return 0;
+        //1、根据问题id 修改 t_question 表中的数据
+        Question question = new Question();
+        question.setUpdateTime(System.currentTimeMillis());
+        question.setIsUrgent(updateQuestionDto.getIsUrgent());
+        question.setQuestionTitle(updateQuestionDto.getQuestionTitle());
+        question.setQuestionDescribe(updateQuestionDto.getQuestionDescribe());
+        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Question::getQuestionId,questionId);
+        questionMapper.update(question,queryWrapper);
+        //2、根据 question_id 修改 t_question_tag 表中的数据
+        List<String> questionTagList = updateQuestionDto.getQuestionTags();
+        for (String tag : questionTagList){
+            QuestionTag questionTag = new QuestionTag();
+            questionTag.setTagInfo(tag);
+            LambdaQueryWrapper<QuestionTag> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(QuestionTag::getQuestionId,questionId);
+            questionTagMapper.update(questionTag, wrapper);
+        }
+        return updateQuestionDto.getQuestionId().intValue();
     }
+
+
+    @Autowired
+    private AnswerMapper answerMapper;
+
+    @Override
+    public int replyQuestion(AnswerDto answerDto, Integer userId) {
+        //1、添加回答到 t_answer表 中
+        Answer answer = new Answer();
+        answer.setAnswerContent(answerDto.getAnswerContent());
+        answer.setUserId(userId.longValue());
+        answer.setQuestionId(answerDto.getQuestionId());
+        //2、用户确认问题已回答
+        return answerMapper.insert(answer);
+    }
+
+
+    @Autowired
+    private CopyUtils copyUtils;
+
+    @Override
+    public PageDataVo<QuestionVo> getMyQuestionsByPage(PageDto pageDto, Integer userId) {
+        PageDataVo<QuestionVo> pageDataVo = new PageDataVo<>();
+        //分页获取问题
+        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Question::getUserId, userId);
+        List<Question> questionList = questionMapper.selectList(queryWrapper);
+
+        pageDataVo.setPageData(copyUtils.questionListCopy(userId,questionList));
+        pageDataVo.setCurrent(pageDto.getPage());
+        pageDataVo.setSize(pageDto.getPageSize());
+        int total = questionMapper.selectCount(new LambdaQueryWrapper<Question>().eq(Question::getUserId,userId)).intValue();
+        pageDataVo.setTotal(total);
+        int isRemainZero = total%pageDto.getPageSize();
+        if (isRemainZero != 0){
+            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
+        }else {
+            pageDataVo.setPages( total/pageDto.getPageSize() );
+        }
+
+        return pageDataVo;
+    }
+
+
+//    @Override
+//    public PageDataVo<QuestionVo> getQuestionListByPage(PageDto pageDto) {
+//        PageDataVo<QuestionVo> pageDataVo = new PageDataVo<>();
+//        //分页获取问题
+//
+//        pageDataVo.setPageData(copyUtils.opinionListCopy(opinionList));
+//        pageDataVo.setCurrent(pageDto.getPage());
+//        pageDataVo.setSize(pageDto.getPageSize());
+//        int total = opinionMapper.selectCount(new LambdaQueryWrapper<Opinion>().eq(Opinion::getUserId,userId)).intValue();
+//        pageDataVo.setTotal(total);
+//        int isRemainZero = total%pageDto.getPageSize();
+//        if (isRemainZero != 0){
+//            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
+//        }else {
+//            pageDataVo.setPages( total/pageDto.getPageSize() );
+//        }
+//
+//        return pageDataVo;
+//    }
 }
 
 

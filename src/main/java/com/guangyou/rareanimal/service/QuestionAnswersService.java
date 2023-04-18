@@ -1,6 +1,10 @@
 package com.guangyou.rareanimal.service;
 
+import com.guangyou.rareanimal.pojo.dto.AnswerDto;
+import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.dto.QuestionDto;
+import com.guangyou.rareanimal.pojo.vo.PageDataVo;
+import com.guangyou.rareanimal.pojo.vo.QuestionVo;
 
 /**
  * @author xukai
@@ -23,4 +27,28 @@ public interface QuestionAnswersService {
      * @return 被修改的问题 id
      */
     int updateQuestion(QuestionDto updateQuestionDto, Integer userId);
+
+    /**
+     * 用户回答问题
+     * @param answerDto 回答问题所需参数
+     * @param userId 用户id
+     * @return 回答id
+     */
+    int replyQuestion(AnswerDto answerDto, Integer userId);
+
+
+    /**
+     * 用户分页查询自己发表的问题
+     * @param pageDto
+     * @param userId
+     * @return
+     */
+    PageDataVo<QuestionVo> getMyQuestionsByPage(PageDto pageDto, Integer userId);
+
+//    /**
+//     * 用户分页查看问题
+//     * @param pageDto
+//     * @return
+//     */
+//    PageDataVo<QuestionVo> getQuestionListByPage(PageDto pageDto);
 }

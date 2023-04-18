@@ -1,5 +1,6 @@
 package com.guangyou.rareanimal.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.guangyou.rareanimal.mapper.ActivityMapper;
 import com.guangyou.rareanimal.mapper.OpinionMapper;
@@ -59,7 +60,7 @@ public class OpinionServiceImpl implements OpinionService {
     @Transactional
     @Override
     public Integer deleteOpinion(Long opinionId, Integer userId) {
-        return opinionMapper.deleteById(opinionId);
+        return opinionMapper.deleteByOpinionId(opinionId);
     }
 
 
@@ -75,7 +76,10 @@ public class OpinionServiceImpl implements OpinionService {
         pageDataVo.setPageData(copyUtils.opinionListCopy(opinionList));
         pageDataVo.setCurrent(pageDto.getPage());
         pageDataVo.setSize(pageDto.getPageSize());
-        int total = activityMapper.selectCount(null).intValue();
+        LambdaQueryWrapper<Opinion> queryWrapper = new LambdaQueryWrapper<Opinion>();
+        queryWrapper.eq(Opinion::getUserId, userId);
+        queryWrapper.eq(Opinion::getIsDelete, 0);
+        int total = opinionMapper.selectCount(queryWrapper).intValue();
         pageDataVo.setTotal(total);
         int isRemainZero = total%pageDto.getPageSize();
         if (isRemainZero != 0){
