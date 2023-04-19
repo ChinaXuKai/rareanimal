@@ -316,8 +316,10 @@ public class CopyUtils {
         aJoinQueryWrapper.eq(ActivityJoin::getActivityId, activity.getActivityId());
         int joinCount = activityJoinMapper.selectCount(aJoinQueryWrapper).intValue();
         activityVo.setJoinCount(joinCount);
-        //isHot
-        if (joinCount > (userMapper.selectCount(null)/1000) ){
+        //isHot：(已报名人数大于参见人数上限一半 且 参见人数上限大于5)   或   已报名人数大于总用户的千分之一
+        Long userCount = userMapper.selectCount(null);
+        if ( ( (joinCount>(activity.getPeopleCeiling()/2)) && activity.getPeopleCeiling()>5 )
+                ||  (joinCount > userCount/1000)){
             activityVo.setIsHot(true);
         }
         return activityVo;

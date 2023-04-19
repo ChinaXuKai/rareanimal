@@ -10,4 +10,10 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ActivityJoinMapper extends BaseMapper<ActivityJoin> {
+    /**
+     * 获取 活动id 对应的 已报名/参与人数
+     * @param activityId
+     * @return
+     */
+    int getJoinCountByActivityId(Long activityId);
 }

@@ -14,11 +14,12 @@ import java.util.List;
 public interface ActivityMapper extends BaseMapper<Activity> {
     /**
      * 获取活动 分页数据集
+     * @param noAuditState 不被选取的审核状态
      * @param initialDataLocation 初始数据位置
      * @param pageSize 每页多少数据
      * @return 活动分页数据集
      */
-    List<Activity> getActivitiesByPage(Integer initialDataLocation, Integer pageSize);
+    List<Activity> getActivitiesByPage(String noAuditState,Integer initialDataLocation, Integer pageSize);
 
     /**
      * 根据 活动id 查询到 活动

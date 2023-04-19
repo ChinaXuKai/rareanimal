@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -41,5 +43,9 @@ public class ActivityDto {
 
     @ApiModelProperty(value = "活动截止时间")
     private String endTime;
+
+    @Min(value = 2)
+    @ApiModelProperty(value = "活动参与人数的上限")
+    private Integer peopleCeiling;
 
 }

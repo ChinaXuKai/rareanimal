@@ -44,4 +44,6 @@ public class Activity {
 
     private Long auditTime;
 
+    private Integer peopleCeiling;
+
 }
