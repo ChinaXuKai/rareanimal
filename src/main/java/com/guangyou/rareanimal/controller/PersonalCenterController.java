@@ -3,7 +3,9 @@ package com.guangyou.rareanimal.controller;
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.mapper.QuestionMapper;
 import com.guangyou.rareanimal.pojo.Question;
+import com.guangyou.rareanimal.pojo.dto.ConfirmAnswerDto;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
+import com.guangyou.rareanimal.pojo.dto.QuestionDto;
 import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.OpinionService;
@@ -15,9 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -144,6 +144,38 @@ public class PersonalCenterController {
             return Result.succ("你当前还没提出过问题哦");
         }
         return Result.succ(200, "你提出过的问题如下", questionVoPage);
+    }
+
+
+    @ApiOperation(value = "用户确认问题已被答复")
+    @PutMapping("/confirmAnswer")
+    public Result confirmAnswer(@RequestBody ConfirmAnswerDto confirmAnswerDto){
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        if (userId == null){
+            return Result.fail(Result.FORBIDDEN,"当前未登录，还不能发表意见哦",null);
+        }
+
+        Long confirmResult = questionAnswersService.confirmAnswer(confirmAnswerDto);
+        if (confirmResult == 0 || confirmResult == null){
+            return Result.fail("确认答复出现异常");
+        }
+        return Result.succ(200, "问题id："+confirmAnswerDto.getQuestionId()+"已确认答复", confirmResult);
+    }
+
+
+    @ApiOperation(value = "用户修改问题",notes = "用户登录后可修改自己提出的问答（需要传jwt）")
+    @PutMapping("/updateQuestion")
+    public Result updateQuestion(@RequestBody QuestionDto updateQuestionDto){
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        if (userId == null) {
+            throw new UnknownAccountException("当前还未登录，还不能修改问题哦~");
+        }
+
+        Long questionId = questionAnswersService.updateQuestion(updateQuestionDto,userId);
+        if (questionId == 0 || questionId == null){
+            return Result.fail("问题修改出现异常");
+        }
+        return Result.succ(200, "问题修改成功", questionId);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.guangyou.rareanimal.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.guangyou.rareanimal.pojo.Answer;
+import com.guangyou.rareanimal.pojo.AnswerQuestion;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @create 2023-04-16 11:30
  */
 @Mapper
-public interface AnswerMapper extends BaseMapper<Answer> {
+public interface AnswerQuestionMapper extends BaseMapper<AnswerQuestion> {
 }

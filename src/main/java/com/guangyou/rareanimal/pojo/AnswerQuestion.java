@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Answer {
+public class AnswerQuestion {
 
     @TableId(value = "answer_id",type = IdType.AUTO)
     private Long answerId;
@@ -24,4 +24,6 @@ public class Answer {
     private Long questionId;
 
     private String answerContent;
+
+    private Integer isPerfectAnswer;
 }

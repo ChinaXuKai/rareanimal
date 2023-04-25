@@ -288,7 +288,10 @@ public class CopyUtils {
     private ActivityVo activityCopy(Activity activity) {
         ActivityVo activityVo = new ActivityVo();
         BeanUtils.copyProperties(activity, activityVo);
-        //publisherVo、requestTime、startTime、endTime、updateTime、coversUrl、tagsDescribe、joinCount、isHot
+        /*
+        publisherVo、requestTime、startTime、endTime、updateTime、
+        tagsDescribe、joinCount、isHot、isEnd
+         */
         //publisherVo
         User publisher = userMapper.getUserById(activity.getPublishUid().intValue());
         UserVo publisherVo = new UserVo();
@@ -303,11 +306,11 @@ public class CopyUtils {
         activityVo.setStartTime(startTime);
         activityVo.setEndTime(endTime);
         activityVo.setUpdateTime(updateTime);
-        //coversUrl
-        LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Activity::getActivityId, activity.getActivityId());
-        String coversUrl = activityMapper.selectOne(queryWrapper).getCoverUrl();
-        activityVo.setCoversUrl(coversUrl);
+        //coverUrl
+//        LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(Activity::getActivityId, activity.getActivityId());
+//        String coversUrl = activityMapper.selectOne(queryWrapper).getCoverUrl();
+//        activityVo.setCoversUrl(coversUrl);
         //tagsDescribe
         List<String> tags = activityCustomTagMapper.getTagById(activity.getActivityId());
         activityVo.setTagsDescribe(tags);
@@ -321,6 +324,10 @@ public class CopyUtils {
         if ( ( (joinCount>(activity.getPeopleCeiling()/2)) && activity.getPeopleCeiling()>5 )
                 ||  (joinCount > userCount/1000)){
             activityVo.setIsHot(true);
+        }
+        //isEnd：当前时间的时间戳 小于 截止时间的时间戳，则设置为 false(未截止)
+        if (System.currentTimeMillis() < activity.getEndTime()){
+            activityVo.setIsEnd(false);
         }
         return activityVo;
     }
@@ -359,6 +366,8 @@ public class CopyUtils {
 
     @Autowired
     private QuestionTagMapper questionTagMapper;
+    @Autowired
+    private AnswerQuestionMapper answerQuestionMapper;
 
     public List<QuestionVo> questionListCopy(Integer userId,List<Question> questionList) {
         List<QuestionVo> questionVoList = new ArrayList<>();
@@ -373,7 +382,7 @@ public class CopyUtils {
         BeanUtils.copyProperties(question, questionVo);
         Long questionId = question.getQuestionId();
         Integer publisherId = question.getUserId();
-        //authorInfo、questionTags、publishTime、updateTime
+        //authorInfo、questionTags、publishTime、updateTime、answers
         //authorInfo
         AuthorInfoVo authorInfo = new AuthorInfoVo();
         authorInfo.setAuthorId(publisherId.longValue());
@@ -382,9 +391,7 @@ public class CopyUtils {
         authorInfo.setAuthorAccount(user.getUserAccount());
         authorInfo.setAuthorAvatarUrl(user.getUserAvatar());
         authorInfo.setCreateTime(new DateTime(user.getCreateTime()).toString("yyyy-MM-dd"));
-
         authorInfo.setFansCount(userCarerMapper.selectCount(new LambdaQueryWrapper<UserCarer>().eq(UserCarer::getCarerId, userId)).intValue());
-
         //authorInfo:isCared
         if (userId == null){
             authorInfo.setIsCared(0);
@@ -399,7 +406,44 @@ public class CopyUtils {
         //publishTime、updateTime
         questionVo.setPublishTime(new DateTime(question.getPublishTime()).toString("yyyy-MM-dd HH:mm:ss"));
         questionVo.setUpdateTime(new DateTime(question.getUpdateTime()).toString("yyyy-MM-dd HH:mm:ss"));
+        //answers：根据 问题id 在 t_answer_question表 中查找集合
+        List<AnswerQuestionVo> answerVoList = answerQuestionListCopy(answerQuestionMapper.selectList(
+                        new LambdaQueryWrapper<AnswerQuestion>().
+                                eq(AnswerQuestion::getQuestionId, questionId)));
+        questionVo.setAnswers(answerVoList);
         return questionVo;
     }
+
+
+    public List<AnswerQuestionVo> answerQuestionListCopy(List<AnswerQuestion> answerList) {
+        List<AnswerQuestionVo> answerVoList = new ArrayList<>();
+        for (AnswerQuestion answer : answerList){
+            AnswerQuestionVo answerVo = answerQuestionCopy(answer);
+            answerVoList.add(answerVo);
+        }
+        return answerVoList;
+    }
+    private AnswerQuestionVo answerQuestionCopy(AnswerQuestion answer) {
+        AnswerQuestionVo answerVo = new AnswerQuestionVo();
+        BeanUtils.copyProperties(answer, answerVo);
+        //author、isPerfectAnswer
+        //isPerfectAnswer
+        if (answer.getIsPerfectAnswer() == 1){
+            answerVo.setIsPerfectAnswer(true);
+        }else {
+            answerVo.setIsPerfectAnswer(false);
+        }
+        //author
+        Long authorId = answer.getUserId();
+        User user = userMapper.getUsersByUid(authorId);
+        AuthorVo authorVo = new AuthorVo();
+        authorVo.setUserId(authorId.intValue());
+        authorVo.setUserName(user.getUserName());
+        authorVo.setUserAccount(user.getUserAccount());
+        authorVo.setUserAvatar(user.getUserAvatar());
+        answerVo.setAuthor(authorVo);
+        return answerVo;
+    }
+
 
 }

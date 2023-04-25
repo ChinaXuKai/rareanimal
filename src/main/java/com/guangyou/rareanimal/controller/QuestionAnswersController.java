@@ -47,22 +47,6 @@ public class QuestionAnswersController {
     }
 
 
-    @ApiOperation(value = "用户修改问题",notes = "用户登录后可修改自己提出的问答（需要传jwt）")
-    @PutMapping("/updateQuestion")
-    public Result updateQuestion( QuestionDto updateQuestionDto){
-        Integer userId = ShiroUtil.getProfile().getUserId();
-        if (userId == null) {
-            throw new UnknownAccountException("当前还未登录，还不能修改问题哦~");
-        }
-
-        int questionId = questionAnswersService.updateQuestion(updateQuestionDto,userId);
-        if (questionId == 0){
-            return Result.fail("问题修改出现异常");
-        }
-        return Result.succ(200, "问题修改成功", questionId);
-    }
-
-
     @ApiOperation(value = "用户回答问题",notes = "用户登录后可回答别人发表的问题")
     @PostMapping("/answerQuestion")
     public Result answerQuestion(@RequestBody AnswerDto answerDto){

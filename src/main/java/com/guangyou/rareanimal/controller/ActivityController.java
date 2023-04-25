@@ -67,7 +67,7 @@ public class ActivityController {
     @SneakyThrows
     @ApiOperation(value = "用户修改活动")
     @PutMapping("/update")
-    public Result update(@Validated @RequestBody ActivityDto activityDto){
+    public Result update(@Validated ActivityDto activityDto){
         Integer userId = ShiroUtil.getProfile().getUserId();
         if (userId == null){
             throw new UnknownAccountException("你还未登录，还不能修改活动哦");

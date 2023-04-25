@@ -1,17 +1,17 @@
 package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.guangyou.rareanimal.mapper.AnswerMapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.guangyou.rareanimal.mapper.AnswerQuestionMapper;
 import com.guangyou.rareanimal.mapper.QuestionMapper;
 import com.guangyou.rareanimal.mapper.QuestionTagMapper;
-import com.guangyou.rareanimal.pojo.Answer;
-import com.guangyou.rareanimal.pojo.Opinion;
+import com.guangyou.rareanimal.pojo.AnswerQuestion;
 import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.QuestionTag;
 import com.guangyou.rareanimal.pojo.dto.AnswerDto;
+import com.guangyou.rareanimal.pojo.dto.ConfirmAnswerDto;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.dto.QuestionDto;
-import com.guangyou.rareanimal.pojo.vo.OpinionVo;
 import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.pojo.vo.QuestionVo;
 import com.guangyou.rareanimal.service.QuestionAnswersService;
@@ -33,7 +33,6 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
     private QuestionMapper questionMapper;
     @Autowired
     private QuestionTagMapper questionTagMapper;
-
 
     /**
      * 发表问题（开启事务）：
@@ -86,7 +85,7 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
      */
     @Transactional
     @Override
-    public int updateQuestion(QuestionDto updateQuestionDto, Integer userId) {
+    public Long updateQuestion(QuestionDto updateQuestionDto, Integer userId) {
         Long questionId = updateQuestionDto.getQuestionId();
         //1、根据问题id 修改 t_question 表中的数据
         Question question = new Question();
@@ -106,22 +105,23 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
             wrapper.eq(QuestionTag::getQuestionId,questionId);
             questionTagMapper.update(questionTag, wrapper);
         }
-        return updateQuestionDto.getQuestionId().intValue();
+        return updateQuestionDto.getQuestionId();
     }
 
 
     @Autowired
-    private AnswerMapper answerMapper;
+    private AnswerQuestionMapper answerQuestionMapper;
 
     @Override
     public int replyQuestion(AnswerDto answerDto, Integer userId) {
-        //1、添加回答到 t_answer表 中
-        Answer answer = new Answer();
-        answer.setAnswerContent(answerDto.getAnswerContent());
-        answer.setUserId(userId.longValue());
-        answer.setQuestionId(answerDto.getQuestionId());
-        //2、用户确认问题已回答
-        return answerMapper.insert(answer);
+        //添加回答到 t_answer_question 表 中
+        AnswerQuestion answerQuestion = new AnswerQuestion();
+        answerQuestion.setAnswerContent(answerDto.getAnswerContent());
+        answerQuestion.setUserId(userId.longValue());
+        answerQuestion.setQuestionId(answerDto.getQuestionId());
+        answerQuestion.setIsPerfectAnswer(0);
+        answerQuestionMapper.insert(answerQuestion);
+        return answerQuestion.getAnswerId().intValue();
     }
 
 
@@ -149,6 +149,34 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
         }
 
         return pageDataVo;
+    }
+
+
+    /**
+     * 用户确认问题已被答复
+     * 1、将 t_question 表的 is_finish 修改为 1
+     * 2、将 t_answer_question 表中对应的 回答 的 is_perfect_answer 修改为 1
+     * @param confirmAnswerDto
+     * @return
+     */
+    @Transactional
+    @Override
+    public Long confirmAnswer(ConfirmAnswerDto confirmAnswerDto) {
+        Long questionId = confirmAnswerDto.getQuestionId();
+        //1、将 t_question 表的 is_finish 修改为 1
+        LambdaUpdateWrapper<Question> questionUpdateWrapper = new LambdaUpdateWrapper<>();
+        questionUpdateWrapper.eq(Question::getQuestionId,questionId);
+        Question question = new Question();
+        question.setIsFinish(1);
+        questionMapper.update(question, questionUpdateWrapper);
+        //2、将 t_answer_question 表中对应的 回答 的 is_perfect_answer 修改为 1
+        LambdaUpdateWrapper<AnswerQuestion> answerUpdateWrapper = new LambdaUpdateWrapper<>();
+        answerUpdateWrapper.eq(AnswerQuestion::getQuestionId, questionId);
+        answerUpdateWrapper.eq(AnswerQuestion::getAnswerId, confirmAnswerDto.getAnswerId());
+        AnswerQuestion answerQuestion = new AnswerQuestion();
+        answerQuestion.setIsPerfectAnswer(1);
+        answerQuestionMapper.update(answerQuestion, answerUpdateWrapper);
+        return questionId;
     }
 
 

@@ -1,6 +1,7 @@
 package com.guangyou.rareanimal.service;
 
 import com.guangyou.rareanimal.pojo.dto.AnswerDto;
+import com.guangyou.rareanimal.pojo.dto.ConfirmAnswerDto;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.dto.QuestionDto;
 import com.guangyou.rareanimal.pojo.vo.PageDataVo;
@@ -26,7 +27,7 @@ public interface QuestionAnswersService {
      * @param userId 修改的用户的 id
      * @return 被修改的问题 id
      */
-    int updateQuestion(QuestionDto updateQuestionDto, Integer userId);
+    Long updateQuestion(QuestionDto updateQuestionDto, Integer userId);
 
     /**
      * 用户回答问题
@@ -44,6 +45,13 @@ public interface QuestionAnswersService {
      * @return
      */
     PageDataVo<QuestionVo> getMyQuestionsByPage(PageDto pageDto, Integer userId);
+
+    /**
+     * 用户确认问题已被答复
+     * @param confirmAnswerDto
+     * @return
+     */
+    Long confirmAnswer(ConfirmAnswerDto confirmAnswerDto);
 
 //    /**
 //     * 用户分页查看问题

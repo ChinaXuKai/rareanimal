@@ -48,8 +48,8 @@ public class ActivityVo {
     @ApiModelProperty(value = "修改时间")
     private String updateTime;
 
-    @ApiModelProperty(value = "活动封面集合")
-    private String coversUrl;
+    @ApiModelProperty(value = "活动封面")
+    private String coverUrl;
 
     @ApiModelProperty(value = "标签描述集合")
     private List<String> tagsDescribe;
@@ -57,13 +57,15 @@ public class ActivityVo {
     @ApiModelProperty(value = "活动参与的人数")
     private Integer joinCount;
 
-    @ApiModelProperty(value = "是否火热")
-    private Boolean isHot;
-
     @ApiModelProperty(value = "审核状态：待审核、审核通过、审核不通过")
     private String auditState;
 
     @ApiModelProperty(value = "活动参与人数的上限")
     private Integer peopleCeiling;
 
+    @ApiModelProperty(value = "是否火热")
+    private Boolean isHot;
+
+    @ApiModelProperty(value = "是否截止")
+    private Boolean isEnd;
 }

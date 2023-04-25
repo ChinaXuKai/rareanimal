@@ -42,7 +42,7 @@ public class QuestionVo {
     @ApiModelProperty(value = "是否紧急")
     private Integer isUrgent;
 
-    @ApiModelProperty(value = "是否完成")
-    private Integer isFinish;
+    @ApiModelProperty(value = "该问题的所有回答")
+    private List<AnswerQuestionVo> answers;
 
 }

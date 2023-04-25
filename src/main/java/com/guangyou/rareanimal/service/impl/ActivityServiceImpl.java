@@ -195,9 +195,9 @@ public class ActivityServiceImpl implements ActivityService {
 
         pageDataVo.setCurrent(pageDto.getPage());
         pageDataVo.setSize(pageDto.getPageSize());
-        //前台给用户仅查询 审核状态不为'待审核' 的活动总数
-        LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<Activity>();
-        queryWrapper.ne(Activity::getAuditState, Activity.WAIT_AUDIT);
+        //前台给用户仅查询 审核状态通过 的活动总数
+        LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Activity::getAuditState, Activity.PASS_AUDIT);
         int total = activityMapper.selectCount(queryWrapper).intValue();
         pageDataVo.setTotal(total);
         int isRemainZero = total%pageDto.getPageSize();
