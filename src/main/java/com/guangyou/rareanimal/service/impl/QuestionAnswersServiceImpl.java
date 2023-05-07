@@ -8,10 +8,7 @@ import com.guangyou.rareanimal.mapper.QuestionTagMapper;
 import com.guangyou.rareanimal.pojo.AnswerQuestion;
 import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.QuestionTag;
-import com.guangyou.rareanimal.pojo.dto.AnswerDto;
-import com.guangyou.rareanimal.pojo.dto.ConfirmAnswerDto;
-import com.guangyou.rareanimal.pojo.dto.PageDto;
-import com.guangyou.rareanimal.pojo.dto.QuestionDto;
+import com.guangyou.rareanimal.pojo.dto.*;
 import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.pojo.vo.QuestionVo;
 import com.guangyou.rareanimal.service.QuestionAnswersService;
@@ -45,13 +42,13 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
      */
     @Transactional
     @Override
-    public int publishQuestion(QuestionDto publishQuestionDto, Integer userId) {
+    public Long publishQuestion(QuestionDto publishQuestionDto, Integer userId) {
         //1、根据userId 和 questionTitle 去数据库中查询，查询结果不为 0 则抛异常
         LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Question::getUserId, userId);
         queryWrapper.eq(Question::getQuestionTitle, publishQuestionDto.getQuestionTitle());
         if (questionMapper.selectCount(queryWrapper) != 0){
-            return -1;
+            return null;
         }
         //2、先将 PublishQuestionDto 中的问题添加到 t_question 表中
         Question question = new Question();
@@ -71,7 +68,7 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
             questionTag.setTagInfo(questionTagInfo);
             questionTagMapper.insert(questionTag);
         }
-        return questionId.intValue();
+        return questionId;
     }
 
 
@@ -132,9 +129,7 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
     public PageDataVo<QuestionVo> getMyQuestionsByPage(PageDto pageDto, Integer userId) {
         PageDataVo<QuestionVo> pageDataVo = new PageDataVo<>();
         //分页获取问题
-        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Question::getUserId, userId);
-        List<Question> questionList = questionMapper.selectList(queryWrapper);
+        List<Question> questionList = questionMapper.getQuestionByPageAndUid(userId,pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
 
         pageDataVo.setPageData(copyUtils.questionListCopy(userId,questionList));
         pageDataVo.setCurrent(pageDto.getPage());
@@ -177,6 +172,59 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
         answerQuestion.setIsPerfectAnswer(1);
         answerQuestionMapper.update(answerQuestion, answerUpdateWrapper);
         return questionId;
+    }
+
+
+    /**
+     *
+     * @param questionPageDto 问题分页的相关参数
+     * @return
+     */
+    @Override
+    public PageDataVo<QuestionVo> getQuestionListByPage(Integer userId,QuestionPageDto questionPageDto) {
+        PageDataVo<QuestionVo> pageDataVo = new PageDataVo<>();
+        List<Question> questionList = null;
+        List<QuestionVo> questionVoList = null;
+        PageDto pageDto = questionPageDto.getPageDto();
+        int total = 0;
+
+        //按时间排序：从最近到以前，即从大到小
+        if (questionPageDto.getIsNew() == 1){
+            questionList = questionMapper.getQuestionOrderTimeByPage(pageDto.getPageSize()*(pageDto.getPage() - 1), pageDto.getPageSize());
+            total = questionMapper.selectCount(null).intValue();
+        }
+        //按热度排序：回答数从大到小
+        if (questionPageDto.getIsTop() == 1){
+            questionList = questionMapper.getQuestionOrderAnswersByPage(pageDto.getPageSize()*(pageDto.getPage() - 1), pageDto.getPageSize());
+            total = questionMapper.selectCount(null).intValue();
+        }
+        //按已完成筛选：筛选出已完成的，然后按时间从大到小
+        if (questionPageDto.getIsFinish() == 1){
+            questionList = questionMapper.getFinishQuestionByPage(pageDto.getPageSize()*(pageDto.getPage() - 1), pageDto.getPageSize());
+            LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Question::getIsFinish, 1);
+            total = questionMapper.selectCount(queryWrapper).intValue();
+        }
+        //按紧急筛选：筛选出已完成的，然后按时间从大到小
+        if (questionPageDto.getIsUrgent() == 1){
+            questionList = questionMapper.getUrgentQuestionByPage(pageDto.getPageSize()*(pageDto.getPage() - 1), pageDto.getPageSize());
+            LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Question::getIsUrgent, 1);
+            total = questionMapper.selectCount(queryWrapper).intValue();
+        }
+
+        questionVoList = copyUtils.questionListCopy(userId, questionList);
+        pageDataVo.setPageData(questionVoList);
+        pageDataVo.setCurrent(pageDto.getPage());
+        pageDataVo.setSize(pageDto.getPageSize());
+        pageDataVo.setTotal(total);
+        int isRemainZero = total%pageDto.getPageSize();
+        if (isRemainZero != 0){
+            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
+        }else {
+            pageDataVo.setPages( total/pageDto.getPageSize() );
+        }
+        return pageDataVo;
     }
 
 

@@ -401,6 +401,7 @@ public class CopyUtils {
             queryWrapper.eq(UserCarer::getCarerId, publisherId);
             authorInfo.setIsCared(userCarerMapper.selectCount(queryWrapper).intValue());
         }
+        questionVo.setAuthorInfo(authorInfo);
         //questionTags：根据问题id 在 t_question_tag表 中查找集合
         questionVo.setQuestionTags(questionTagMapper.selectTagsById(questionId));
         //publishTime、updateTime

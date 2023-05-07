@@ -4,4 +4,64 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.guangyou.rareanimal.mapper.QuestionMapper">
 
+<!--    List<Question> getQuestionByPageAndUid(Integer userId, Integer initialDataLocation, Integer pageSize)-->
+    <select id="getQuestionByPageAndUid" resultType="com.guangyou.rareanimal.pojo.Question">
+        select *
+        from t_questuon
+        where user_id = #{userId}
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+
+<!--    List<Question> getQuestionOrderTimeByPage(Integer initialDataLocation, Integer pageSize);-->
+    <select id="getQuestionOrderTimeByPage" resultType="com.guangyou.rareanimal.pojo.Question">
+        select *
+        from t_question
+        order by publish_time desc
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+
+<!--    List<Question> getQuestionOrderAnswersByPage(Integer initialDataLocation, Integer pageSize);-->
+    <select id="getQuestionOrderAnswersByPage" resultType="com.guangyou.rareanimal.pojo.Question">
+        -- 根据排序查找 对应的 问题
+        SELECT * FROM t_question
+        WHERE question_id IN (
+            -- 获取 该表的 问题id集合
+            SELECT t_question_id.question_id
+            FROM (
+                -- 根据问题id 查询 该问题的 回答数，并按照回答数 降序排序
+                SELECT question_id,COUNT(*) AS answer_count
+                FROM t_answer_question
+                WHERE question_id IN (
+                    -- 先获取问题id集合
+                    SELECT question_id
+                    FROM t_question
+                )
+                GROUP BY question_id
+                ORDER BY answer_count DESC
+            ) AS t_question_id
+        )
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+
+<!--    List<Question> getFinishQuestionByPage(Integer initialDataLocation, Integer pageSize);-->
+    <select id="getFinishQuestionByPage" resultType="com.guangyou.rareanimal.pojo.Question">
+        -- 按已完成筛选：筛选出已完成的，然后按时间从大到小
+        SELECT *
+        FROM t_question
+        WHERE is_finish = 1
+        ORDER BY publish_time DESC
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+
+<!--    List<Question> getUrgentQuestionByPage(Integer initialDataLocation, Integer pageSize)-->
+    <select id="getUrgentQuestionByPage" resultType="com.guangyou.rareanimal.pojo.Question">
+        -- 按紧急筛选：筛选出已完成的，然后按时间从大到小
+        SELECT *
+        FROM t_question
+        WHERE is_urgent = 1
+        ORDER BY publish_time DESC
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+
+
 </mapper>

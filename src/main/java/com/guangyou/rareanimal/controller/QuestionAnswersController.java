@@ -5,6 +5,7 @@ import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.dto.AnswerDto;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.dto.QuestionDto;
+import com.guangyou.rareanimal.pojo.dto.QuestionPageDto;
 import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.pojo.vo.QuestionVo;
 import com.guangyou.rareanimal.service.QuestionAnswersService;
@@ -37,8 +38,8 @@ public class QuestionAnswersController {
             throw new UnknownAccountException("当前还未登录，还不能发表问题哦~");
         }
 
-        int questionId = questionAnswersService.publishQuestion(publishQuestionDto,userId);
-        if (questionId == 0){
+        Long questionId = questionAnswersService.publishQuestion(publishQuestionDto,userId);
+        if (questionId == 0 || questionId == null){
             return Result.fail("问题发表出现异常");
         }else if (questionId == -1){
             return Result.fail(Result.FORBIDDEN,"你发表过同标题的问题，请更换标题",null);
@@ -63,15 +64,16 @@ public class QuestionAnswersController {
     }
 
 
-//    @ApiOperation(value = "用户分页查看所有问题",notes = "用户分页查看问题")
-//    @GetMapping("/getQuestionListByPage")
-//    public Result getQuestionListByPage(PageDto pageDto){
-//        PageDataVo<QuestionVo> questionVoPage = questionAnswersService.getQuestionListByPage(pageDto);
-//
-//        if (questionVoPage.getPageData().isEmpty()){
-//            return Result.succ("当前还没有人发表问题哦~");
-//        }
-//        return Result.succ(200,"问题列表如下",questionVoPage);
-//    }
+    @ApiOperation(value = "用户根据排序条件分页查看相关问题",notes = "用户分页查看问题")
+    @GetMapping("/getQuestionListByPage")
+    public Result getQuestionListByPage(QuestionPageDto questionPageDto){
+        Integer userId = ShiroUtil.getProfile().getUserId();
+        PageDataVo<QuestionVo> questionVoPage = questionAnswersService.getQuestionListByPage(userId,questionPageDto);
+
+        if (questionVoPage.getPageData().isEmpty()){
+            return Result.succ("当前还没有人发表问题哦~");
+        }
+        return Result.succ(200,"问题列表如下",questionVoPage);
+    }
 
 }
