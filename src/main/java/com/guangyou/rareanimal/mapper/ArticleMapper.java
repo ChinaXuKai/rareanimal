@@ -83,31 +83,35 @@ public interface ArticleMapper extends BaseMapper<Article> {
     /**
      * 获取 用户的 可读的 文章集合
      * 要求：用户文章、访问权限不能是仅我可见
+     * @param auditState 被选取的审核状态
      * @param visitPermission 访问权限
      * @return
      */
-    List<Article> selectUserArticles(String visitPermission);
+    List<Article> selectUserArticles(String auditState,String visitPermission);
 
     /**
      * 获取官方发表的前 OFFICIAL_ARTICLE_NUMBER 条文章
-     * @param officialArticleNumber
+     * @param auditState 被选取的审核状态
+     * @param officialArticleNumber 限制展示的文章数
      * @return
      */
-    List<Article> selectOfficialArticles(Integer officialArticleNumber);
+    List<Article> selectOfficialArticles(String auditState,Integer officialArticleNumber);
 
     /**
      * 获取当前最热（阅读最多）的前 hotArticleLimit 篇文章
+     * @param auditState 被选取的审核状态
      * @param hotArticleLimit
      * @return
      */
-    List<Article> selectHotArticle(int hotArticleLimit);
+    List<Article> selectHotArticle(String auditState,int hotArticleLimit);
 
     /**
      * 获取当前最新（日期最新）的前 newArticleLimit 篇文章
+     * @param auditState 被选取的审核状态
      * @param newArticleLimit
      * @return
      */
-    List<Article> selectNewArticle(int newArticleLimit);
+    List<Article> selectNewArticle(String auditState,int newArticleLimit);
 
     /**
      * 将 articleId 对应的文章 进行逻辑删除
@@ -124,10 +128,11 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     /**
      * 根据 圈子id、逻辑删除、是否已读 获取文章集合
+     * @param auditState 被选取的审核状态
      * @param categoryId 圈子id
      * @param visitPermission 阅读权限不能是该权限
      * @return 文章集合
      */
-    List<Article> selectArticlesByCategoryId(String visitPermission,Integer categoryId);
+    List<Article> selectArticlesByCategoryId(String auditState,String visitPermission,Integer categoryId);
 }
 

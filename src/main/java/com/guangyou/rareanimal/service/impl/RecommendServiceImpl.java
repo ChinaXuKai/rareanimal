@@ -237,7 +237,7 @@ public class RecommendServiceImpl implements RecommendService {
      * 1、获取当前系统时间
      * 2、先判断 t_recommend_article 表中是否有数据：
      *      无数据：
-     *          获取到 推荐用户集合 ，将该集合 存入 MySQL，记录 存入时间
+     *          获取到 推荐用户集合，将该集合 存入 MySQL，记录 存入时间
      *      有数据：
      *              删除原有数据，重新获取到 推荐用户集合 ，将 t_recommend_article 表中的数据做修改
      */
@@ -253,10 +253,10 @@ public class RecommendServiceImpl implements RecommendService {
             copyArticle(dbRecommendArticles, recommendArticleVos,recommendTime);
             return recommendArticleVos;
         }else {             //有数据
-            List<RecommendArticle> dbRecommendArticles = recommendArticleMapper.selectList(null);
+//            List<RecommendArticle> dbRecommendArticles = recommendArticleMapper.selectList(null);
             //删除原有的数据
             recommendArticleMapper.delete(null);
-            dbRecommendArticles = acquireRecommendArticle(recommendArticleNumber);
+            List<RecommendArticle> dbRecommendArticles = acquireRecommendArticle(recommendArticleNumber);
             copyArticle(dbRecommendArticles, recommendArticleVos,recommendTime);
             return recommendArticleVos;
         }
@@ -298,13 +298,14 @@ public class RecommendServiceImpl implements RecommendService {
      */
     private void computeAndInsertArticlesRecommendFactor(){
         List<RecommendArticle> recommendArticles = new ArrayList<>();
-        //1、获取到 非官方没逻辑删除 的文章集合
+        //1、获取到 没逻辑删除、审核通过 的文章集合
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getIsDelete, 0);
+        queryWrapper.eq(Article::getAuditState,Article.PASS_AUDIT);
         List<Article> articles = articleMapper.selectList(queryWrapper);
-        if (articles.size() == 0){
-
-        }
+//        if (articles.size() == 0){
+//
+//        }
         //2、for循环 依次封装对象并添加进数据库
         for (int i = 0; i < articles.size(); i++){
             //获取相应的 article对象，添加并获取recommendArticle对象

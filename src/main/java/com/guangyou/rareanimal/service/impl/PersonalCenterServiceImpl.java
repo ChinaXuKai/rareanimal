@@ -80,7 +80,7 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
     public PageDataVo<ArticleVo> getMyArticles(PageDto pageDto, String userAccount, Integer userId) {
         PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
         List<Article> articleList = personalCenterMapper.selectMyArticles(userAccount, pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
-        List<ArticleVo> articleVoList = articleUtil.copyList(userId,articleList, true, true, false, true);
+        List<ArticleVo> articleVoList = articleUtil.copyList(userId,articleList, true, true, false, true,true);
         pageDataVo.setPageData(articleVoList);
         //设置 数据库中用户文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
         pageDataVo.setCurrent(pageDto.getPage());
@@ -116,27 +116,28 @@ public class PersonalCenterServiceImpl implements PersonalCenterService {
          * 3、设置 数据库中收藏文章总数（total）、每页显示数量（size）、当前第几页（current）、总共有多少页数据（pages）
          */
         PageDataVo<ArticleVo> pageDataVo = new PageDataVo<>();
-        ArrayList<ArticleVo> saveArticlesVo = new ArrayList<>();
+        List<ArticleVo> saveArticlesVo = new ArrayList<>();
         List<Article> saveArticles = articleMapper.selectSaveArticles(userId, pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
-        for (Article saveArticle : saveArticles){
-            ArticleVo articleVo = new ArticleVo();
-            BeanUtils.copyProperties(saveArticle, articleVo);
-            //author_name需要通过 根据author_account 查询t_user表 获取作者
-            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getUserAccount, saveArticle.getAuthorAccount());
-            User author = userMapper.selectOne(queryWrapper);
-            //获取到作者后赋值作者昵称并添加进 saveArticlesVo集合
-            AuthorInfoVo authorInfoVo = new AuthorInfoVo();
-            articleVo.setAuthorInfo(authorInfoVo);
-            articleVo.getAuthorInfo().setAuthorId(author.getUserId().longValue());
-            articleVo.getAuthorInfo().setAuthorName(author.getUserName());
-            articleVo.getAuthorInfo().setAuthorAccount(author.getUserAccount());
-            articleVo.getAuthorInfo().setAuthorAvatarUrl(author.getUserAvatar());
-            //根据文章id 获取文章封面url地址集合
-            List<String> coverImgList = articleCoverImgMapper.selectCoverImgByArticleId(saveArticle.getId());
-            articleVo.setCoverImg(coverImgList);
-            saveArticlesVo.add(articleVo);
-        }
+//        for (Article saveArticle : saveArticles){
+//            ArticleVo articleVo = new ArticleVo();
+//            BeanUtils.copyProperties(saveArticle, articleVo);
+//            //author_name需要通过 根据author_account 查询t_user表 获取作者
+//            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+//            queryWrapper.eq(User::getUserAccount, saveArticle.getAuthorAccount());
+//            User author = userMapper.selectOne(queryWrapper);
+//            //获取到作者后赋值作者昵称并添加进 saveArticlesVo集合
+//            AuthorInfoVo authorInfoVo = new AuthorInfoVo();
+//            articleVo.setAuthorInfo(authorInfoVo);
+//            articleVo.getAuthorInfo().setAuthorId(author.getUserId().longValue());
+//            articleVo.getAuthorInfo().setAuthorName(author.getUserName());
+//            articleVo.getAuthorInfo().setAuthorAccount(author.getUserAccount());
+//            articleVo.getAuthorInfo().setAuthorAvatarUrl(author.getUserAvatar());
+//            //根据文章id 获取文章封面url地址集合
+//            List<String> coverImgList = articleCoverImgMapper.selectCoverImgByArticleId(saveArticle.getId());
+//            articleVo.setCoverImg(coverImgList);
+//            saveArticlesVo.add(articleVo);
+//        }
+        saveArticlesVo = articleUtil.copyList(userId, saveArticles, true, true, false, true, true);
 
         int total = userArticleMapper.selectSaveArticleCount(userId);
         pageDataVo.setTotal(total);

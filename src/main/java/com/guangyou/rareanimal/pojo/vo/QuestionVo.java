@@ -1,5 +1,7 @@
 package com.guangyou.rareanimal.pojo.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 @ApiModel(description = "用户问题的展示")
 public class QuestionVo {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "问题主键id")
     private Long questionId;
 
@@ -41,8 +44,14 @@ public class QuestionVo {
 
     @ApiModelProperty(value = "是否紧急")
     private Integer isUrgent;
+//
+//    @ApiModelProperty(value = "该问题的所有回答")
+//    private List<AnswerQuestionVo> answers;
 
-    @ApiModelProperty(value = "该问题的所有回答")
-    private List<AnswerQuestionVo> answers;
+    @ApiModelProperty(value = "该问题的点赞数")
+    private Integer supportCount;
+
+    @ApiModelProperty(value = "当前用户是否已经点赞了该问题。已点赞为1，没点赞为0")
+    private Integer isSupport;
 
 }

@@ -79,7 +79,7 @@ public interface ArticleService {
      * @param userId
      * @return
      */
-    int saveArticleToUser(Long articleId, Integer userId);
+    Result saveArticleToUser(Long articleId, Integer userId);
 
     /**
      * 用户userId 取消收藏文章articleId

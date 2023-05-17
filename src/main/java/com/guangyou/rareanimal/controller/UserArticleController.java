@@ -99,23 +99,8 @@ public class UserArticleController {
     @PostMapping("/save/{articleId}")
     public Result save(@PathVariable("articleId") Long articleId){
         Integer userId = ShiroUtil.getProfile().getUserId();
-        if (userId == null){
-            throw new UnknownAccountException("你当前还没登录，登录后才能收藏文章哦~");
-        }
 
-        //判断用户是否有权限访问该文章，没有则不允许收藏
-        if (!articleUtil.haveArticleVisitPermission(userId.longValue(), articleId)){
-            return Result.fail(Result.FORBIDDEN,"该博主设置了访问权限，你当前还没权限收藏哦",null);
-        }
-
-        int saveResult = articleService.saveArticleToUser(articleId,userId);
-        if (saveResult == 0){
-            return Result.fail("收藏失败");
-        }else if (saveResult == -1){
-            return Result.fail(Result.FORBIDDEN,"已经在收藏文章列表了，不能重复收藏哦~",null);
-        }else {
-            return Result.succ(200, "收藏成功，可以在收藏列表中查看", userId);
-        }
+        return articleService.saveArticleToUser(articleId,userId);
     }
 
 
@@ -164,6 +149,10 @@ public class UserArticleController {
             //先判断用户是否有权限访问该文章，没有则不允许收藏
             if (!articleUtil.haveArticleVisitPermission(userId.longValue(), articleId)){
                 return Result.fail(Result.FORBIDDEN,"该博主设置了访问权限，你当前还没权限点赞哦",null);
+            }
+            //查询该文章的审核状态是否为 "审核通过"，必须为审核通过才能点赞
+            if (!articleUtil.judgeIsPassAudit(articleId)) {  //若审核不通过
+                return Result.fail(Result.FORBIDDEN,"当前文章未通过审核，不能点赞该文章",null );
             }
 
             //根据userId、articleId查询 t_user_support表中 是否已经有数据，若有，则不允许点赞

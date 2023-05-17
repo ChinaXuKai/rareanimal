@@ -46,7 +46,7 @@
 
     <!--    List<Article> selectSaveArticles(Integer userId, Integer initialDataLocation, Integer pageSize);-->
     <select id="selectSaveArticles" resultType="com.guangyou.rareanimal.pojo.Article">
-        select id,author_account,title,comment_counts,view_counts,support_counts,save_counts
+        select *
         from t_article
         where id in (
             select article_id
@@ -76,39 +76,43 @@
         where id = #{articleId}
     </select>
 
-<!--    List<Article> selectUserArticles(String visitPermission);-->
+<!--    List<Article> selectUserArticles(String auditState,String visitPermission);-->
     <select id="selectUserArticles" resultType="com.guangyou.rareanimal.pojo.Article">
         select *
         from t_article as article
         where weight = 0
         and is_delete = 0
+        and audit_state = #{auditState}
         and visit_permission != #{visitPermission}
     </select>
 
-<!--    List<Article> selectOfficialArticles(Integer officialArticleNumber);-->
+<!--    List<Article> selectOfficialArticles(String auditState,Integer officialArticleNumber);-->
     <select id="selectOfficialArticles" resultType="com.guangyou.rareanimal.pojo.Article">
         select *
         from t_article
         where weight = 1
         and is_delete = 0
+        and audit_state = #{auditState}
         order by create_date desc
         limit #{officialArticleNumber}
     </select>
 
-<!--    List<Article> selectHotArticle(int hotArticleLimit);-->
+<!--    List<Article> selectHotArticle(String auditState,int hotArticleLimit);-->
     <select id="selectHotArticle" resultType="com.guangyou.rareanimal.pojo.Article">
         select * from t_article
         where weight = 0
         and is_delete = 0
+        and audit_state = #{auditState}
         order by view_counts desc
         limit #{hotArticleLimit}
     </select>
 
-<!--    List<Article> selectNewArticle(int newArticleLimit);-->
+<!--    List<Article> selectNewArticle(String auditState,int newArticleLimit);-->
     <select id="selectNewArticle" resultType="com.guangyou.rareanimal.pojo.Article">
         select * from t_article
         where weight = 0
         and is_delete = 0
+        and audit_state = #{auditState}
         order by create_date desc
         limit #{newArticleLimit}
     </select>
@@ -119,13 +123,14 @@
         from t_article
     </select>
 
-<!--    List<Article> selectArticlesByCategoryId(String visitPermission,Integer categoryId);-->
+<!--    List<Article> selectArticlesByCategoryId(String auditState,String visitPermission,Integer categoryId);-->
     <select id="selectArticlesByCategoryId" resultType="com.guangyou.rareanimal.pojo.Article">
         select *
         from t_article
         where category_id = #{categoryId}
         and is_delete = 0
         and is_read = 0
+        and audit_state = #{auditState}
         and visit_permission != #{visitPermission}
     </select>
 </mapper>

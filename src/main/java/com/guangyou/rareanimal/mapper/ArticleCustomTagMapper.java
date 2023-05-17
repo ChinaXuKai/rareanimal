@@ -13,6 +13,5 @@ import java.util.List;
 @Repository
 public interface ArticleCustomTagMapper extends BaseMapper<ArticleCustomTag> {
 
-
     List<ArticleCustomTag> selectByArticleId(Long articleId);
 }

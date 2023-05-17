@@ -109,6 +109,13 @@ public class UserController {
         SecurityUtils.getSubject().logout();
         //获取Jwt信息，将其从redis中删除
         String jwt = request.getHeader("Authorization");
+        //查看是否已经删除，避免重复退出
+        log.info("jwt：{}", redisUtil.get(jwt));
+            //已退出
+        if (redisUtil.get(jwt) == null) {
+            return Result.fail(Result.FORBIDDEN, "已经退出登录，不能重复退出", null);
+        }
+            //未退出
         redisUtil.delete(jwt);
         return Result.succ("退出登录成功");
     }

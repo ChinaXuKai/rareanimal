@@ -94,8 +94,11 @@ public class ArticleController {
         }
     }
 
+
     @Autowired
     private ArticleMapper articleMapper;
+    @Autowired
+    private ArticleUtil articleUtil;
 
     @ApiOperation(value = "文章详情",notes = "可以查看文章的具体信息")
     @GetMapping("viewArticle/{id}")
@@ -107,6 +110,10 @@ public class ArticleController {
         //若文章已被逻辑删除，则 不允许访问
         if (articleMapper.selectById(articleId).getIsDelete() == 1){
             return Result.fail(Result.FORBIDDEN,"该文章已被逻辑删除，不可访问",null);
+        }
+        //查询该文章的审核状态是否为 "审核通过"，必须为审核通过才能查看
+        if (!articleUtil.judgeIsPassAudit(articleId)) {  //若审核不通过
+            return Result.fail(Result.FORBIDDEN,"当前文章未通过审核，不能查看该文章",null);
         }
 
         Integer userId = ShiroUtil.getProfile().getUserId();
@@ -124,6 +131,7 @@ public class ArticleController {
         }
     }
 
+
     @ApiOperation(value = "获取文章圈子的主题集合",notes = "获取文章圈子的主题集合")
     @GetMapping("/getCategoryTheme")
     public Result getCategoryTheme(){
@@ -138,6 +146,7 @@ public class ArticleController {
         ArticleCategoriesVo articleCategories = categoryService.getCategoryByThemeId(themeId);
         return Result.succ(200, "请在下列文章圈子中选择一样", articleCategories);
     }
+
 
     @ApiOperation(value = "文章分类圈子",notes = "获取所有的文章圈子")
     @GetMapping("getAllArticleCategory")

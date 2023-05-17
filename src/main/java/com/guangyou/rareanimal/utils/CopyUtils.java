@@ -368,6 +368,8 @@ public class CopyUtils {
     private QuestionTagMapper questionTagMapper;
     @Autowired
     private AnswerQuestionMapper answerQuestionMapper;
+    @Autowired
+    private SupportQuestionMapper supportQuestionMapper;
 
     public List<QuestionVo> questionListCopy(Integer userId,List<Question> questionList) {
         List<QuestionVo> questionVoList = new ArrayList<>();
@@ -382,7 +384,7 @@ public class CopyUtils {
         BeanUtils.copyProperties(question, questionVo);
         Long questionId = question.getQuestionId();
         Integer publisherId = question.getUserId();
-        //authorInfo、questionTags、publishTime、updateTime、answers
+        //authorInfo、questionTags、publishTime、updateTime、supportCount、isSupport
         //authorInfo
         AuthorInfoVo authorInfo = new AuthorInfoVo();
         authorInfo.setAuthorId(publisherId.longValue());
@@ -407,11 +409,23 @@ public class CopyUtils {
         //publishTime、updateTime
         questionVo.setPublishTime(new DateTime(question.getPublishTime()).toString("yyyy-MM-dd HH:mm:ss"));
         questionVo.setUpdateTime(new DateTime(question.getUpdateTime()).toString("yyyy-MM-dd HH:mm:ss"));
-        //answers：根据 问题id 在 t_answer_question表 中查找集合
-        List<AnswerQuestionVo> answerVoList = answerQuestionListCopy(answerQuestionMapper.selectList(
-                        new LambdaQueryWrapper<AnswerQuestion>().
-                                eq(AnswerQuestion::getQuestionId, questionId)));
-        questionVo.setAnswers(answerVoList);
+//        //answers：根据 问题id 在 t_answer_question表 中查找集合
+//        List<AnswerQuestionVo> answerVoList = answerQuestionListCopy(answerQuestionMapper.selectList(
+//                        new LambdaQueryWrapper<AnswerQuestion>().
+//                                eq(AnswerQuestion::getQuestionId, questionId)));
+//        questionVo.setAnswers(answerVoList);
+        //supportCount：根据 问题id 在 t_support_question 表中查询总数
+        int supportCount = supportQuestionMapper.selectCount(
+                new LambdaQueryWrapper<SupportQuestion>().
+                        eq(SupportQuestion::getQuestionId, question.getQuestionId())).intValue();
+        questionVo.setSupportCount(supportCount);
+        //isSupport
+        SupportQuestion supportQuestion = supportQuestionMapper.selectOne(
+                new LambdaQueryWrapper<SupportQuestion>()
+                        .eq(SupportQuestion::getQuestionId, questionId)
+                        .eq(SupportQuestion::getUserId, userId)
+        );
+        questionVo.setIsSupport((supportQuestion == null)||(userId == null) ? 0 : 1);
         return questionVo;
     }
 

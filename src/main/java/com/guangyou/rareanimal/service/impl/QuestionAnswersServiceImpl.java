@@ -2,13 +2,17 @@ package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.mapper.AnswerQuestionMapper;
 import com.guangyou.rareanimal.mapper.QuestionMapper;
 import com.guangyou.rareanimal.mapper.QuestionTagMapper;
+import com.guangyou.rareanimal.mapper.SupportQuestionMapper;
 import com.guangyou.rareanimal.pojo.AnswerQuestion;
 import com.guangyou.rareanimal.pojo.Question;
 import com.guangyou.rareanimal.pojo.QuestionTag;
+import com.guangyou.rareanimal.pojo.SupportQuestion;
 import com.guangyou.rareanimal.pojo.dto.*;
+import com.guangyou.rareanimal.pojo.vo.AnswerQuestionVo;
 import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.pojo.vo.QuestionVo;
 import com.guangyou.rareanimal.service.QuestionAnswersService;
@@ -111,6 +115,14 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
 
     @Override
     public int replyQuestion(AnswerDto answerDto, Integer userId) {
+        //若该问题id 不存在，则不进行添加
+        Question dbQuestion = questionMapper.selectOne(
+                new LambdaQueryWrapper<Question>()
+                        .eq(Question::getQuestionId, answerDto.getQuestionId()));
+        if (dbQuestion == null){
+            return -1;
+        }
+
         //添加回答到 t_answer_question 表 中
         AnswerQuestion answerQuestion = new AnswerQuestion();
         answerQuestion.setAnswerContent(answerDto.getAnswerContent());
@@ -176,7 +188,7 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
 
 
     /**
-     *
+     * 分排序情况 分页问题
      * @param questionPageDto 问题分页的相关参数
      * @return
      */
@@ -228,25 +240,86 @@ public class QuestionAnswersServiceImpl implements QuestionAnswersService {
     }
 
 
-//    @Override
-//    public PageDataVo<QuestionVo> getQuestionListByPage(PageDto pageDto) {
-//        PageDataVo<QuestionVo> pageDataVo = new PageDataVo<>();
-//        //分页获取问题
-//
-//        pageDataVo.setPageData(copyUtils.opinionListCopy(opinionList));
-//        pageDataVo.setCurrent(pageDto.getPage());
-//        pageDataVo.setSize(pageDto.getPageSize());
-//        int total = opinionMapper.selectCount(new LambdaQueryWrapper<Opinion>().eq(Opinion::getUserId,userId)).intValue();
-//        pageDataVo.setTotal(total);
-//        int isRemainZero = total%pageDto.getPageSize();
-//        if (isRemainZero != 0){
-//            pageDataVo.setPages( (total/pageDto.getPageSize()) + 1);
-//        }else {
-//            pageDataVo.setPages( total/pageDto.getPageSize() );
-//        }
-//
-//        return pageDataVo;
-//    }
+    @Autowired
+    private SupportQuestionMapper supportQuestionMapper;
+
+    /**
+     * 用户点赞 特定问题
+     * @param userId 用户id
+     * @param questionId 问题id
+     * @return 结果集
+     */
+    @Override
+    public Result supportQuestionByUid(Integer userId, Long questionId) {
+        if (userId == null){
+            return Result.fail(Result.FORBIDDEN, "当前为登录，请登录后再进行该操作", null);
+        }
+
+        //在 t_support_question 表中查询是否已有数据
+        LambdaQueryWrapper<SupportQuestion> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SupportQuestion::getQuestionId,questionId);
+        queryWrapper.eq(SupportQuestion::getUserId, userId);
+        Long isExist = supportQuestionMapper.selectCount(queryWrapper);
+
+        //表中 已有数据：该用户已经点赞过该问题，不可以点赞该问题
+        if (isExist != 0){
+            return Result.fail(Result.FORBIDDEN, "你已点赞过该问题，不能重复操作", questionId);
+        }
+        //表中 没有数据：该用户可以点赞该问题
+        SupportQuestion supportQuestion = new SupportQuestion();
+        supportQuestion.setUserId(userId);
+        supportQuestion.setQuestionId(questionId);
+        supportQuestionMapper.insert(supportQuestion);
+
+        Long supportId = supportQuestion.getSupportId();
+        if (supportId == null || supportId == 0){
+            return Result.fail("点赞" + questionId + "失败");
+        }
+        return Result.succ(200, "点赞" + questionId + "成功", questionId);
+    }
+
+
+    /**
+     * 用户取消点赞 特定问题
+     * @param userId 用户id
+     * @param questionId 问题id
+     * @return 结果集
+     */
+    @Override
+    public Result disSupportQuestionByUid(Integer userId, Long questionId) {
+        if (userId == null){
+            return Result.fail(Result.FORBIDDEN, "当前为登录，请登录后再进行该操作", null);
+        }
+
+        //先在 t_support_question 表中查询 是否有数据
+        LambdaQueryWrapper<SupportQuestion> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SupportQuestion::getQuestionId,questionId);
+        queryWrapper.eq(SupportQuestion::getUserId, userId);
+        Long isExist = supportQuestionMapper.selectCount(queryWrapper);
+
+        //表中 有数据：根据 问题id、用户id 删除该数据
+        if (isExist != 0){
+            supportQuestionMapper.delete(
+                    new LambdaQueryWrapper<SupportQuestion>()
+                            .eq(SupportQuestion::getQuestionId, questionId)
+                            .eq(SupportQuestion::getUserId, userId));
+            return Result.succ(200, "取消点赞" + questionId + "成功", null);
+        }
+        //表中 没数据：返回错误
+        return Result.fail(Result.FORBIDDEN, "你当前还未对该问题进行点赞操作，无法进行取消点赞操作", null);
+    }
+
+
+    @Override
+    public List<AnswerQuestionVo> getAnswersByQid(Long questionId) {
+        //answers：根据 问题id 在 t_answer_question表 中查找集合
+        List<AnswerQuestion> answerList = answerQuestionMapper.selectList(
+                new LambdaQueryWrapper<AnswerQuestion>().
+                        eq(AnswerQuestion::getQuestionId, questionId));
+        return copyUtils.answerQuestionListCopy(answerList);
+    }
+
+
 }
 
 

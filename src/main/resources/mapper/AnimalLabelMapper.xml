@@ -6,6 +6,8 @@
 
 <!--    List<AnimalLabel> selectAnimalLabelById(Long id);-->
     <select id="selectAnimalLabelById" resultType="com.guangyou.rareanimal.pojo.vo.AnimalLabelVo">
-        select animal_id,animal_label from t_animal_label where animal_id = #{animalId}
+        select animal_id,animal_label
+        from t_animal_label
+        where animal_id = #{animalId}
     </select>
 </mapper>

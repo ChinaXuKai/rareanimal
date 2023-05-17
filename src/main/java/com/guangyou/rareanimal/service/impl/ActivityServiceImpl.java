@@ -189,8 +189,8 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public PageDataVo<ActivityVo> getActivitiesByPage(PageDto pageDto) {
         PageDataVo<ActivityVo> pageDataVo = new PageDataVo<>();
-        //前台给用户仅展示出 审核状态不为'待审核' 的活动
-        List<Activity> activityList = activityMapper.getActivitiesByPage(Activity.WAIT_AUDIT,pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
+        //前台给用户仅展示出 审核状态为 '审核通过' 的活动
+        List<Activity> activityList = activityMapper.getActivitiesByPage(Activity.PASS_AUDIT,pageDto.getPageSize() * (pageDto.getPage() - 1), pageDto.getPageSize());
         pageDataVo.setPageData(copyUtils.activityListCopy(activityList));
 
         pageDataVo.setCurrent(pageDto.getPage());

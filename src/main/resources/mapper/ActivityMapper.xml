@@ -11,11 +11,11 @@
         where activity_id = #{activityId}
     </update>
 
-    <!--    List<ActivityVo> getActivitiesByPage(String noAuditState,Integer initialDataLocation, Integer pageSize);-->
+    <!--    List<ActivityVo> getActivitiesByPage(String auditState,Integer initialDataLocation, Integer pageSize);-->
     <select id="getActivitiesByPage" resultType="com.guangyou.rareanimal.pojo.Activity">
         select *
         from t_activity
-        where audit_state != #{noAuditState}
+        where audit_state = #{auditState}
         LIMIT #{initialDataLocation},#{pageSize}
     </select>
 

@@ -24,9 +24,9 @@ public class ArticleUtil {
     public final static String VISIT_PERMISSION_CARER = "关注可见";
     public final static String VISIT_PERMISSION_MY = "仅我可见";
 
-    public final static int NOT_FOUND_ARTICLE = -1;
-    public final static int NOT_PERMISSION_VIEW_ARTICLE = 0;
-    public final static int HAVE_PERMISSION_VIEW_ARTICLE = 1;
+//    public final static int NOT_FOUND_ARTICLE = -1;
+//    public final static int NOT_PERMISSION_VIEW_ARTICLE = 0;
+//    public final static int HAVE_PERMISSION_VIEW_ARTICLE = 1;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -43,7 +43,6 @@ public class ArticleUtil {
     public boolean haveArticleVisitPermission(Long userId,Long articleId){
         //1、先从 t_article 中查询该文章的访问权限
         String visitPermission = articleMapper.selectVisitPermission(articleId);
-//        if (visitPermission.)
         //若访问权限为仅我可见
         if (VISIT_PERMISSION_MY.equals(visitPermission)){
             //查看该用户是否就是该文章作者
@@ -68,6 +67,27 @@ public class ArticleUtil {
     }
 
 
+    /**
+     * 根据文章id 查询 当前文章的审核状态
+     * @param articleId 文章id
+     * @return 文章审核状态
+     */
+    public String getArticleAuditState(Long articleId){
+        Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>().eq(Article::getId, articleId));
+        return article.getAuditState();
+    }
+
+    /**
+     * 判断当前文章是否审核通过
+     * @param articleId 文章id
+     * @return 返回true表示审核通过，返回false表示 审核不通过 或 待审核
+     */
+    public boolean judgeIsPassAudit(Long articleId){
+        String articleAuditState = getArticleAuditState(articleId);
+        return Article.PASS_AUDIT.equals(articleAuditState);
+    }
+
+
     @Autowired
     private ArticleBodyMapper articleBodyMapper;
     @Autowired
@@ -80,19 +100,21 @@ public class ArticleUtil {
     private PersonalCenterMapper personalCenterMapper;
     @Autowired
     private QuestionMapper questionMapper;
+    @Autowired
+    private UserSupportMapper userSupportMapper;
 
-    public List<ArticleVo> copyList(Integer userId,List<Article> articleList, boolean isCreateTime, boolean isTag, boolean isBody, boolean isCategory) {
+    public List<ArticleVo> copyList(Integer userId,List<Article> articleList, boolean isCreateTime, boolean isTag, boolean isBody, boolean isCategory,boolean isIsSupport) {
         List<ArticleVo> articleVoList = new ArrayList<>();
         for (Article article : articleList){
-            articleVoList.add(copy(userId,article,isCreateTime,isTag,isBody,isCategory));
+            articleVoList.add(copy(userId,article,isCreateTime,isTag,isBody,isCategory,isIsSupport));
         }
         return articleVoList;
     }
-    public ArticleVo copy(Integer userId,Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory){
+    public ArticleVo copy(Integer userId,Article article,boolean isCreateTime,boolean isTag,boolean isBody,boolean isCategory,boolean isIsSupport){
         ArticleVo articleVo = new ArticleVo();
         BeanUtils.copyProperties(article, articleVo);
         /**
-         * createDate、authorAccount、authorAvatarUrl、authorName、tag、category、body、coverImg都不能被复制属性，所以要单独拿出来赋值
+         * createDate、authorAccount、authorAvatarUrl、authorName、tag、category、body、coverImg、isSupport都不能被复制属性
          * 注：weight 也不能被赋值，因为要考虑到官方发表的文章被查看，
          *          官方发表的weight == 1，而默认发表的weight == 0，因此官方文章的weight需要重新赋值
          */
@@ -171,6 +193,15 @@ public class ArticleUtil {
             Category articleCategory = categoryMapper.findCategoryById(categoryId);
             BeanUtils.copyProperties(articleCategory, categoryVo);
             articleVo.setCategory(categoryVo);
+        }
+        //当需要 isSupport属性（用户id 不能为null ）
+        if (userId != null && isIsSupport){
+            //在 t_user_support 表中 根据 article_id 和 user_id 查询，若查询结果不为0，则设置为已点赞（isSupport=1）
+            LambdaQueryWrapper<UserSupport> supportQueryWrapper = new LambdaQueryWrapper<>();
+            supportQueryWrapper.eq(UserSupport::getArticleId, article.getId());
+            supportQueryWrapper.eq(UserSupport::getUserId, userId);
+            UserSupport userSupport = userSupportMapper.selectOne(supportQueryWrapper);
+            articleVo.setIsSupport(userSupport != null ? 1 : 0);
         }
         return articleVo;
     }

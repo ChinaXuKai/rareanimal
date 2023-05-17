@@ -1,8 +1,13 @@
 package com.guangyou.rareanimal.service;
 
+import com.guangyou.rareanimal.common.lang.Result;
+import com.guangyou.rareanimal.pojo.AnswerQuestion;
 import com.guangyou.rareanimal.pojo.dto.*;
+import com.guangyou.rareanimal.pojo.vo.AnswerQuestionVo;
 import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.pojo.vo.QuestionVo;
+
+import java.util.List;
 
 /**
  * @author xukai
@@ -56,6 +61,27 @@ public interface QuestionAnswersService {
      * @return 问题的分页数据集
      */
     PageDataVo<QuestionVo> getQuestionListByPage(Integer userId,QuestionPageDto questionPageDto);
+
+    /**
+     * 用户 点赞特定问题
+     * @param userId 用户id
+     * @return 问题id
+     */
+    Result supportQuestionByUid(Integer userId, Long questionId);
+
+    /**
+     * 用户 取消点赞特定问题
+     * @param userId 用户id
+     * @return 问题id
+     */
+    Result disSupportQuestionByUid(Integer userId, Long questionId);
+
+    /**
+     * 根据问题id 获得 对应回答列表
+     * @param questionId 问题id
+     * @return 问题回答列表
+     */
+    List<AnswerQuestionVo> getAnswersByQid(Long questionId);
 
 //    /**
 //     * 用户分页查看问题

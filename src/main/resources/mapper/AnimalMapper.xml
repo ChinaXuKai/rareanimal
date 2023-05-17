@@ -99,7 +99,8 @@
         select
         <include refid="animal-complete-field"></include>
         from t_animal,t_animal_introduce,t_animal_label
-        where t_animal.animal_id = t_animal_introduce.animal_id and t_animal.animal_id = t_animal_label.animal_id
+        where t_animal.animal_id = t_animal_introduce.animal_id
+        and t_animal.animal_id = t_animal_label.animal_id
         and (animal_name like #{animalName} or animal_label like #{animalName})
     </select>
 

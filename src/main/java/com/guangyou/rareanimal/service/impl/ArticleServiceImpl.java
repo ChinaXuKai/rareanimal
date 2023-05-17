@@ -12,6 +12,7 @@ import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.service.ThreadService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
 import com.guangyou.rareanimal.utils.IDUtil;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,8 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCategoryId(categoryId);
         article.setSummary(articleDto.getSummary());
         article.setCommentCounts(0);
+            //发布时，设置审核状态为 待审核
+        article.setAuditState(Article.WAIT_AUDIT);
         if (User.OFFICIAL_ACCOUNT.equals(userAccount)){
             article.setWeight(1);
         }else {
@@ -141,6 +144,8 @@ public class ArticleServiceImpl implements ArticleService {
         updateArticle.setCategoryId(articleDto.getArticleBelongCategory().getCategoryId());
         updateArticle.setSummary(articleDto.getSummary());
         updateArticle.setVisitPermission(articleDto.getVisitPermission());
+            //修改文章需要将 审核状态 重置为 待审核
+        updateArticle.setAuditState(Article.WAIT_AUDIT);
         articleMapper.updateById(updateArticle);
         //2、获取 bodyId
         Long bodyId = articleMapper.selectById(articleDto.getId()).getBodyId();
@@ -196,16 +201,30 @@ public class ArticleServiceImpl implements ArticleService {
     private UserArticleMapper userArticleMapper;
 
     @Override
-    public int saveArticleToUser(Long articleId, Integer userId) {
+    public Result saveArticleToUser(Long articleId, Integer userId) {
         /*
          * 先查询是否已经收藏：
          *      未收藏：
          *          1、根据 articleId 在 t_article 表中增加 save_counts 字段值
          *          2、根据 userId、articleId 在 t_user_article 表中添加相关数据
          */
+        //用户未登录，不允许收藏文章
+        if (userId == null){
+            return Result.fail(Result.FORBIDDEN,"你当前还没登录，登录后才能收藏文章哦~",null);
+        }
+        //判断用户是否有权限访问该文章，没有则不允许收藏
+        if (!articleUtil.haveArticleVisitPermission(userId.longValue(), articleId)){
+            return Result.fail(Result.FORBIDDEN,"该博主设置了访问权限，你当前还没权限收藏哦",null);
+        }
+        //查询该文章的审核状态是否为 "审核通过"，必须为审核通过才能收藏
+        if (!articleUtil.judgeIsPassAudit(articleId)) {  //若审核不通过
+            return Result.fail(Result.FORBIDDEN,"当前文章未通过审核，不能收藏该文章",null );
+        }
+
         UserArticle userArticle = new UserArticle();
         userArticle.setArticleId(articleId);
         userArticle.setUserId(userId.longValue());
+        int insertResult = 0;
 
         //先查询是否已经收藏
         LambdaQueryWrapper<UserArticle> queryWrapper = new LambdaQueryWrapper<>();
@@ -218,12 +237,21 @@ public class ArticleServiceImpl implements ArticleService {
             updateWrapper.eq(Article::getId, articleId);
             updateWrapper.setSql("save_counts = save_counts + 1");
             articleMapper.update(articleMapper.selectById(articleId), updateWrapper);
-
-            return userArticleMapper.insert(userArticle);
+            insertResult = userArticleMapper.insert(userArticle);
+//            if (insertResult == 0) {
+//                return Result.fail("收藏失败");
+//            }else {
+//                return Result.succ(200, "收藏成功，可以在收藏列表中查看", userId);
+//            }
         }else {     //不为空，说明用户已经收藏了该文章
-            return -1;
+            return Result.fail(Result.FORBIDDEN,"已经在收藏文章列表了，不能重复收藏哦~",null);
         }
-
+        //来到这个if-else，说明 上个 if-else 走的是if
+        if (insertResult == 0) {
+            return Result.fail("收藏失败");
+        }else {
+            return Result.succ(200, "收藏成功，可以在收藏列表中查看", userId);
+        }
     }
 
     @Override
@@ -391,13 +419,14 @@ public class ArticleServiceImpl implements ArticleService {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getIsRead, 0);
         queryWrapper.eq(Article::getCategoryId, categoryId);
+        queryWrapper.eq(Article::getIsDelete, 0);
         int notViewed = articleMapper.selectCount(queryWrapper).intValue();
         if (notViewed < USER_ARTICLE_SHOW_NUMBER){
             //重置数据库中 t_article 中的 is_read 为 0
             articleMapper.update(null, new LambdaUpdateWrapper<Article>().setSql("is_read = 0"));
         }
         //根据 圈子id、逻辑删除、是否已读 获取文章集合
-        List<Article> categoryArticles = articleMapper.selectArticlesByCategoryId(ArticleUtil.VISIT_PERMISSION_MY,categoryId);
+        List<Article> categoryArticles = articleMapper.selectArticlesByCategoryId(Article.PASS_AUDIT,ArticleUtil.VISIT_PERMISSION_MY,categoryId);
         //获取范围为 0~该文章集合长度，USER_ARTICLE_SHOW_NUMBER 个 随机整数
         List<Integer> randIntegerList = IDUtil.getRandIntegerList(USER_ARTICLE_SHOW_NUMBER, categoryArticles.size());
         //依次获取该文章集合的第 随机整数 个文章，填入用户展示文章集合
@@ -412,7 +441,7 @@ public class ArticleServiceImpl implements ArticleService {
             articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
         }
         List<ArticleVo> categoryArticlesVo = new ArrayList<>
-                (articleUtil.copyList(userId, categoryShowArticles, true, true, false, true));
+                (articleUtil.copyList(userId, categoryShowArticles, true, true, false, true,true));
         if (categoryArticlesVo.isEmpty()){
             return Result.succ("当前圈子还没有人发布文章哦~");
         }
@@ -430,10 +459,10 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     public Result getOfficialArticles(Integer userId) {
-        //1、获取官方（where weight == 1 and is_delete = 0 order by create_date desc limit OFFICIAL_ARTICLE_NUMBER）
-        List<Article> officialArticles = articleMapper.selectOfficialArticles(OFFICIAL_ARTICLE_SHOW_NUMBER);
+        //1、获取 官方、未被逻辑删除、审核通过 的前 OFFICIAL_ARTICLE_SHOW_NUMBER 条文章
+        List<Article> officialArticles = articleMapper.selectOfficialArticles(Article.PASS_AUDIT,OFFICIAL_ARTICLE_SHOW_NUMBER);
         //2、将 articleList 转为 articleVoList 返回
-        List<ArticleVo> officialArticlesVo = articleUtil.copyList(userId,officialArticles,true,true,false,true);
+        List<ArticleVo> officialArticlesVo = articleUtil.copyList(userId,officialArticles,true,true,false,true,true);
         if (officialArticlesVo.isEmpty()){
             return Result.fail("获取官方文章失败");
         }
@@ -475,13 +504,14 @@ public class ArticleServiceImpl implements ArticleService {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getIsRead, 0);
         queryWrapper.eq(Article::getWeight, 0);
+        queryWrapper.eq(Article::getIsDelete, 0);
         int notViewed = articleMapper.selectCount(queryWrapper).intValue();
         if (notViewed < 10){
             //重置数据库中 t_article 中的 is_read 为 0
             articleMapper.update(null, new LambdaUpdateWrapper<Article>().setSql("is_read = 0"));
         }
         //从 is_read 为 0 的数据中获取 用户的 可读的 文章集合
-        List<Article> articles = articleMapper.selectUserArticles(ArticleUtil.VISIT_PERMISSION_MY);
+        List<Article> articles = articleMapper.selectUserArticles(Article.PASS_AUDIT,ArticleUtil.VISIT_PERMISSION_MY);
         //获取范围为 0~该文章集合长度，USER_ARTICLE_SHOW_NUMBER 个 随机整数
         List<Integer> randIntegerList = IDUtil.getRandIntegerList(USER_ARTICLE_SHOW_NUMBER, articles.size());
         //依次获取该文章集合的第 随机整数 个文章，填入用户展示文章集合
@@ -495,7 +525,7 @@ public class ArticleServiceImpl implements ArticleService {
             article.setIsRead(1);
             articleMapper.update(article, new LambdaUpdateWrapper<Article>().eq(Article::getId, article.getId()));
         }
-        userArticlesVo.addAll(articleUtil.copyList(userId,userShowArticles, true, true, false, true));
+        userArticlesVo.addAll(articleUtil.copyList(userId,userShowArticles, true, true, false, true,true));
         if (userArticlesVo.isEmpty()){
             return Result.fail("获取用户文章出现错误");
         }
@@ -504,14 +534,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleVo> getHotArticle(Integer userId) {
-        List<Article> hotArticles = articleMapper.selectHotArticle(HOT_ARTICLE_LIMIT);
-        return articleUtil.copyList(userId,hotArticles, true,false,false,true);
+        List<Article> hotArticles = articleMapper.selectHotArticle(Article.PASS_AUDIT,HOT_ARTICLE_LIMIT);
+        return articleUtil.copyList(userId,hotArticles, true,false,false,true,true);
     }
 
     @Override
     public List<ArticleVo> getNewArticle(Integer userId) {
-        List<Article> newArticles = articleMapper.selectNewArticle(NEW_ARTICLE_LIMIT);
-        return articleUtil.copyList(userId,newArticles, true,false,false,true);
+        List<Article> newArticles = articleMapper.selectNewArticle(Article.PASS_AUDIT,NEW_ARTICLE_LIMIT);
+        return articleUtil.copyList(userId,newArticles, true,false,false,true,true);
     }
 
 
@@ -530,7 +560,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ArticleVo findArticleById(Integer userId,Long articleId) {
         Article article = articleMapper.selectById(articleId);
-        ArticleVo articleVo = articleUtil.copy(userId,article, true,true,true,true);
+        ArticleVo articleVo = articleUtil.copy(userId,article, true,true,true,true,true);
         threadService.updateArticleViewCount(articleMapper, article);
         return articleVo;
     }
