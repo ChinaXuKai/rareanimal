@@ -2,9 +2,6 @@ package com.guangyou.rareanimal.controller;
 
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.pojo.dto.OpinionDto;
-import com.guangyou.rareanimal.pojo.dto.PageDto;
-import com.guangyou.rareanimal.pojo.vo.OpinionVo;
-import com.guangyou.rareanimal.pojo.vo.PageDataVo;
 import com.guangyou.rareanimal.service.OpinionService;
 import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
@@ -71,6 +68,13 @@ public class OpinionController {
             return Result.fail("删除意见出现异常");
         }
         return Result.succ(200, "删除意见成功", opinionId);
+    }
+
+
+    @ApiOperation(value = "查看用户意见的回复")
+    @GetMapping("/getReplyByOid")
+    public Result getReplyByOid(Long opinionId){
+        return opinionService.getReplyByOid(opinionId);
     }
 
 

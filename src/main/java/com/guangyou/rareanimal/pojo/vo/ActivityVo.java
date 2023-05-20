@@ -60,6 +60,9 @@ public class ActivityVo {
     @ApiModelProperty(value = "审核状态：待审核、审核通过、审核不通过")
     private String auditState;
 
+    @ApiModelProperty(value = "审核所给的原因")
+    private String auditReason;
+
     @ApiModelProperty(value = "活动参与人数的上限")
     private Integer peopleCeiling;
 

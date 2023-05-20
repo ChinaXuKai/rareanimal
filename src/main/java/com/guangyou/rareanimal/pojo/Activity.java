@@ -42,6 +42,8 @@ public class Activity {
 
     private String auditState;
 
+    private String auditReason;
+
     private Long auditTime;
 
     private Integer peopleCeiling;

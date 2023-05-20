@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author xukai
  * @create 2023-04-13 9:17
@@ -25,7 +27,6 @@ public class OpinionVo {
     @ApiModelProperty(value = "意见内容")
     private String opinionContent;
 
-
     @ApiModelProperty(value = "用户作展示的信息")
     private UserVo userVo;
 
@@ -34,5 +35,8 @@ public class OpinionVo {
 
     @ApiModelProperty(value = "修改意见的时间")
     private String updateTime;
+
+    @ApiModelProperty(value = "该意见的回复")
+    private List<OpinionReplyVo> opinionReplies;
 
 }

@@ -1,5 +1,6 @@
 package com.guangyou.rareanimal.service;
 
+import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.pojo.dto.OpinionDto;
 import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.OpinionVo;
@@ -41,4 +42,11 @@ public interface OpinionService {
      * @return 意见分页数据集
      */
     PageDataVo<OpinionVo> getOpinionsByPage(PageDto pageDto, Integer userId);
+
+    /**
+     * 根据用户意见id 查看 意见回复
+     * @param opinionId 用户意见id
+     * @return 结果集
+     */
+    Result getReplyByOid(Long opinionId);
 }

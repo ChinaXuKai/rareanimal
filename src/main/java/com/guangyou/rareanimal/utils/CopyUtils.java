@@ -285,7 +285,7 @@ public class CopyUtils {
      * @param activity 活动
      * @return 活动vo
      */
-    private ActivityVo activityCopy(Activity activity) {
+    public ActivityVo activityCopy(Activity activity) {
         ActivityVo activityVo = new ActivityVo();
         BeanUtils.copyProperties(activity, activityVo);
         /*
@@ -333,10 +333,13 @@ public class CopyUtils {
     }
 
 
+    @Autowired
+    private OpinionReplyMapper opinionReplyMapper;
+
     /**
-     *
-     * @param opinionList
-     * @return
+     * 赋值 opinionList 为 opinionVoList
+     * @param opinionList 意见集合
+     * @return 意见vo集合
      */
     public List<OpinionVo> opinionListCopy(List<Opinion> opinionList) {
         List<OpinionVo> opinionVoList = new ArrayList<>();
@@ -346,10 +349,15 @@ public class CopyUtils {
         }
         return opinionVoList;
     }
-    private OpinionVo opinionCopy(Opinion opinion) {
+    /**
+     * 赋值 opinion 为 opinionVo
+     * @param opinion 意见
+     * @return 意见vo
+     */
+    public OpinionVo opinionCopy(Opinion opinion) {
         OpinionVo opinionVo = new OpinionVo();
         BeanUtils.copyProperties(opinion, opinionVo);
-        //userVo、submitTime、updateTime
+        //userVo、submitTime、updateTime、opinionReplies
         //userVo
         User user = userMapper.getUserById(opinion.getUserId().intValue());
         UserVo userVo = new UserVo();
@@ -360,14 +368,47 @@ public class CopyUtils {
         String updateTime = new DateTime(opinion.getUpdateTime()).toString("yyyy-MM-dd HH:mm:ss");
         opinionVo.setSubmitTime(submitTime);
         opinionVo.setUpdateTime(updateTime);
+        //opinionReplies
+        List<OpinionReplyVo> opinionReplyVoList = new ArrayList<>();
+        List<OpinionReply> opinionReplyList = opinionReplyMapper.selectList(new LambdaQueryWrapper<OpinionReply>()
+                .eq(OpinionReply::getOpinionId, opinion.getOpinionId()));
+        for (OpinionReply opinionReply : opinionReplyList) {
+            OpinionReplyVo opinionReplyVo = new OpinionReplyVo();
+            BeanUtils.copyProperties(opinionReply, opinionReplyVo);
+            opinionReplyVoList.add(opinionReplyVo);
+        }
+        opinionVo.setOpinionReplies(opinionReplyVoList);
         return opinionVo;
+    }
+
+
+    /**
+     * 赋值 OpinionReplyList 为 OpinionReplyVoList
+     * @param opinionReplyList 意见回复集合
+     * @return 意见回复vo集合
+     */
+    public List<OpinionReplyVo> opinionReplyListCopy(List<OpinionReply> opinionReplyList) {
+        List<OpinionReplyVo> opinionReplyVoList = new ArrayList<>();
+        for (OpinionReply opinionReply : opinionReplyList){
+            OpinionReplyVo opinionReplyVo = opinionReplyCopy(opinionReply);
+            opinionReplyVoList.add(opinionReplyVo);
+        }
+        return opinionReplyVoList;
+    }
+    /**
+     * 赋值 OpinionReply 为 OpinionReplyVo
+     * @param opinionReply 意见回复
+     * @return 意见回复vo
+     */
+    public OpinionReplyVo opinionReplyCopy(OpinionReply opinionReply) {
+        OpinionReplyVo opinionReplyVo = new OpinionReplyVo();
+        BeanUtils.copyProperties(opinionReply, opinionReplyVo);
+        return opinionReplyVo;
     }
 
 
     @Autowired
     private QuestionTagMapper questionTagMapper;
-    @Autowired
-    private AnswerQuestionMapper answerQuestionMapper;
     @Autowired
     private SupportQuestionMapper supportQuestionMapper;
 
@@ -379,7 +420,7 @@ public class CopyUtils {
         }
         return questionVoList;
     }
-    private QuestionVo questionCopy(Integer userId,Question question) {
+    public QuestionVo questionCopy(Integer userId,Question question) {
         QuestionVo questionVo = new QuestionVo();
         BeanUtils.copyProperties(question, questionVo);
         Long questionId = question.getQuestionId();
@@ -438,16 +479,12 @@ public class CopyUtils {
         }
         return answerVoList;
     }
-    private AnswerQuestionVo answerQuestionCopy(AnswerQuestion answer) {
+    public AnswerQuestionVo answerQuestionCopy(AnswerQuestion answer) {
         AnswerQuestionVo answerVo = new AnswerQuestionVo();
         BeanUtils.copyProperties(answer, answerVo);
         //author、isPerfectAnswer
         //isPerfectAnswer
-        if (answer.getIsPerfectAnswer() == 1){
-            answerVo.setIsPerfectAnswer(true);
-        }else {
-            answerVo.setIsPerfectAnswer(false);
-        }
+        answerVo.setIsPerfectAnswer(answer.getIsPerfectAnswer() == 1);
         //author
         Long authorId = answer.getUserId();
         User user = userMapper.getUsersByUid(authorId);
