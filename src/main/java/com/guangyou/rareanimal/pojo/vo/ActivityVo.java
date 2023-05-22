@@ -27,6 +27,9 @@ public class ActivityVo {
     @ApiModelProperty(value = "活动详情描述")
     private String activityDescribe;
 
+    @ApiModelProperty(value = "活动分类")
+    private String activityClassify;
+
     @ApiModelProperty(value = "活动地址")
     private String activityPlace;
 

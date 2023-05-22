@@ -29,6 +29,9 @@ public class ActivityDto {
     @ApiModelProperty(value = "活动描述",notes = "不得超过1024个字")
     private String activityDescription;
 
+    @ApiModelProperty(value = "活动分类")
+    private String activityClassify;
+
     @ApiModelProperty(value = "活动地址")
     private String activityPlace;
 

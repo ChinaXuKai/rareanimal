@@ -52,6 +52,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setActivityTitle( activityDto.getActivityTitle());
         activity.setPublishUid(userId.longValue());
         activity.setActivityDescribe( activityDto.getActivityDescription());
+        activity.setActivityClassify(activityDto.getActivityClassify());
         activity.setActivityPlace( activityDto.getActivityPlace());
         activity.setRequestTime( System.currentTimeMillis());
         activity.setStartTime( sdf.parse(activityDto.getStartTime()).getTime());
@@ -92,6 +93,7 @@ public class ActivityServiceImpl implements ActivityService {
         updateActivity.setActivityTitle( activityDto.getActivityTitle());
         updateActivity.setPublishUid(userId.longValue());
         updateActivity.setActivityDescribe( activityDto.getActivityDescription());
+        updateActivity.setActivityClassify(activityDto.getActivityClassify());
         updateActivity.setActivityPlace( activityDto.getActivityPlace());
         updateActivity.setRequestTime(activityMapper.getActivityById(activityId).getRequestTime());
         updateActivity.setStartTime( sdf.parse(activityDto.getStartTime()).getTime());

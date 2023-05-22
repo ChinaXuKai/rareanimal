@@ -22,8 +22,10 @@ public interface UserCarerMapper extends BaseMapper<UserCarer> {
 
     /**
      * 根据 userId 获取其对应的 carerId 集合（分页）
-     * @param userId
-     * @return
+     * @param initialDataLocation 初始数据位置
+     * @param pageSize 每页多少数据
+     * @param userId 用户id
+     * @return 用户id分页数据集
      */
     List<Long> selectCarersIdPageByUserId(Long userId, Integer initialDataLocation, Integer pageSize);
 

@@ -498,4 +498,35 @@ public class CopyUtils {
     }
 
 
+
+    @Autowired
+    private KnowledgeQuestionTypeMapper knowledgeQuestionTypeMapper;
+    /**
+     * 赋值  knowledgeQuestionList 为  knowledgeQuestionVoList
+     * @param knowledgeQuestionList 知识问题集合
+     * @return 知识问题vo集合
+     */
+    public List<KnowledgeQuestionVo> knowledgeQuestionListCopy(List<KnowledgeQuestion> knowledgeQuestionList) {
+        List<KnowledgeQuestionVo> KnowledgeQuestionVoList = new ArrayList<>();
+        for (KnowledgeQuestion knowledgeQuestion : knowledgeQuestionList){
+            KnowledgeQuestionVo knowledgeQuestionVo = knowledgeQuestionCopy(knowledgeQuestion);
+            KnowledgeQuestionVoList.add(knowledgeQuestionVo);
+        }
+        return KnowledgeQuestionVoList;
+    }
+    /**
+     * 赋值  knowledgeQuestion 为  knowledgeQuestionVo
+     * @param knowledgeQuestion 知识问题
+     * @return 知识问题vo
+     */
+    public KnowledgeQuestionVo knowledgeQuestionCopy(KnowledgeQuestion knowledgeQuestion) {
+        KnowledgeQuestionVo knowledgeQuestionVo = new KnowledgeQuestionVo();
+        BeanUtils.copyProperties(knowledgeQuestion, knowledgeQuestionVo);
+        //questionType 需要手动赋值
+        KnowledgeQuestionType knowledgeQuestionType = knowledgeQuestionTypeMapper.selectOne(
+                new LambdaQueryWrapper<KnowledgeQuestionType>()
+                .eq(KnowledgeQuestionType::getQuestionTypeId, knowledgeQuestion.getQuestionTypeId()));
+        knowledgeQuestionVo.setQuestionType(knowledgeQuestionType.getType());
+        return knowledgeQuestionVo;
+    }
 }

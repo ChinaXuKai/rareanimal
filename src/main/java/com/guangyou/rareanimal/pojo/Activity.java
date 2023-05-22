@@ -28,6 +28,8 @@ public class Activity {
 
     private String activityDescribe;
 
+    private String activityClassify;
+
     private String activityPlace;
 
     private String coverUrl;

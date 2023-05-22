@@ -24,12 +24,12 @@ public class KnowledgeQuestion {
 
     private Integer correctOption;
 
-    private String optionContentA;
+    private String contentOfOptionA;
 
-    private String optionContentB;
+    private String contentOfOptionB;
 
-    private String optionContentC;
+    private String contentOfOptionC;
 
-    private String optionContentD;
+    private String contentOfOptionD;
 
 }

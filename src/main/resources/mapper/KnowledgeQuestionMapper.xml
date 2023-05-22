@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.guangyou.rareanimal.mapper.KnowledgeQuestionMapper">
+
+<!--    List<KnowledgeQuestion> getQuestionByPageAndType(Integer initialDataLocation, Integer pageSize, Long questionTypeId);-->
+    <select id="getQuestionByPageAndType" resultType="com.guangyou.rareanimal.pojo.KnowledgeQuestion">
+        select *
+        from t_knowledge_question
+        where question_type_id = #{questionTypeId}
+        limit #{initialDataLocation},#{pageSize}
+    </select>
+</mapper>
