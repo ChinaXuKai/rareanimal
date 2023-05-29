@@ -41,6 +41,11 @@ public class IDUtil {
             if (!randIntegerList.contains(randInteger)){
                 randIntegerList.add(randInteger);
             }
+            //假如，生成随机整数的范围 小于 需要的随机整数个数，即 rang < numbers，此时就会进入死循环
+            //所以，当生成的随机数个数 等于 生成随机整数的范围时，即randIntegerList.size() < rang，需要退出循环
+            if (randIntegerList.size() == range) {
+                break;
+            }
         }
 
         return randIntegerList;

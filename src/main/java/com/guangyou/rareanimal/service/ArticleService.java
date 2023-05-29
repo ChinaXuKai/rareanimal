@@ -2,6 +2,7 @@ package com.guangyou.rareanimal.service;
 
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.pojo.dto.ArticleDto;
+import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.ArticleVo;
 
 import java.util.List;
@@ -124,8 +125,9 @@ public interface ArticleService {
 
     /**
      * 根据圈子id 获取对应的 文章集合
+     * @param userId 当前用户id
      * @param categoryId 圈子id
      * @return 文章集合
      */
-    Result getArticlesByCategoryId(Integer userId,Integer categoryId);
+    Result getArticlesByCategoryId(Integer userId, Integer categoryId);
 }

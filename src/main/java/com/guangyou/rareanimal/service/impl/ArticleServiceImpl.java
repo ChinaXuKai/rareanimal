@@ -6,6 +6,7 @@ import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.mapper.*;
 import com.guangyou.rareanimal.pojo.*;
 import com.guangyou.rareanimal.pojo.dto.ArticleDto;
+import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.vo.*;
 import com.guangyou.rareanimal.pojo.User;
 import com.guangyou.rareanimal.service.ArticleService;
@@ -15,6 +16,7 @@ import com.guangyou.rareanimal.utils.IDUtil;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -412,14 +414,17 @@ public class ArticleServiceImpl implements ArticleService {
      * @param categoryId 圈子id
      * @return
      */
+//    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
     public Result getArticlesByCategoryId(Integer userId,Integer categoryId) {
-        //圈子id、逻辑删除、是否已读
-        //获取 指定圈子的 已被查看 的文章数，若小于10则说明需要重置 t_article 中的 is_read
+        //获取 指定圈子的、未被逻辑删除的、未被查看的、审核通过的、非仅我可见的 文章数，
+        // 若小于10则说明需要重置 t_article 中的 is_read
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Article::getIsRead, 0);
         queryWrapper.eq(Article::getCategoryId, categoryId);
+        queryWrapper.eq(Article::getIsRead, 0);
         queryWrapper.eq(Article::getIsDelete, 0);
+        queryWrapper.eq(Article::getAuditState, Article.PASS_AUDIT);
+        queryWrapper.ne(Article::getVisitPermission, ArticleUtil.VISIT_PERMISSION_MY);
         int notViewed = articleMapper.selectCount(queryWrapper).intValue();
         if (notViewed < USER_ARTICLE_SHOW_NUMBER){
             //重置数据库中 t_article 中的 is_read 为 0
@@ -427,11 +432,16 @@ public class ArticleServiceImpl implements ArticleService {
         }
         //根据 圈子id、逻辑删除、是否已读 获取文章集合
         List<Article> categoryArticles = articleMapper.selectArticlesByCategoryId(Article.PASS_AUDIT,ArticleUtil.VISIT_PERMISSION_MY,categoryId);
+
+        if (categoryArticles.isEmpty()){
+            return Result.succ("当前圈子还没有人发布文章哦~");
+        }
+
         //获取范围为 0~该文章集合长度，USER_ARTICLE_SHOW_NUMBER 个 随机整数
         List<Integer> randIntegerList = IDUtil.getRandIntegerList(USER_ARTICLE_SHOW_NUMBER, categoryArticles.size());
         //依次获取该文章集合的第 随机整数 个文章，填入用户展示文章集合
         List<Article> categoryShowArticles = new ArrayList<>();
-        for(int i = 0; i < USER_ARTICLE_SHOW_NUMBER; i++){
+        for(int i = 0; i < randIntegerList.size(); i++){
             Article article = categoryArticles.get(randIntegerList.get(i));
             categoryShowArticles.add(article);
         }
@@ -442,9 +452,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         List<ArticleVo> categoryArticlesVo = new ArrayList<>
                 (articleUtil.copyList(userId, categoryShowArticles, true, true, false, true,true));
-        if (categoryArticlesVo.isEmpty()){
-            return Result.succ("当前圈子还没有人发布文章哦~");
-        }
+
         return Result.succ(200,"获取圈子文章成功，当前圈子为："+categoryId, categoryArticlesVo);
     }
 
