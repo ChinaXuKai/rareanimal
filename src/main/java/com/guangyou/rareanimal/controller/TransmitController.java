@@ -1,6 +1,5 @@
 package com.guangyou.rareanimal.controller;
 
-import cn.hutool.core.io.resource.ClassPathResource;
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.service.UploadService;
 import io.swagger.annotations.Api;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

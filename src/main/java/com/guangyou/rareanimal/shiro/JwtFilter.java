@@ -54,7 +54,7 @@ public class JwtFilter extends AuthenticatingFilter {
         
         if(StringUtils.isEmpty(jwt)) {
             return true;
-        } else { ;
+        } else {
             // 截去 jwt字符串 的前缀"Bearer"，校验 JWT 是否失效
 //            jwt = jwt.substring("Bearer ".length());
             Claims claim = jwtUtils.getClaimByToken(jwt);
