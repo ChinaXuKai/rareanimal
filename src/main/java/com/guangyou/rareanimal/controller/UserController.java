@@ -18,16 +18,12 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -137,7 +133,6 @@ public class UserController {
         String jsonUser = redisUtil.get(oldJwt);
         // 设置旧的 jwt 两分钟后 失效
         redisUtil.expire(oldJwt, 120, TimeUnit.SECONDS);
-//        redisUtil.delete(oldJwt);
         // 把新的 JWT 信息存到redis中
         redisUtil.set(newJwt, jsonUser);
         redisUtil.expire(newJwt, 7, TimeUnit.DAYS);

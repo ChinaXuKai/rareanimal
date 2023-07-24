@@ -33,6 +33,12 @@ public class AccountRealm extends AuthorizingRealm {
         return null;
     }
 
+    /**
+     * 自定义认证
+     * @param token
+     * @return
+     * @throws AuthenticationException
+     */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         // 强转为 jwtToken

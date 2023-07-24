@@ -1,12 +1,9 @@
 package com.guangyou.rareanimal.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.guangyou.rareanimal.mapper.AnimalLabelMapper;
 import com.guangyou.rareanimal.mapper.AnimalMapper;
-import com.guangyou.rareanimal.pojo.AnimalLabel;
 import com.guangyou.rareanimal.pojo.vo.Animal;
 import com.guangyou.rareanimal.pojo.vo.AnimalIntroduce;
-import com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo;
 import com.guangyou.rareanimal.pojo.vo.AnimalLabelVo;
 import com.guangyou.rareanimal.service.AnimalService;
 import lombok.extern.slf4j.Slf4j;

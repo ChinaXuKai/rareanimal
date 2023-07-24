@@ -3,6 +3,7 @@ package com.guangyou.rareanimal.common.exception;
 import com.guangyou.rareanimal.common.lang.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authz.AuthorizationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -51,4 +52,12 @@ public class GlobalExceptionHandler {
         log.error("账号异常：----------------{}", e);
         return Result.fail(Result.UNAUTHORIZED, "账号异常！", e.getMessage());
     }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(value = AuthorizationException.class)
+    public Result handler(AuthorizationException e){
+        log.error("权限异常：-----------------{}",e);
+        return Result.fail(Result.FORBIDDEN,"当前用户未被授权调用该方法",e.getMessage());
+    }
+
 }

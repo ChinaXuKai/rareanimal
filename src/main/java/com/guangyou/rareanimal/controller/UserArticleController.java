@@ -1,24 +1,19 @@
 package com.guangyou.rareanimal.controller;
 
 import com.guangyou.rareanimal.common.lang.Result;
-import com.guangyou.rareanimal.pojo.Article;
 import com.guangyou.rareanimal.pojo.dto.ArticleDto;
-import com.guangyou.rareanimal.pojo.dto.PageDto;
 import com.guangyou.rareanimal.pojo.dto.UserSupportDto;
-import com.guangyou.rareanimal.pojo.vo.ArticleVo;
 import com.guangyou.rareanimal.service.ArticleService;
 import com.guangyou.rareanimal.utils.ArticleUtil;
 import com.guangyou.rareanimal.utils.ShiroUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -229,6 +224,4 @@ public class UserArticleController {
             return Result.succ(200, "取消关注成功", authorId);
         }
     }
-
-
 }

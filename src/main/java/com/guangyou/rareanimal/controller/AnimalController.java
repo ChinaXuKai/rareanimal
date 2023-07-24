@@ -3,7 +3,6 @@ package com.guangyou.rareanimal.controller;
 import com.guangyou.rareanimal.common.lang.Result;
 import com.guangyou.rareanimal.pojo.vo.Animal;
 import com.guangyou.rareanimal.pojo.vo.AnimalIntroduce;
-import com.guangyou.rareanimal.pojo.vo.AnimalIntroduceImgVo;
 import com.guangyou.rareanimal.service.AnimalService;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;

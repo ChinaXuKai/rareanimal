@@ -26,7 +26,6 @@ public class ProtectController {
     @Autowired
     private ProtectService protectService;
 
-
     /**
      * 若用户没登录 或 用户没定位，则默认返回全国的 野生动物救护中心电话/森林公安电话
      * 若用户有定位，则返回当地的 野生动物救护中心电话/森林公安电话

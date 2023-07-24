@@ -1,0 +1,86 @@
+spring:
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: file:${animal-model-glb.URL-location}
+  # MySQL数据库配置
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://localhost:3306/ar_animal?rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: 2577715138qwer
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # 最大文件传输配置和最大请求传输配置
+  servlet:
+    multipart:
+      max-file-size: 512MB
+      max-request-size: 512MB
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  # Redis数据库配置
+  redis:
+    host: localhost
+    password: 2577715138qwer
+    port: 6379
+    jedis:
+      pool:
+        #设置最大连接数（负值表示没有限制）、最大阻塞时间（负值表示没有限制）、最大空闲连接、最小空闲连接
+        max-active: 1000
+        max-wait: -1ms
+        max-idle: 999
+        min-idle: 0
+    lettuce:
+      shutdown-timeout: 20000ms
+      #设置超时连接时间
+    timeout: 1800000
+
+# glb文件存放的位置
+animal-model-glb:
+  URL-location: /usr/rareanimalProject/animal_model_glb
+
+# shiro整合Redis配置
+shiro-redis:
+  enabled: true
+  redis-manager:
+    host: localhost:6379
+    password: 2577715138qwer
+
+# mybatis-plus配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml          #扫描 Mapper 映射文件
+  type-aliases-package: com.guangtou.rareanimal.pojo
+  # 全局配置表前缀：t_
+  global-config:
+    db-config:
+      table-prefix: t_
+
+# 配置shiro的登录路径
+shiro:
+  loginUrl: /user/loginUser
+
+# 设置jwt 的盐secret、过期时间expire、头token
+rareanimal:
+  jwt:
+    secret: f4e2e52034348f86b67cde581c0f9eb5
+    expire: 604800
+    header: token
+
+# 配置ftp
+ftp:
+  host: localhost
+  userName: root
+  password: 2577715138qweR
+  port: 22
+  # 图片服务器的存储的图片路径根目录
+  rootPath: /usr/local/nginx/image
+  timeout: 500000
+  img:
+    url: http://localhost:80     # ftp.img.url 为了上传文件成功后返回文件路径
+
+userVo:
+  #用户注册时所需赋值的默认值
+  defaultValue:
+    userAvatar: http://localhost:80/你的名字.jpeg

@@ -1,7 +1,6 @@
 package com.guangyou.rareanimal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.guangyou.rareanimal.mapper.*;
 import com.guangyou.rareanimal.pojo.*;
 import com.guangyou.rareanimal.pojo.vo.*;

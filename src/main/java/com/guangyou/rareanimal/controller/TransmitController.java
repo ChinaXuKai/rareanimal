@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 /**
@@ -28,7 +29,7 @@ public class TransmitController {
 
     @ApiOperation(value = "通过动物id传输对应的glb文件",notes = "通过动物id传输对应的glb文件")
     @GetMapping("/transmit/getGlbFile/{animalId}")
-    public Result getGlbFile(@PathVariable("animalId") Integer animalId) throws IOException {
+    public Result getGlbFile(@PathVariable("animalId") Integer animalId, HttpServletResponse response) {
         String glbModePath = glbFile + "/" + animalId + ".glb";
 
         System.out.println("\n\n glbModePath:" + glbModePath + "\n\n");
@@ -41,6 +42,9 @@ public class TransmitController {
                 outputStream.write(buffer, 0, len);
             }
             byte[] glbData = outputStream.toByteArray();
+
+            response.setHeader("Content-type", "application/octet-stream");
+
             return Result.succ(200, "glb模型", ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(glbData));
         } catch (IOException e) {
             return Result.fail(e.getMessage());
@@ -67,7 +71,4 @@ public class TransmitController {
             return Result.succ(200, "上传成功", imgUrl);
         }
     }
-
-
-
 }

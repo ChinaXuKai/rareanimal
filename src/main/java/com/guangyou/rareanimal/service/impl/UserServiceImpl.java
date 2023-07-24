@@ -9,17 +9,12 @@ import com.guangyou.rareanimal.pojo.User;
 import com.guangyou.rareanimal.pojo.UserCarer;
 import com.guangyou.rareanimal.pojo.vo.UserVo;
 import com.guangyou.rareanimal.service.UserService;
-import com.guangyou.rareanimal.utils.FtpUtil;
-import com.guangyou.rareanimal.utils.IDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 /**

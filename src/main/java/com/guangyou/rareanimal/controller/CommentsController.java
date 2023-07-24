@@ -1,7 +1,6 @@
 package com.guangyou.rareanimal.controller;
 
 import com.guangyou.rareanimal.common.lang.Result;
-import com.guangyou.rareanimal.pojo.Comment;
 import com.guangyou.rareanimal.pojo.dto.CommentDto;
 import com.guangyou.rareanimal.pojo.vo.CommentsVo;
 import com.guangyou.rareanimal.service.ArticleService;
@@ -12,7 +11,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -169,6 +169,7 @@
             <version>3.6</version>
         </dependency>
 
+        <!--引入alibaba数据源 -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
