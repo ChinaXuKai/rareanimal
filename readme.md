@@ -1,6 +1,6 @@
 # 项目介绍
 
-文档更新
+# 文档更新
 | 日期    | 内容 |
 | -- | -- |
 | 2023年7月24日 | 更新文档。新增README.md、数据库表结构文档item_rareanimal.sql、配置文件application-dev.yaml|
